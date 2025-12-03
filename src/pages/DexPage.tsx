@@ -1,3 +1,11 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 export function DexPage() {
   return (
     <section className="space-y-4">
@@ -10,12 +18,19 @@ export function DexPage() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 text-sm">
-        <p className="text-muted-foreground">
-          아직 도감 데이터 연동 전입니다. 이후 PokéAPI와 연동하여 세대별 포켓몬 리스트와 상세 정보를
-          표시할 예정입니다.
-        </p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">도감 준비 중</CardTitle>
+          <CardDescription>
+            아직 도감 데이터 연동 전입니다. 이후 PokéAPI와 연동하여 세대별 포켓몬 리스트와 상세 정보를
+            표시할 예정입니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground">
+          먼저 타입/세대 필터와 카드 그리드 UI를 완성한 뒤, 세대별 포켓몬 species 리스트와 개별 상세를
+          단계적으로 연결하게 됩니다.
+        </CardContent>
+      </Card>
     </section>
   );
 }
