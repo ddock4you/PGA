@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { buildSearchQueryString } from "@/lib/utils";
 
 /**
  * 검색 랜딩 페이지 중앙의
@@ -12,6 +14,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
  */
 export function SearchLandingForm() {
   const navigate = useNavigate();
+  const {
+    state: { selectedGenerationId, selectedGameId, primaryLanguage },
+  } = usePreferences();
   const [query, setQuery] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -19,15 +24,18 @@ export function SearchLandingForm() {
     const trimmed = query.trim();
     if (!trimmed) return;
 
-    // TODO: 이후 세대/게임/언어 선택 값을 함께 쿼리 파라미터로 전달
-    const params = new URLSearchParams();
-    params.set("q", trimmed);
+    const searchQuery = buildSearchQueryString({
+      q: trimmed,
+      generationId: selectedGenerationId,
+      gameId: selectedGameId,
+      language: primaryLanguage,
+    });
 
-    navigate(`/search?${params.toString()}`);
+    navigate(`/search?${searchQuery}`);
   };
 
   return (
-    <Card asChild className="w-full">
+    <Card className="w-full">
       <form onSubmit={handleSubmit}>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">빠른 검색</CardTitle>

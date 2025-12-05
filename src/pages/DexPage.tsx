@@ -1,32 +1,45 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { usePokemonSpeciesByGeneration } from "@/features/pokemon/hooks/usePokemonQueries";
 
-function DexFilterBar() {
+interface DexFilterBarProps {
+  generationId: string;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+}
+
+function DexFilterBar({ generationId, searchQuery, onSearchQueryChange }: DexFilterBarProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">필터</CardTitle>
         <CardDescription className="text-xs">
-          세대/게임과 타입, 이름으로 도감 리스트를 간단히 좁혀볼 수 있습니다. (현재는 더미 UI입니다)
+          세대/게임과 이름으로 도감 리스트를 좁혀볼 수 있습니다. (타입/게임 선택은 추후 구현)
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-xs sm:flex-row sm:items-end">
         <div className="flex-1">
           <label className="mb-1 block font-medium text-muted-foreground">게임/세대</label>
-          <select className="h-9 w-full rounded-md border bg-background px-2 text-xs">
-            <option>1세대 (레드/그린/블루/옐로우)</option>
-          </select>
+          <div className="h-9 rounded-md border bg-muted px-2 text-xs text-muted-foreground">
+            <div className="flex h-full items-center">세대 ID: {generationId}</div>
+          </div>
         </div>
         <div className="flex-1">
           <label className="mb-1 block font-medium text-muted-foreground">타입</label>
-          <select className="h-9 w-full rounded-md border bg-background px-2 text-xs">
-            <option>모든 타입</option>
-          </select>
+          <div className="h-9 rounded-md border bg-muted px-2 text-xs text-muted-foreground">
+            <div className="flex h-full items-center">모든 타입 (추후 구현)</div>
+          </div>
         </div>
         <div className="flex-1">
           <label className="mb-1 block font-medium text-muted-foreground">이름 검색</label>
-          <Input placeholder="포켓몬 이름으로 검색 (추후 구현)" className="h-9 text-xs" />
+          <Input
+            placeholder="포켓몬 이름으로 검색"
+            className="h-9 text-xs"
+            value={searchQuery}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
+          />
         </div>
       </CardContent>
     </Card>
@@ -118,6 +131,18 @@ function DexPokemonDetailSheet(props: { pokemon: DexPokemonSummary | null; onClo
 }
 
 export function DexPage() {
+  const { state } = usePreferences();
+
+  // 기본값은 1세대. Preferences 에 세대가 설정되어 있으면 그것을 우선 사용.
+  const effectiveGenerationId = state.selectedGenerationId ?? "1";
+
+  const {
+    data: speciesList,
+    isLoading,
+    isError,
+  } = usePokemonSpeciesByGeneration(effectiveGenerationId);
+
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedPokemon, setSelectedPokemon] = useState<DexPokemonSummary | null>(null);
 
   const handleOpen = (pokemon: DexPokemonSummary) => {
@@ -128,68 +153,77 @@ export function DexPage() {
     setSelectedPokemon(null);
   };
 
+  const pokemonSummaries: DexPokemonSummary[] = useMemo(() => {
+    if (!speciesList) return [];
+
+    return speciesList
+      .filter((s) => {
+        if (!searchQuery.trim()) return true;
+        return s.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+      })
+      .map((s) => {
+        let id = 0;
+        if (s.url) {
+          const match = s.url.match(/\/pokemon-species\/(\d+)\//);
+          if (match) {
+            id = Number.parseInt(match[1] ?? "0", 10);
+          }
+        }
+
+        const number = id ? `No.${id.toString().padStart(3, "0")}` : "No.???";
+
+        return {
+          name: s.name,
+          number,
+          types: "타입 정보는 추후 추가 예정입니다.",
+        };
+      });
+  }, [searchQuery, speciesList]);
+
   return (
     <section className="space-y-4">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold">포켓몬 도감</h2>
           <p className="text-sm text-muted-foreground">
-            세대/게임과 타입을 선택해 포켓몬을 탐색할 수 있습니다. (현재는 더미 데이터입니다)
+            세대/게임과 타입을 선택해 포켓몬을 탐색할 수 있습니다. (현재는 1세대 중심의 기본
+            리스트만 제공됩니다)
           </p>
         </div>
       </header>
 
-      <DexFilterBar />
+      <DexFilterBar
+        generationId={effectiveGenerationId}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+      />
+
+      {isLoading && (
+        <p className="pt-2 text-xs text-muted-foreground">포켓몬 리스트를 불러오는 중입니다...</p>
+      )}
+
+      {isError && (
+        <p className="pt-2 text-xs text-destructive">
+          포켓몬 리스트를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.
+        </p>
+      )}
+
+      {!isLoading && !isError && pokemonSummaries.length === 0 && (
+        <p className="pt-2 text-xs text-muted-foreground">
+          현재 세대와 검색 조건에 해당하는 포켓몬이 없습니다.
+        </p>
+      )}
 
       <section className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
-        <DexPokemonCard
-          name="이상해씨"
-          number="No.001"
-          types="풀 / 독"
-          onClick={() =>
-            handleOpen({
-              name: "이상해씨",
-              number: "No.001",
-              types: "풀 / 독",
-            })
-          }
-        />
-        <DexPokemonCard
-          name="파이리"
-          number="No.004"
-          types="불꽃"
-          onClick={() =>
-            handleOpen({
-              name: "파이리",
-              number: "No.004",
-              types: "불꽃",
-            })
-          }
-        />
-        <DexPokemonCard
-          name="꼬부기"
-          number="No.007"
-          types="물"
-          onClick={() =>
-            handleOpen({
-              name: "꼬부기",
-              number: "No.007",
-              types: "물",
-            })
-          }
-        />
-        <DexPokemonCard
-          name="피카츄"
-          number="No.025"
-          types="전기"
-          onClick={() =>
-            handleOpen({
-              name: "피카츄",
-              number: "No.025",
-              types: "전기",
-            })
-          }
-        />
+        {pokemonSummaries.map((pokemon) => (
+          <DexPokemonCard
+            key={pokemon.number + pokemon.name}
+            name={pokemon.name}
+            number={pokemon.number}
+            types={pokemon.types}
+            onClick={() => handleOpen(pokemon)}
+          />
+        ))}
       </section>
 
       <DexPokemonDetailSheet pokemon={selectedPokemon} onClose={handleClose} />
