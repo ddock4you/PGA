@@ -6,6 +6,7 @@ import { HomePage } from "./pages/HomePage";
 import { DexPage } from "./pages/DexPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TrainingPage } from "./pages/TrainingPage";
+import { PokemonDetailPage } from "./pages/PokemonDetailPage";
 
 function AppLayout() {
   const { state, toggleTheme } = usePreferences();
@@ -74,6 +75,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/dex" element={<DexPage />} />
+        <Route path="/dex/:id" element={<PokemonDetailPage />} />
         <Route path="/training" element={<TrainingPage />} />
       </Route>
     </Routes>
