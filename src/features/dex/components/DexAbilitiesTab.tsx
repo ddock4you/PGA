@@ -17,10 +17,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { DexFilterBar } from "@/features/dex/components/DexFilterBar";
-import {
-  useAbilitiesListByGeneration,
-  useAbilitiesDetails,
-} from "@/features/abilities/hooks/useAbilitiesQueries";
+import { useDexCsvData } from "../hooks/useDexCsvData";
+import { transformNaturesForDex } from "../utils/dataTransforms";
+import type { DexNatureSummary } from "../utils/dataTransforms";
 
 interface DexAbilitiesTabProps {
   generationId: string;
@@ -33,29 +32,29 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. 세대별 특성 목록 가져오기
-  const { data: abilityList, isLoading: isListLoading } =
-    useAbilitiesListByGeneration(generationId);
+  // 1. CSV 데이터 로딩
+  const { naturesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
 
-  // 2. 검색 필터링 & 페이지네이션
-  const filteredList = useMemo(() => {
-    if (!abilityList) return [];
-    if (!searchQuery.trim()) return abilityList;
-    return abilityList.filter((a) =>
-      a.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  // 2. 특성 데이터 변환 및 필터링
+  const allNatures = useMemo(() => {
+    if (!naturesData) return [];
+    return transformNaturesForDex(naturesData);
+  }, [naturesData]);
+
+  const filteredNatures = useMemo(() => {
+    if (!allNatures) return [];
+    if (!searchQuery.trim()) return allNatures;
+    return allNatures.filter((n) =>
+      n.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
     );
-  }, [abilityList, searchQuery]);
+  }, [allNatures, searchQuery]);
 
-  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
-
-  const paginatedNames = useMemo(() => {
+  // 3. 페이지네이션 계산
+  const totalPages = Math.ceil(filteredNatures.length / ITEMS_PER_PAGE);
+  const paginatedNatures = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredList.slice(start, start + ITEMS_PER_PAGE).map((a) => a.name);
-  }, [filteredList, currentPage]);
-
-  // 3. 상세 정보 로딩
-  const abilityDetailsQueries = useAbilitiesDetails(paginatedNames);
-  const isDetailsLoading = abilityDetailsQueries.some((q) => q.isLoading);
+    return filteredNatures.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredNatures, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -71,17 +70,11 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
     navigate(`/abilities/${id}`);
   };
 
-  // 언어에 맞는 텍스트 찾기 헬퍼 (한국어 우선, 없으면 영어)
-  const getEffectText = (entries: { effect: string; language: { name: string } }[]) => {
-    const ko = entries.find((e) => e.language.name === "ko");
-    const en = entries.find((e) => e.language.name === "en");
-    return ko?.effect || en?.effect || "-";
-  };
-
-  const getShortEffectText = (entries: { short_effect: string; language: { name: string } }[]) => {
-    const ko = entries.find((e) => e.language.name === "ko");
-    const en = entries.find((e) => e.language.name === "en");
-    return ko?.short_effect || en?.short_effect || "-";
+  // 특성 효과 텍스트 (CSV에 없으므로 간단한 설명 생성)
+  const getNatureDescription = (nature: DexNatureSummary) => {
+    const increased = nature.increasedStat;
+    const decreased = nature.decreasedStat;
+    return `${increased} 상승, ${decreased} 하락`;
   };
 
   return (
@@ -93,8 +86,12 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
         description="이름으로 특성을 검색할 수 있습니다."
       />
 
-      {isListLoading ? (
+      {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">특성 리스트를 불러오는 중입니다...</p>
+      ) : isCsvError ? (
+        <p className="pt-2 text-xs text-destructive">
+          특성 리스트를 불러오는 중 오류가 발생했습니다.
+        </p>
       ) : (
         <>
           <div className="rounded-md border">
@@ -102,21 +99,12 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[150px]">특성명</TableHead>
-                  <TableHead className="w-[200px]">요약</TableHead>
+                  <TableHead className="w-[200px]">스탯 변화</TableHead>
                   <TableHead>설명</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isDetailsLoading ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="h-24 text-center text-xs text-muted-foreground"
-                    >
-                      상세 정보를 불러오는 중입니다...
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedNames.length === 0 ? (
+                {paginatedNatures.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={3}
@@ -126,24 +114,19 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  abilityDetailsQueries.map(({ data: ability, isLoading }) => {
-                    if (isLoading || !ability) return null;
-                    return (
-                      <TableRow
-                        key={ability.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => handleRowClick(ability.id)}
-                      >
-                        <TableCell className="font-medium">{ability.name}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {getShortEffectText(ability.effect_entries)}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {getEffectText(ability.effect_entries)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  paginatedNatures.map((nature: DexNatureSummary) => (
+                    <TableRow
+                      key={nature.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(nature.id)}
+                    >
+                      <TableCell className="font-medium">{nature.name}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {nature.increasedStat} ↑ / {nature.decreasedStat} ↓
+                      </TableCell>
+                      <TableCell className="text-xs">{getNatureDescription(nature)}</TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>

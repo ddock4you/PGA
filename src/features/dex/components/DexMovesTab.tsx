@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { DexFilterBar } from "./DexFilterBar";
-import { useMovesListByGeneration, useMovesDetails } from "@/features/moves/hooks/useMovesQueries";
+import { useDexCsvData } from "../hooks/useDexCsvData";
+import { transformMovesForDex } from "../utils/dataTransforms";
+import type { DexMoveSummary } from "../utils/dataTransforms";
 
 interface DexMovesTabProps {
   generationId: string;
@@ -31,26 +33,27 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. 세대별 기술 목록 가져오기 (이름만 있음)
-  const { data: moveList, isLoading: isListLoading } = useMovesListByGeneration(generationId);
+  // 1. CSV 데이터 로딩
+  const { movesData, machinesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
 
-  // 2. 검색 필터링 & 페이지네이션 계산
-  const filteredList = useMemo(() => {
-    if (!moveList) return [];
-    if (!searchQuery.trim()) return moveList;
-    return moveList.filter((m) => m.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  }, [moveList, searchQuery]);
+  // 2. 기술 데이터 변환 및 필터링
+  const allMoves = useMemo(() => {
+    if (!movesData || !machinesData) return [];
+    return transformMovesForDex(movesData, machinesData, generationId);
+  }, [movesData, machinesData, generationId]);
 
-  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
+  const filteredMoves = useMemo(() => {
+    if (!allMoves) return [];
+    if (!searchQuery.trim()) return allMoves;
+    return allMoves.filter((m) => m.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+  }, [allMoves, searchQuery]);
 
-  const paginatedNames = useMemo(() => {
+  // 3. 페이지네이션 계산
+  const totalPages = Math.ceil(filteredMoves.length / ITEMS_PER_PAGE);
+  const paginatedMoves = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredList.slice(start, start + ITEMS_PER_PAGE).map((m) => m.name);
-  }, [filteredList, currentPage]);
-
-  // 3. 현재 페이지 아이템 상세 정보 가져오기
-  const moveDetailsQueries = useMovesDetails(paginatedNames);
-  const isDetailsLoading = moveDetailsQueries.some((q) => q.isLoading);
+    return filteredMoves.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredMoves, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -77,8 +80,12 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
         description="이름으로 기술을 검색할 수 있습니다."
       />
 
-      {isListLoading ? (
+      {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">기술 리스트를 불러오는 중입니다...</p>
+      ) : isCsvError ? (
+        <p className="pt-2 text-xs text-destructive">
+          기술 리스트를 불러오는 중 오류가 발생했습니다.
+        </p>
       ) : (
         <>
           <div className="rounded-md border">
@@ -94,16 +101,7 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isDetailsLoading ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="h-24 text-center text-xs text-muted-foreground"
-                    >
-                      상세 정보를 불러오는 중입니다...
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedNames.length === 0 ? (
+                {paginatedMoves.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={6}
@@ -113,27 +111,24 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  moveDetailsQueries.map(({ data: move, isLoading }) => {
-                    if (isLoading || !move) return null; // 로딩 중인 행은 스킵하거나 스켈레톤 처리 가능
-                    return (
-                      <TableRow
-                        key={move.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => handleRowClick(move.id)}
-                      >
-                        <TableCell className="font-medium">{move.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="capitalize">
-                            {move.type.name}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="capitalize">{move.damage_class.name}</TableCell>
-                        <TableCell className="text-right">{move.power ?? "-"}</TableCell>
-                        <TableCell className="text-right">{move.accuracy ?? "-"}</TableCell>
-                        <TableCell className="text-right">{move.pp}</TableCell>
-                      </TableRow>
-                    );
-                  })
+                  paginatedMoves.map((move: DexMoveSummary) => (
+                    <TableRow
+                      key={move.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(move.id)}
+                    >
+                      <TableCell className="font-medium">{move.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="capitalize">
+                          {move.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="capitalize">{move.damageClass}</TableCell>
+                      <TableCell className="text-right">{move.power ?? "-"}</TableCell>
+                      <TableCell className="text-right">{move.accuracy ?? "-"}</TableCell>
+                      <TableCell className="text-right">{move.pp}</TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>

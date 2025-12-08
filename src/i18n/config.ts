@@ -11,21 +11,21 @@ const resources = {
   ko: {
     translation: {
       "app.title": "포켓몬 게임 어시스턴트",
-      "nav.dex": "포켓몬 도감",
+      "nav.dex": "도감",
       "nav.training": "배틀 트레이닝",
     },
   },
   en: {
     translation: {
       "app.title": "Pokemon Game Assistant",
-      "nav.dex": "Pokédex",
+      "nav.dex": "dex",
       "nav.training": "Battle Training",
     },
   },
   ja: {
     translation: {
       "app.title": "ポケモンゲームアシスタント",
-      "nav.dex": "ポケモン図鑑",
+      "nav.dex": "図鑑",
       "nav.training": "バトルトレーニング",
     },
   },
@@ -45,4 +45,3 @@ export function initI18n() {
 
   return i18n;
 }
-

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { usePokemonSpeciesByGeneration } from "@/features/pokemon/hooks/usePokemonQueries";
+import { useDexCsvData } from "../hooks/useDexCsvData";
+import { transformPokemonForDex } from "../utils/dataTransforms";
 import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 
@@ -12,44 +13,22 @@ export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: speciesList, isLoading, isError } = usePokemonSpeciesByGeneration(generationId);
+  const { pokemonData, isLoading, isError } = useDexCsvData();
 
   const handleOpen = (pokemon: DexPokemonSummary) => {
     navigate(`/dex/${pokemon.id}`);
   };
 
   const pokemonSummaries: DexPokemonSummary[] = useMemo(() => {
-    if (!speciesList) return [];
+    if (!pokemonData) return [];
 
-    const list = speciesList
-      .filter((s) => {
-        if (!searchQuery.trim()) return true;
-        return s.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
-      })
-      .map((s) => {
-        let id = 0;
-        if (s.url) {
-          const match = s.url.match(/\/pokemon-species\/(\d+)\//);
-          if (match) {
-            id = Number.parseInt(match[1] ?? "0", 10);
-          }
-        }
+    const allPokemon = transformPokemonForDex(pokemonData, generationId);
 
-        return {
-          id,
-          name: s.name,
-        };
-      });
-
-    // ID 기준 오름차순 정렬
-    list.sort((a, b) => a.id - b.id);
-
-    // 포켓몬 번호 포맷팅
-    return list.map((p) => ({
-      ...p,
-      number: p.id ? `No.${p.id.toString().padStart(4, "0")}` : "No.???",
-    }));
-  }, [searchQuery, speciesList]);
+    return allPokemon.filter((p) => {
+      if (!searchQuery.trim()) return true;
+      return p.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    });
+  }, [searchQuery, pokemonData, generationId]);
 
   return (
     <div className="space-y-4">

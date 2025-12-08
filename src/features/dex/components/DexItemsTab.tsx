@@ -17,7 +17,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { DexFilterBar } from "@/features/dex/components/DexFilterBar";
-import { useAllItemsList, useItemsDetails } from "@/features/items/hooks/useItemsQueries";
+import { useDexCsvData } from "../hooks/useDexCsvData";
+import { transformItemsForDex } from "../utils/dataTransforms";
+import type { DexItemSummary } from "../utils/dataTransforms";
 
 interface DexItemsTabProps {
   generationId: string; // 도구는 API 한계로 세대 필터 적용이 어려우나 인터페이스는 유지
@@ -30,26 +32,27 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. 전체 아이템 목록 가져오기
-  const { data: itemList, isLoading: isListLoading } = useAllItemsList();
+  // 1. CSV 데이터 로딩
+  const { itemsData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
 
-  // 2. 검색 필터링 & 페이지네이션
-  const filteredList = useMemo(() => {
-    if (!itemList) return [];
-    if (!searchQuery.trim()) return itemList;
-    return itemList.filter((i) => i.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  }, [itemList, searchQuery]);
+  // 2. 도구 데이터 변환 및 필터링
+  const allItems = useMemo(() => {
+    if (!itemsData) return [];
+    return transformItemsForDex(itemsData);
+  }, [itemsData]);
 
-  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
+  const filteredItems = useMemo(() => {
+    if (!allItems) return [];
+    if (!searchQuery.trim()) return allItems;
+    return allItems.filter((i) => i.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+  }, [allItems, searchQuery]);
 
-  const paginatedNames = useMemo(() => {
+  // 3. 페이지네이션 계산
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredList.slice(start, start + ITEMS_PER_PAGE).map((i) => i.name);
-  }, [filteredList, currentPage]);
-
-  // 3. 상세 정보 로딩
-  const itemDetailsQueries = useItemsDetails(paginatedNames);
-  const isDetailsLoading = itemDetailsQueries.some((q) => q.isLoading);
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredItems, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -65,10 +68,25 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
     navigate(`/items/${id}`);
   };
 
-  const getEffectText = (entries: { short_effect: string; language: { name: string } }[]) => {
-    const ko = entries.find((e) => e.language.name === "ko");
-    const en = entries.find((e) => e.language.name === "en");
-    return ko?.short_effect || en?.short_effect || "-";
+  // 도구 효과 텍스트 (CSV에 없으므로 기본 설명)
+  const getItemEffectText = (item: DexItemSummary) => {
+    // 간단한 카테고리 기반 설명
+    const descriptions: Record<string, string> = {
+      "standard-balls": "포켓몬을 잡는 데 사용",
+      healing: "HP 회복",
+      "pp-recovery": "기술 PP 회복",
+      "status-cures": "상태 이상 치료",
+      vitamins: "능력치 상승",
+      evolution: "진화 관련",
+      "held-items": "지니게 하는 도구",
+      // 기타 카테고리는 기본 설명
+    };
+    return descriptions[item.category] || `${item.category} 카테고리의 도구`;
+  };
+
+  // 도구 이미지 URL 생성 (PokéAPI 스프라이트)
+  const getItemSpriteUrl = (itemName: string) => {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
   };
 
   return (
@@ -80,8 +98,12 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
         description="이름으로 도구를 검색할 수 있습니다. (도구는 세대 구분 없이 전체 목록이 표시됩니다)"
       />
 
-      {isListLoading ? (
+      {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">도구 리스트를 불러오는 중입니다...</p>
+      ) : isCsvError ? (
+        <p className="pt-2 text-xs text-destructive">
+          도구 리스트를 불러오는 중 오류가 발생했습니다.
+        </p>
       ) : (
         <>
           <div className="rounded-md border">
@@ -95,16 +117,7 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isDetailsLoading ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="h-24 text-center text-xs text-muted-foreground"
-                    >
-                      상세 정보를 불러오는 중입니다...
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedNames.length === 0 ? (
+                {paginatedItems.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={4}
@@ -114,33 +127,32 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  itemDetailsQueries.map(({ data: item, isLoading }) => {
-                    if (isLoading || !item) return null;
-                    return (
-                      <TableRow
-                        key={item.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => handleRowClick(item.id)}
-                      >
-                        <TableCell>
-                          <div className="size-8 flex items-center justify-center">
-                            {item.sprites.default && (
-                              <img
-                                src={item.sprites.default}
-                                alt={item.name}
-                                className="max-h-full max-w-full"
-                              />
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell className="capitalize">{item.category.name}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {getEffectText(item.effect_entries)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  paginatedItems.map((item: DexItemSummary) => (
+                    <TableRow
+                      key={item.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(item.id)}
+                    >
+                      <TableCell>
+                        <div className="size-8 flex items-center justify-center">
+                          <img
+                            src={getItemSpriteUrl(item.name)}
+                            alt={item.name}
+                            className="max-h-full max-w-full"
+                            onError={(e) => {
+                              // 이미지 로드 실패 시 숨김
+                              (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="capitalize">{item.category}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {getItemEffectText(item)}
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
