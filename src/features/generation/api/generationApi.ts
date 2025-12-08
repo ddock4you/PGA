@@ -9,6 +9,10 @@ export interface PokeApiGeneration {
   id: number;
   name: string;
   pokemon_species: PokeApiNamedResource[];
+  moves: PokeApiNamedResource[];
+  abilities: PokeApiNamedResource[];
+  types: PokeApiNamedResource[];
+  version_groups: PokeApiNamedResource[];
 }
 
 interface PokeApiGenerationListResponse {

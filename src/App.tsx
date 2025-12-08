@@ -7,6 +7,9 @@ import { DexPage } from "./pages/DexPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TrainingPage } from "./pages/TrainingPage";
 import { PokemonDetailPage } from "./pages/PokemonDetailPage";
+import { MoveDetailPage } from "./pages/MoveDetailPage";
+import { AbilityDetailPage } from "./pages/AbilityDetailPage";
+import { ItemDetailPage } from "./pages/ItemDetailPage";
 
 function AppLayout() {
   const { state, toggleTheme } = usePreferences();
@@ -76,6 +79,9 @@ export function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/dex" element={<DexPage />} />
         <Route path="/dex/:id" element={<PokemonDetailPage />} />
+        <Route path="/moves/:id" element={<MoveDetailPage />} />
+        <Route path="/abilities/:id" element={<AbilityDetailPage />} />
+        <Route path="/items/:id" element={<ItemDetailPage />} />
         <Route path="/training" element={<TrainingPage />} />
       </Route>
     </Routes>

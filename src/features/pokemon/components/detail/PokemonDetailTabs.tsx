@@ -6,6 +6,7 @@ import type {
 } from "../../api/pokemonApi";
 import { PokemonStatsChart } from "./PokemonStatsChart";
 import { PokemonTypeEffectiveness } from "./PokemonTypeEffectiveness";
+import { PokemonAttackEffectivenessSection } from "./PokemonAttackEffectivenessSection";
 import { PokemonMovesSection } from "./PokemonMovesSection";
 import { PokemonEvolutionChain } from "./PokemonEvolutionChain";
 import { PokemonDetailInfo } from "./PokemonDetailInfo";
@@ -26,18 +27,21 @@ export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonD
         <TabsTrigger value="info">정보</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="space-y-4">
+      <TabsContent value="overview" className="space-y-4 mt-4">
         <div className="grid gap-4 md:grid-cols-2">
           <PokemonStatsChart stats={pokemon.stats} />
+          <div className="space-y-4">
+            <PokemonAttackEffectivenessSection types={pokemon.types} />
           <PokemonTypeEffectiveness types={pokemon.types} />
+          </div>
         </div>
       </TabsContent>
 
-      <TabsContent value="moves">
+      <TabsContent value="moves" className="mt-4">
         <PokemonMovesSection moves={pokemon.moves} />
       </TabsContent>
 
-      <TabsContent value="evolution">
+      <TabsContent value="evolution" className="mt-4">
         {evolutionChain ? (
           <PokemonEvolutionChain chain={evolutionChain} />
         ) : (
@@ -45,7 +49,7 @@ export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonD
         )}
       </TabsContent>
 
-      <TabsContent value="info">
+      <TabsContent value="info" className="mt-4">
         <PokemonDetailInfo pokemon={pokemon} species={species} />
       </TabsContent>
     </Tabs>

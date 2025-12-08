@@ -76,3 +76,27 @@ export function computeDefenseEffectiveness(
 
   return result;
 }
+
+export interface OffenseEffectiveness {
+  double: TypeName[];
+  half: TypeName[];
+  zero: TypeName[];
+}
+
+export function computeOffenseEffectiveness(
+  attackType: TypeName,
+  typeMap: TypeMap
+): OffenseEffectiveness {
+  const typeInfo = typeMap[attackType];
+  if (!typeInfo) {
+    return { double: [], half: [], zero: [] };
+  }
+
+  const { double_damage_to, half_damage_to, no_damage_to } = typeInfo.damage_relations;
+
+  return {
+    double: double_damage_to.map((t) => t.name),
+    half: half_damage_to.map((t) => t.name),
+    zero: no_damage_to.map((t) => t.name),
+  };
+}

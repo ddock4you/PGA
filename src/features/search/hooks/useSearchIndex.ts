@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  buildPokemonOnlySearchIndex,
-  type SearchIndex,
-} from "@/features/search/api/searchIndexApi";
+import { buildFullSearchIndex, type SearchIndex } from "@/features/search/api/searchIndexApi";
 
 export function useSearchIndex(
   generationId: string | number | null,
@@ -15,13 +12,12 @@ export function useSearchIndex(
         throw new Error("generationId is required to build search index");
       }
       const lang = primaryLanguage ?? "en";
-      return buildPokemonOnlySearchIndex(generationId, lang);
+      return buildFullSearchIndex(generationId, lang);
     },
     enabled: generationId != null,
     meta: {
       persist: true,
     },
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 }
-
-
