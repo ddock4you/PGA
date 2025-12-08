@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -17,6 +18,26 @@ interface PokemonDetailHeaderProps {
 
 export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetailHeaderProps) {
   const { state, setSelectedGenerationId } = usePreferences();
+  const headerRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const element = headerRef.current;
+    if (!element) return;
+
+    const updateHeight = () => {
+      const height = element.offsetHeight;
+      document.documentElement.style.setProperty("--header-height", `${height}px`);
+    };
+
+    // 초기 높이 설정
+    updateHeight();
+
+    // ResizeObserver로 변경 감지
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(element);
+
+    return () => resizeObserver.disconnect();
+  }, [pokemon, species, language]);
 
   // Find name in current language, fallback to English or API name
   const localNameObj = species.names.find((n) => n.language.name === language);
@@ -29,14 +50,11 @@ export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetai
   // Format ID
   const formattedId = `No.${pokemon.id.toString().padStart(4, "0")}`;
 
-  // Image (Official Artwork > Home > Front Default)
-  const imageUrl =
-    pokemon.sprites.other?.["official-artwork"].front_default ||
-    pokemon.sprites.other?.home.front_default ||
-    pokemon.sprites.front_default;
-
   return (
-    <header className="flex flex-col gap-6">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-10 flex flex-col gap-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       {/* 상단 컨트롤 및 타이틀 행 */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-full sm:w-[180px]">
@@ -76,41 +94,6 @@ export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetai
           </div>
         </div>
       </div>
-
-      {/* 이미지 및 설명 섹션 */}
-      <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-        <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-xl border bg-muted sm:w-40">
-          {imageUrl ? (
-            <img src={imageUrl} alt={name} className="h-full w-full object-contain p-2" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              No Image
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 space-y-4">
-          <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground leading-relaxed">
-            <FlavorText species={species} language={language} />
-          </div>
-        </div>
-      </div>
     </header>
   );
-}
-
-function FlavorText({ species, language }: { species: PokeApiPokemonSpecies; language: string }) {
-  const entries = species.flavor_text_entries.filter((e) => e.language.name === language);
-  const targetEntries =
-    entries.length > 0
-      ? entries
-      : species.flavor_text_entries.filter((e) => e.language.name === "en");
-
-  if (targetEntries.length === 0) return <span>설명이 없습니다.</span>;
-
-  const cleanText = (text: string) => text.replace(/[\f\n\r]/g, " ");
-
-  // 랜덤하게 하나 보여주거나, 가장 최신 버전을 보여주는 것이 좋음
-  // 여기서는 첫 번째 항목 사용
-  return <span>{cleanText(targetEntries[0].flavor_text)}</span>;
 }

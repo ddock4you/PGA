@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePokemonDetail } from "@/features/pokemon/hooks/usePokemonDetail";
 import { PokemonDetailHeader } from "@/features/pokemon/components/detail/PokemonDetailHeader";
+import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
 import { PokemonDetailTabs } from "@/features/pokemon/components/detail/PokemonDetailTabs";
 
 export function PokemonDetailPage() {
@@ -39,7 +40,10 @@ export function PokemonDetailPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div
+      className="space-y-6 animate-in fade-in duration-500"
+      style={{ paddingTop: "1rem" } as React.CSSProperties}
+    >
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="-ml-2">
           <ArrowLeft className="h-5 w-5" />
@@ -48,7 +52,7 @@ export function PokemonDetailPage() {
       </div>
 
       <PokemonDetailHeader pokemon={pokemon} species={species} language={language} />
-
+      <PokemonDetailOverview pokemon={pokemon} species={species} language={language} />
       <PokemonDetailTabs pokemon={pokemon} species={species} evolutionChain={evolutionChain} />
     </div>
   );
