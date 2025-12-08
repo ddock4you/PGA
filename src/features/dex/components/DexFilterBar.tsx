@@ -10,7 +10,6 @@ interface DexFilterBarProps {
 }
 
 export function DexFilterBar({
-  generationId,
   searchQuery,
   onSearchQueryChange,
   description = "세대/게임과 이름으로 리스트를 좁혀볼 수 있습니다.",
@@ -23,12 +22,6 @@ export function DexFilterBar({
         <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-xs sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <label className="mb-1 block font-medium text-muted-foreground">게임/세대</label>
-          <div className="h-9 rounded-md border bg-muted px-2 text-xs text-muted-foreground">
-            <div className="flex h-full items-center">세대 ID: {generationId}</div>
-          </div>
-        </div>
         {showTypeFilter && (
           <div className="flex-1">
             <label className="mb-1 block font-medium text-muted-foreground">타입</label>

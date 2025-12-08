@@ -7,6 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon } from "../../api/pokemonApi";
 
 interface PokemonMovesSectionProps {
@@ -14,17 +16,18 @@ interface PokemonMovesSectionProps {
 }
 
 export function PokemonMovesSection({ moves }: PokemonMovesSectionProps) {
-  // Filter to only Level Up moves for MVP simplicity
+  const { state } = usePreferences();
+  const selectedGenerationId = state.selectedGenerationId || "1";
+  const targetVersionGroup = GENERATION_VERSION_GROUP_MAP[selectedGenerationId] || "red-blue";
+
+  // Filter to only Level Up moves for the selected generation's version group
   // And sort by level
   const levelUpMoves = moves
     .map((m) => {
-      // Find the "level-up" method entry.
-      // There might be multiple entries for different game versions.
-      // We pick the one with the highest level just to have *some* logic,
-      // or ideally the one from the latest version group.
-      // For now, just find ANY level-up entry.
+      // Find the "level-up" method entry for the selected version group
       const levelUpEntry = m.version_group_details.find(
-        (d) => d.move_learn_method.name === "level-up"
+        (d) =>
+          d.move_learn_method.name === "level-up" && d.version_group.name === targetVersionGroup
       );
       return {
         name: m.move.name,
@@ -38,7 +41,9 @@ export function PokemonMovesSection({ moves }: PokemonMovesSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">자력기 (Level Up Moves)</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          자력기 (Level Up Moves) - {selectedGenerationId}세대
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {levelUpMoves.length === 0 ? (

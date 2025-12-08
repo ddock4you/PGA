@@ -1,13 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { GameGenerationSelector } from "@/features/generation/components/GameGenerationSelector";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";
 
 interface PokemonDetailHeaderProps {
@@ -17,7 +11,7 @@ interface PokemonDetailHeaderProps {
 }
 
 export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetailHeaderProps) {
-  const { state, setSelectedGenerationId } = usePreferences();
+  const { setSelectedGenerationId, setSelectedGameId } = usePreferences();
   const headerRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -58,22 +52,14 @@ export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetai
       {/* 상단 컨트롤 및 타이틀 행 */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-full sm:w-[180px]">
-          <Select
-            value={state.selectedGenerationId || "1"}
-            onValueChange={(val) => setSelectedGenerationId(val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="세대 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              {/* 1~9세대 하드코딩 (API로 불러올 수도 있음) */}
-              {Array.from({ length: 9 }, (_, i) => i + 1).map((gen) => (
-                <SelectItem key={gen} value={gen.toString()}>
-                  {gen}세대
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <GameGenerationSelector
+            variant="compact"
+            showGenerationOnly={false}
+            onGenerationSelect={(generationId, gameId) => {
+              setSelectedGenerationId(generationId);
+              if (gameId) setSelectedGameId(gameId);
+            }}
+          />
         </div>
 
         <div className="flex flex-1 flex-wrap items-center gap-3">

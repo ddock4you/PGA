@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, Route, Routes } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { GameGenerationSelector } from "@/features/generation/components/GameGenerationSelector";
 import { HomePage } from "./pages/HomePage";
 import { DexPage } from "./pages/DexPage";
 import { SearchPage } from "./pages/SearchPage";
@@ -12,7 +13,7 @@ import { AbilityDetailPage } from "./pages/AbilityDetailPage";
 import { ItemDetailPage } from "./pages/ItemDetailPage";
 
 function AppLayout() {
-  const { state, toggleTheme } = usePreferences();
+  const { state, toggleTheme, setSelectedGenerationId, setSelectedGameId } = usePreferences();
   const { t } = useTranslation();
   const themeLabel = state.theme === "dark" ? "다크" : "라이트";
 
@@ -39,14 +40,13 @@ function AppLayout() {
               </NavLink>
             </nav>
             <div className="hidden items-center gap-2 sm:flex">
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                aria-label="현재 게임/세대 선택 (추후 구현)"
-              >
-                게임/세대
-              </Button>
+              <GameGenerationSelector
+                variant="compact"
+                onGenerationSelect={(generationId, gameId) => {
+                  setSelectedGenerationId(generationId);
+                  if (gameId) setSelectedGameId(gameId);
+                }}
+              />
               <Button variant="ghost" size="sm" type="button" aria-label="언어 선택 (추후 구현)">
                 언어
               </Button>

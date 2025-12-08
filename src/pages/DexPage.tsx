@@ -15,10 +15,8 @@ export function DexPage() {
     <section className="space-y-4">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold">포켓몬 도감</h2>
-          <p className="text-sm text-muted-foreground">
-            세대/게임을 선택하고 다양한 정보를 탐색하세요.
-          </p>
+          <h2 className="text-xl font-semibold">도감</h2>
+          <p className="text-sm text-muted-foreground">다양한 정보를 탐색하세요.</p>
         </div>
       </header>
 

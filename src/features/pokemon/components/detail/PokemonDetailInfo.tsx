@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";
 
 interface PokemonDetailInfoProps {
@@ -8,6 +10,9 @@ interface PokemonDetailInfoProps {
 }
 
 export function PokemonDetailInfo({ pokemon, species }: PokemonDetailInfoProps) {
+  const { state } = usePreferences();
+  const selectedGameId = state.selectedGameId;
+
   const evYields = pokemon.stats
     .filter((s) => s.effort > 0)
     .map((s) => `${s.stat.name} +${s.effort}`);
@@ -112,12 +117,55 @@ export function PokemonDetailInfo({ pokemon, species }: PokemonDetailInfoProps) 
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           {pokemon.held_items.length > 0 ? (
-            pokemon.held_items.map((item) => (
-              <div key={item.item.name} className="flex items-center justify-between">
-                <span className="capitalize">{item.item.name.replace("-", " ")}</span>
-                {/* Show aggregated rarity across versions or simple list? Just simple for now */}
-              </div>
-            ))
+            pokemon.held_items
+              .map((item) => {
+                // 선택된 버전에 맞는 version_detail 찾기
+                let versionDetail = null;
+                if (selectedGameId) {
+                  versionDetail = item.version_details.find(
+                    (detail) => detail.version.name === selectedGameId
+                  );
+                }
+
+                // 선택된 버전에 정보가 없으면 해당 세대의 다른 버전 찾기
+                if (!versionDetail && selectedGameId) {
+                  const selectedGeneration = GENERATION_GAME_MAPPING.find((gen) =>
+                    gen.versions.some((v) => v.id === selectedGameId)
+                  );
+                  if (selectedGeneration) {
+                    const generationVersionNames = selectedGeneration.versions.map((v) => v.id);
+                    versionDetail = item.version_details.find((detail) =>
+                      generationVersionNames.includes(detail.version.name)
+                    );
+                  }
+                }
+
+                // 그래도 없으면 첫 번째 버전 사용
+                if (!versionDetail) {
+                  versionDetail = item.version_details[0];
+                }
+
+                return {
+                  itemName: item.item.name,
+                  rarity: versionDetail ? versionDetail.rarity : 0,
+                  versionName: versionDetail ? versionDetail.version.name : "",
+                };
+              })
+              .filter((item) => item.rarity > 0) // 확률이 0인 아이템은 표시하지 않음
+              .sort((a, b) => b.rarity - a.rarity) // 확률 높은 순으로 정렬
+              .map((item) => (
+                <div key={item.itemName} className="flex items-center justify-between">
+                  <span className="capitalize">{item.itemName.replace("-", " ")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{item.rarity}%</span>
+                    {item.versionName && selectedGameId && item.versionName !== selectedGameId && (
+                      <Badge variant="outline" className="text-xs">
+                        {item.versionName}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))
           ) : (
             <div className="text-muted-foreground">없음</div>
           )}

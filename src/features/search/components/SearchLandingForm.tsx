@@ -45,14 +45,6 @@ export function SearchLandingForm() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">
-              게임/세대
-            </label>
-            <select className="h-9 w-full rounded-md border bg-background px-2 text-sm">
-              <option>게임/세대 선택</option>
-            </select>
-          </div>
-          <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-muted-foreground">검색어</label>
             <Input
               placeholder="포켓몬 / 기술 / 특성 / 도구 이름"
