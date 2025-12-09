@@ -26,7 +26,6 @@ export function DexFilterBar({
   const updateFilter = <K extends keyof DexFilters>(key: K, value: DexFilters[K]) => {
     onFiltersChange({ ...filters, [key]: value });
   };
-  console.log({ filters });
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -95,20 +94,29 @@ export function DexFilterBar({
             sortByWeight={filters.sortByWeight}
             weightOrder={filters.weightOrder}
             onWeightSortChange={(enabled, order) => {
-              updateFilter("sortByWeight", enabled);
-              updateFilter("weightOrder", order);
+              onFiltersChange({
+                ...filters,
+                sortByWeight: enabled,
+                weightOrder: order
+              });
             }}
             sortByHeight={filters.sortByHeight}
             heightOrder={filters.heightOrder}
             onHeightSortChange={(enabled, order) => {
-              updateFilter("sortByHeight", enabled);
-              updateFilter("heightOrder", order);
+              onFiltersChange({
+                ...filters,
+                sortByHeight: enabled,
+                heightOrder: order
+              });
             }}
             sortByDexNumber={filters.sortByDexNumber}
             dexNumberOrder={filters.dexNumberOrder}
             onDexNumberSortChange={(enabled, order) => {
-              updateFilter("sortByDexNumber", enabled);
-              updateFilter("dexNumberOrder", order);
+              onFiltersChange({
+                ...filters,
+                sortByDexNumber: enabled,
+                dexNumberOrder: order
+              });
             }}
           />
         </div>

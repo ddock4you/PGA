@@ -17,7 +17,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
-import { DexFilterBar } from "./DexFilterBar";
+import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "../hooks/useDexCsvData";
 import { transformMovesForDex } from "../utils/dataTransforms";
 import type { DexMoveSummary } from "../utils/dataTransforms";
@@ -73,12 +73,15 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
 
   return (
     <div className="space-y-4">
-      <DexFilterBar
-        generationId={generationId}
-        searchQuery={searchQuery}
-        onSearchQueryChange={handleSearchChange}
-        description="이름으로 기술을 검색할 수 있습니다."
-      />
+      <div className="flex flex-col space-y-2">
+        <label className="text-xs font-medium text-muted-foreground">기술명 검색</label>
+        <Input
+          placeholder="기술 이름으로 검색"
+          className="max-w-sm h-9 text-xs"
+          value={searchQuery}
+          onChange={(event) => handleSearchChange(event.target.value)}
+        />
+      </div>
 
       {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">기술 리스트를 불러오는 중입니다...</p>

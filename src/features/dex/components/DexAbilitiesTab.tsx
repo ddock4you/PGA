@@ -16,7 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { DexFilterBar } from "@/features/dex/components/DexFilterBar";
+import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "../hooks/useDexCsvData";
 import { transformAbilitiesForDex } from "../utils/dataTransforms";
 import type { DexAbilitySummary } from "../utils/dataTransforms";
@@ -82,12 +82,15 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
 
   return (
     <div className="space-y-4">
-      <DexFilterBar
-        generationId={generationId}
-        searchQuery={searchQuery}
-        onSearchQueryChange={handleSearchChange}
-        description="이름으로 특성을 검색할 수 있습니다."
-      />
+      <div className="flex flex-col space-y-2">
+        <label className="text-xs font-medium text-muted-foreground">특성명 검색</label>
+        <Input
+          placeholder="특성 이름으로 검색"
+          className="max-w-sm h-9 text-xs"
+          value={searchQuery}
+          onChange={(event) => handleSearchChange(event.target.value)}
+        />
+      </div>
 
       {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">특성 리스트를 불러오는 중입니다...</p>

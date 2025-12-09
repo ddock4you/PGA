@@ -5,7 +5,7 @@ import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
 interface DexFilterContextType {
   filters: DexFilters;
   searchQuery: string;
-  updateFilters: (filters: Partial<DexFilters>) => void;
+  updateFilters: (filters: DexFilters | Partial<DexFilters>) => void;
   updateSearchQuery: (query: string) => void;
   resetFilters: () => void;
 }
@@ -62,7 +62,6 @@ function loadFromStorage(): { filters: DexFilters; searchQuery: string } {
       ? {
           ...DEFAULT_DEX_FILTERS,
           ...savedFilters,
-          dexGenerationId: savedFilters.dexGenerationId || "9",
         }
       : { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" };
 
@@ -89,10 +88,7 @@ interface DexFilterProviderProps {
 }
 
 export function DexFilterProvider({ children }: DexFilterProviderProps) {
-  const [state, dispatch] = useReducer(dexFilterReducer, {
-    filters: { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" },
-    searchQuery: "",
-  });
+  const [state, dispatch] = useReducer(dexFilterReducer, loadFromStorage());
 
   // 컴포넌트 마운트 시 localStorage에서 데이터 로드
   useEffect(() => {

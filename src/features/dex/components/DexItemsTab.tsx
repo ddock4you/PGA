@@ -16,7 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { DexFilterBar } from "@/features/dex/components/DexFilterBar";
+import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "../hooks/useDexCsvData";
 import { transformItemsForDex } from "../utils/dataTransforms";
 import type { DexItemSummary } from "../utils/dataTransforms";
@@ -91,12 +91,15 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
 
   return (
     <div className="space-y-4">
-      <DexFilterBar
-        generationId={generationId}
-        searchQuery={searchQuery}
-        onSearchQueryChange={handleSearchChange}
-        description="이름으로 도구를 검색할 수 있습니다. (도구는 세대 구분 없이 전체 목록이 표시됩니다)"
-      />
+      <div className="flex flex-col space-y-2">
+        <label className="text-xs font-medium text-muted-foreground">도구명 검색</label>
+        <Input
+          placeholder="도구 이름으로 검색"
+          className="max-w-sm h-9 text-xs"
+          value={searchQuery}
+          onChange={(event) => handleSearchChange(event.target.value)}
+        />
+      </div>
 
       {isCsvLoading ? (
         <p className="pt-2 text-xs text-muted-foreground">도구 리스트를 불러오는 중입니다...</p>
