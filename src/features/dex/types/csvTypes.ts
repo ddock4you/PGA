@@ -54,3 +54,16 @@ export interface CsvItem {
   fling_power: number | null;
   fling_effect_id: number | null;
 }
+
+export interface CsvAbility {
+  id: number;
+  identifier: string;
+  generation_id: number;
+  is_main_series: number;
+}
+
+export interface CsvAbilityName {
+  ability_id: number;
+  local_language_id: number;
+  name: string;
+}

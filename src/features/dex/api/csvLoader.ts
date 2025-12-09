@@ -1,5 +1,13 @@
 import Papa from "papaparse";
-import type { CsvPokemon, CsvMove, CsvMachine, CsvNature, CsvItem } from "../types/csvTypes";
+import type {
+  CsvPokemon,
+  CsvMove,
+  CsvMachine,
+  CsvNature,
+  CsvItem,
+  CsvAbility,
+  CsvAbilityName,
+} from "../types/csvTypes";
 
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
 import pokemonCsv from "../data/pokemon.csv?raw";
@@ -7,6 +15,8 @@ import movesCsv from "../data/moves.csv?raw";
 import machinesCsv from "../data/machines.csv?raw";
 import naturesCsv from "../data/natures.csv?raw";
 import itemsCsv from "../data/items.csv?raw";
+import abilitiesCsv from "../data/abilities.csv?raw";
+import abilityNamesCsv from "../data/ability_names.csv?raw";
 
 // CSV 텍스트를 파싱하는 유틸리티 함수
 export async function loadCsvData<T>(
@@ -100,5 +110,22 @@ export async function loadItemsCsv(): Promise<CsvItem[]> {
     cost: Number(row.cost),
     fling_power: row.fling_power === "" ? null : Number(row.fling_power),
     fling_effect_id: row.fling_effect_id === "" ? null : Number(row.fling_effect_id),
+  }));
+}
+
+export async function loadAbilitiesCsv(): Promise<CsvAbility[]> {
+  return loadCsvData<CsvAbility>(abilitiesCsv, "abilities.csv", (row) => ({
+    id: Number(row.id),
+    identifier: row.identifier,
+    generation_id: Number(row.generation_id),
+    is_main_series: Number(row.is_main_series),
+  }));
+}
+
+export async function loadAbilityNamesCsv(): Promise<CsvAbilityName[]> {
+  return loadCsvData<CsvAbilityName>(abilityNamesCsv, "ability_names.csv", (row) => ({
+    ability_id: Number(row.ability_id),
+    local_language_id: Number(row.local_language_id),
+    name: row.name,
   }));
 }

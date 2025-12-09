@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/pagination";
 import { DexFilterBar } from "@/features/dex/components/DexFilterBar";
 import { useDexCsvData } from "../hooks/useDexCsvData";
-import { transformNaturesForDex } from "../utils/dataTransforms";
-import type { DexNatureSummary } from "../utils/dataTransforms";
+import { transformAbilitiesForDex } from "../utils/dataTransforms";
+import type { DexAbilitySummary } from "../utils/dataTransforms";
 
 interface DexAbilitiesTabProps {
   generationId: string;
@@ -33,28 +33,33 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 1. CSV 데이터 로딩
-  const { naturesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
+  const {
+    abilitiesData,
+    abilityNamesData,
+    isLoading: isCsvLoading,
+    isError: isCsvError,
+  } = useDexCsvData();
 
   // 2. 특성 데이터 변환 및 필터링
-  const allNatures = useMemo(() => {
-    if (!naturesData) return [];
-    return transformNaturesForDex(naturesData);
-  }, [naturesData]);
+  const allAbilities = useMemo(() => {
+    if (!abilitiesData || !abilityNamesData) return [];
+    return transformAbilitiesForDex(abilitiesData, abilityNamesData);
+  }, [abilitiesData, abilityNamesData]);
 
-  const filteredNatures = useMemo(() => {
-    if (!allNatures) return [];
-    if (!searchQuery.trim()) return allNatures;
-    return allNatures.filter((n) =>
-      n.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  const filteredAbilities = useMemo(() => {
+    if (!allAbilities) return [];
+    if (!searchQuery.trim()) return allAbilities;
+    return allAbilities.filter((ability) =>
+      ability.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
     );
-  }, [allNatures, searchQuery]);
+  }, [allAbilities, searchQuery]);
 
   // 3. 페이지네이션 계산
-  const totalPages = Math.ceil(filteredNatures.length / ITEMS_PER_PAGE);
-  const paginatedNatures = useMemo(() => {
+  const totalPages = Math.ceil(filteredAbilities.length / ITEMS_PER_PAGE);
+  const paginatedAbilities = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredNatures.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredNatures, currentPage]);
+    return filteredAbilities.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredAbilities, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -70,11 +75,9 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
     navigate(`/abilities/${id}`);
   };
 
-  // 특성 효과 텍스트 (CSV에 없으므로 간단한 설명 생성)
-  const getNatureDescription = (nature: DexNatureSummary) => {
-    const increased = nature.increasedStat;
-    const decreased = nature.decreasedStat;
-    return `${increased} 상승, ${decreased} 하락`;
+  // 특성 효과 텍스트 (간단한 설명 표시)
+  const getAbilityDescription = (ability: DexAbilitySummary) => {
+    return ability.description;
   };
 
   return (
@@ -99,12 +102,12 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[150px]">특성명</TableHead>
-                  <TableHead className="w-[200px]">스탯 변화</TableHead>
+                  <TableHead className="w-[100px]">세대</TableHead>
                   <TableHead>설명</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedNatures.length === 0 ? (
+                {paginatedAbilities.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={3}
@@ -114,17 +117,17 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedNatures.map((nature: DexNatureSummary) => (
+                  paginatedAbilities.map((ability: DexAbilitySummary) => (
                     <TableRow
-                      key={nature.id}
+                      key={ability.id}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleRowClick(nature.id)}
+                      onClick={() => handleRowClick(ability.id)}
                     >
-                      <TableCell className="font-medium">{nature.name}</TableCell>
+                      <TableCell className="font-medium">{ability.name}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {nature.increasedStat} ↑ / {nature.decreasedStat} ↓
+                        {ability.generation}세대
                       </TableCell>
-                      <TableCell className="text-xs">{getNatureDescription(nature)}</TableCell>
+                      <TableCell className="text-xs">{getAbilityDescription(ability)}</TableCell>
                     </TableRow>
                   ))
                 )}

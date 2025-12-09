@@ -5,8 +5,18 @@ import {
   loadMachinesCsv,
   loadNaturesCsv,
   loadItemsCsv,
+  loadAbilitiesCsv,
+  loadAbilityNamesCsv,
 } from "../api/csvLoader";
-import type { CsvPokemon, CsvMove, CsvMachine, CsvNature, CsvItem } from "../types/csvTypes";
+import type {
+  CsvPokemon,
+  CsvMove,
+  CsvMachine,
+  CsvNature,
+  CsvItem,
+  CsvAbility,
+  CsvAbilityName,
+} from "../types/csvTypes";
 
 // CSV 데이터를 로드하는 커스텀 훅
 // 모든 CSV 데이터를 한 번에 로드하고 캐시
@@ -51,6 +61,26 @@ export function useDexCsvData() {
     refetchOnMount: false,
   });
 
+  const abilitiesQuery = useQuery({
+    queryKey: ["dex-csv", "abilities"],
+    queryFn: loadAbilitiesCsv,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+
+  const abilityNamesQuery = useQuery({
+    queryKey: ["dex-csv", "ability-names"],
+    queryFn: loadAbilityNamesCsv,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+
   const itemsQuery = useQuery({
     queryKey: ["dex-csv", "items"],
     queryFn: loadItemsCsv,
@@ -67,6 +97,8 @@ export function useDexCsvData() {
     movesQuery.isLoading ||
     machinesQuery.isLoading ||
     naturesQuery.isLoading ||
+    abilitiesQuery.isLoading ||
+    abilityNamesQuery.isLoading ||
     itemsQuery.isLoading;
 
   // 모든 쿼리가 에러인지 확인
@@ -75,6 +107,8 @@ export function useDexCsvData() {
     movesQuery.isError ||
     machinesQuery.isError ||
     naturesQuery.isError ||
+    abilitiesQuery.isError ||
+    abilityNamesQuery.isError ||
     itemsQuery.isError;
 
   // 에러 메시지들 수집
@@ -83,6 +117,8 @@ export function useDexCsvData() {
     movesQuery.error,
     machinesQuery.error,
     naturesQuery.error,
+    abilitiesQuery.error,
+    abilityNamesQuery.error,
     itemsQuery.error,
   ].filter(Boolean);
 
@@ -92,6 +128,8 @@ export function useDexCsvData() {
     movesData: movesQuery.data ?? [],
     machinesData: machinesQuery.data ?? [],
     naturesData: naturesQuery.data ?? [],
+    abilitiesData: abilitiesQuery.data ?? [],
+    abilityNamesData: abilityNamesQuery.data ?? [],
     itemsData: itemsQuery.data ?? [],
 
     // 상태
@@ -104,6 +142,8 @@ export function useDexCsvData() {
     movesQuery,
     machinesQuery,
     naturesQuery,
+    abilitiesQuery,
+    abilityNamesQuery,
     itemsQuery,
   };
 }

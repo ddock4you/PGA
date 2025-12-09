@@ -1,4 +1,12 @@
-import type { CsvPokemon, CsvMove, CsvMachine, CsvNature, CsvItem } from "../types/csvTypes";
+import type {
+  CsvPokemon,
+  CsvMove,
+  CsvMachine,
+  CsvNature,
+  CsvItem,
+  CsvAbility,
+  CsvAbilityName,
+} from "../types/csvTypes";
 
 // 타입 ID와 이름 매핑 (PokéAPI 기준)
 const TYPE_ID_TO_NAME: Record<number, string> = {
@@ -172,6 +180,46 @@ export function transformNaturesForDex(csvNatures: CsvNature[]): DexNatureSummar
     increasedStat: getStatName(nature.increased_stat_id),
     decreasedStat: getStatName(nature.decreased_stat_id),
   }));
+}
+
+// 특성 데이터 변환
+export interface DexAbilitySummary {
+  id: number;
+  name: string;
+  generation: number;
+  description: string;
+}
+
+export function transformAbilitiesForDex(
+  csvAbilities: CsvAbility[],
+  csvAbilityNames: CsvAbilityName[],
+  primaryLanguageId: number = 9, // 영어 기본값
+  secondaryLanguageId: number = 3 // 한국어
+): DexAbilitySummary[] {
+  return csvAbilities
+    .filter((ability) => ability.is_main_series === 1) // 메인 시리즈 특성만
+    .map((ability) => {
+      // 한국어 이름 찾기 (없으면 영어 사용)
+      const primaryName =
+        csvAbilityNames.find(
+          (name) => name.ability_id === ability.id && name.local_language_id === primaryLanguageId
+        )?.name || ability.identifier;
+
+      const secondaryName = csvAbilityNames.find(
+        (name) => name.ability_id === ability.id && name.local_language_id === secondaryLanguageId
+      )?.name;
+
+      // 특성 이름 구성 (영어 우선, 한국어 있으면 괄호 안에)
+      const displayName = secondaryName ? `${primaryName} (${secondaryName})` : primaryName;
+
+      return {
+        id: ability.id,
+        name: displayName,
+        generation: ability.generation_id,
+        description: "특성 효과 정보", // 추후 상세 설명으로 교체 가능
+      };
+    })
+    .sort((a, b) => a.id - b.id);
 }
 
 // 도구 데이터 변환
