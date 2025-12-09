@@ -4,6 +4,7 @@ import { DexPokemonTab } from "@/features/dex/components/DexPokemonTab";
 import { DexMovesTab } from "@/features/dex/components/DexMovesTab";
 import { DexAbilitiesTab } from "@/features/dex/components/DexAbilitiesTab";
 import { DexItemsTab } from "@/features/dex/components/DexItemsTab";
+import { DexFilterProvider } from "@/features/dex/contexts/DexFilterContext";
 
 export function DexPage() {
   const { state } = usePreferences();
@@ -29,7 +30,9 @@ export function DexPage() {
         </TabsList>
 
         <TabsContent value="pokemon" className="mt-4">
-          <DexPokemonTab generationId={effectiveGenerationId} />
+          <DexFilterProvider>
+            <DexPokemonTab generationId={effectiveGenerationId} />
+          </DexFilterProvider>
         </TabsContent>
 
         <TabsContent value="moves" className="mt-4">

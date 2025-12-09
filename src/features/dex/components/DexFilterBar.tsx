@@ -1,43 +1,131 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { DexGenerationSelector } from "./DexGenerationSelector";
+import { DexTypeFilter } from "./DexTypeFilter";
+import { DexAbilityFilterNew as DexAbilityFilter } from "./DexAbilityFilterNew";
+import { DexSortOptions } from "./DexSortOptions";
+import type { DexFilters } from "../types/filterTypes";
 
 interface DexFilterBarProps {
-  generationId: string;
+  filters: DexFilters;
   searchQuery: string;
+  onFiltersChange: (filters: DexFilters) => void;
   onSearchQueryChange: (value: string) => void;
   description?: string;
-  showTypeFilter?: boolean;
 }
 
 export function DexFilterBar({
+  filters,
   searchQuery,
+  onFiltersChange,
   onSearchQueryChange,
-  description = "세대/게임과 이름으로 리스트를 좁혀볼 수 있습니다.",
-  showTypeFilter = false,
+  description = "세대/게임과 다양한 조건으로 포켓몬을 탐색할 수 있습니다.",
 }: DexFilterBarProps) {
+  const updateFilter = <K extends keyof DexFilters>(key: K, value: DexFilters[K]) => {
+    onFiltersChange({ ...filters, [key]: value });
+  };
+  console.log({ filters });
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">필터</CardTitle>
         <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3 text-xs sm:flex-row sm:items-end">
-        {showTypeFilter && (
-          <div className="flex-1">
-            <label className="mb-1 block font-medium text-muted-foreground">타입</label>
-            <div className="h-9 rounded-md border bg-muted px-2 text-xs text-muted-foreground">
-              <div className="flex h-full items-center">모든 타입 (추후 구현)</div>
+      <CardContent className="space-y-6 text-xs">
+        {/* 1행: 게임/세대 선택, 하위세대 포함, 기본 포켓몬만 보기 */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">게임/세대</label>
+            <DexGenerationSelector
+              generationId={filters.dexGenerationId}
+              onGenerationChange={(genId) => updateFilter("dexGenerationId", genId)}
+            />
+          </div>
+
+          <div className="flex items-end space-x-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="include-sub-generations"
+                checked={filters.includeSubGenerations}
+                onCheckedChange={(checked) =>
+                  updateFilter("includeSubGenerations", checked as boolean)
+                }
+                className="h-3 w-3"
+              />
+              <Label htmlFor="include-sub-generations" className="text-xs">
+                하위세대 포함
+              </Label>
             </div>
           </div>
-        )}
-        <div className="flex-1">
-          <label className="mb-1 block font-medium text-muted-foreground">이름 검색</label>
-          <Input
-            placeholder="이름으로 검색"
-            className="h-9 text-xs"
-            value={searchQuery}
-            onChange={(event) => onSearchQueryChange(event.target.value)}
+
+          <div className="flex items-end">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="only-default-forms"
+                checked={filters.onlyDefaultForms}
+                onCheckedChange={(checked) => updateFilter("onlyDefaultForms", checked as boolean)}
+                className="h-3 w-3"
+              />
+              <Label htmlFor="only-default-forms" className="text-xs">
+                기본 포켓몬만 보기
+              </Label>
+            </div>
+          </div>
+        </div>
+
+        {/* 2행: 타입 필터, 특성 필터 */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <DexTypeFilter
+            selectedTypes={filters.selectedTypes}
+            onTypesChange={(types) => updateFilter("selectedTypes", types)}
           />
+
+          <DexAbilityFilter
+            generationId={filters.dexGenerationId}
+            selectedAbilityId={filters.selectedAbilityId}
+            onAbilityChange={(abilityId) => updateFilter("selectedAbilityId", abilityId)}
+          />
+        </div>
+
+        {/* 3행, 4행, 5행: 정렬 옵션들 */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <DexSortOptions
+            sortByWeight={filters.sortByWeight}
+            weightOrder={filters.weightOrder}
+            onWeightSortChange={(enabled, order) => {
+              updateFilter("sortByWeight", enabled);
+              updateFilter("weightOrder", order);
+            }}
+            sortByHeight={filters.sortByHeight}
+            heightOrder={filters.heightOrder}
+            onHeightSortChange={(enabled, order) => {
+              updateFilter("sortByHeight", enabled);
+              updateFilter("heightOrder", order);
+            }}
+            sortByDexNumber={filters.sortByDexNumber}
+            dexNumberOrder={filters.dexNumberOrder}
+            onDexNumberSortChange={(enabled, order) => {
+              updateFilter("sortByDexNumber", enabled);
+              updateFilter("dexNumberOrder", order);
+            }}
+          />
+        </div>
+
+        {/* 이름 검색 (항상 마지막에) */}
+        <div className="pt-2 border-t">
+          <div className="max-w-sm">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              이름 검색
+            </label>
+            <Input
+              placeholder="이름으로 검색"
+              className="h-9 text-xs"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange(event.target.value)}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

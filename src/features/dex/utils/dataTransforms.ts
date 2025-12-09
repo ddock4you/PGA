@@ -9,7 +9,7 @@ import type {
 } from "../types/csvTypes";
 
 // 타입 ID와 이름 매핑 (PokéAPI 기준)
-const TYPE_ID_TO_NAME: Record<number, string> = {
+export const TYPE_ID_TO_NAME: Record<number, string> = {
   1: "normal",
   2: "fighting",
   3: "flying",
@@ -30,6 +30,28 @@ const TYPE_ID_TO_NAME: Record<number, string> = {
   18: "fairy",
 };
 
+// 타입별 색상 도메인 (Tailwind CSS 클래스)
+export const TYPE_COLORS: Record<string, string> = {
+  normal: "bg-gray-400 text-white",
+  fighting: "bg-red-600 text-white",
+  flying: "bg-indigo-400 text-white",
+  poison: "bg-purple-600 text-white",
+  ground: "bg-yellow-600 text-white",
+  rock: "bg-yellow-800 text-white",
+  bug: "bg-green-500 text-white",
+  ghost: "bg-purple-800 text-white",
+  steel: "bg-gray-500 text-white",
+  fire: "bg-red-500 text-white",
+  water: "bg-blue-500 text-white",
+  grass: "bg-green-600 text-white",
+  electric: "bg-yellow-400 text-black",
+  psychic: "bg-pink-500 text-white",
+  ice: "bg-cyan-400 text-black",
+  dragon: "bg-indigo-600 text-white",
+  dark: "bg-gray-800 text-white",
+  fairy: "bg-pink-400 text-black",
+};
+
 // 데미지 클래스 ID와 이름 매핑
 const DAMAGE_CLASS_ID_TO_NAME: Record<number, string> = {
   2: "physical",
@@ -45,6 +67,19 @@ const STAT_ID_TO_NAME: Record<number, string> = {
   4: "special-attack",
   5: "special-defense",
   6: "speed",
+};
+
+// 세대별 포켓몬 ID 범위 (시작 ID, 종료 ID)
+export const GENERATION_POKEMON_RANGES: Record<string, [number, number]> = {
+  "1": [1, 151],
+  "2": [152, 251],
+  "3": [252, 386],
+  "4": [387, 493],
+  "5": [494, 649],
+  "6": [650, 721],
+  "7": [722, 809],
+  "8": [810, 905],
+  "9": [906, 1010], // 현재까지 알려진 9세대 범위
 };
 
 // 헬퍼 함수들

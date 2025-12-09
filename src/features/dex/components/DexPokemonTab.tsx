@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDexCsvData } from "../hooks/useDexCsvData";
-import { transformPokemonForDex } from "../utils/dataTransforms";
+import { useDexFilters } from "../contexts/DexFilterContext";
+import { transformPokemonForDex, GENERATION_POKEMON_RANGES } from "../utils/dataTransforms";
 import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 
@@ -11,33 +12,134 @@ interface DexPokemonTabProps {
 
 export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
 
-  const { pokemonData, isLoading, isError } = useDexCsvData();
+  const { pokemonData, pokemonTypesData, pokemonAbilitiesData, isLoading, isError } =
+    useDexCsvData();
 
   const handleOpen = (pokemon: DexPokemonSummary) => {
     navigate(`/dex/${pokemon.id}`);
   };
 
+  // 필터링된 포켓몬 목록 생성
   const pokemonSummaries: DexPokemonSummary[] = useMemo(() => {
-    if (!pokemonData) return [];
+    if (!pokemonData || !pokemonTypesData) return [];
 
-    const allPokemon = transformPokemonForDex(pokemonData, generationId);
+    // 1. 세대 범위 필터링
+    let filteredPokemon = pokemonData;
+    let minId = 1;
+    let maxId = 1010; // 9세대까지
 
-    return allPokemon.filter((p) => {
-      if (!searchQuery.trim()) return true;
-      return p.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
-    });
-  }, [searchQuery, pokemonData, generationId]);
+    if (!filters.includeSubGenerations) {
+      // 특정 세대만
+      const range = GENERATION_POKEMON_RANGES[filters.dexGenerationId];
+      if (range) {
+        [minId, maxId] = range;
+      }
+    } else {
+      // 하위세대 포함: 1세대부터 선택된 세대까지
+      const range = GENERATION_POKEMON_RANGES[filters.dexGenerationId];
+      if (range) {
+        minId = 1; // 1세대부터
+        maxId = range[1]; // 선택된 세대 끝까지
+      }
+    }
+
+    filteredPokemon = filteredPokemon.filter((p) => p.id >= minId && p.id <= maxId);
+
+    // 2. 기본 포켓몬만 필터링
+    // 체크 시: is_default = 1인 포켓몬만 표시
+    // 체크 해제 시: 모든 포켓몬 표시 (is_default = 0, 1 모두)
+    if (filters.onlyDefaultForms) {
+      filteredPokemon = filteredPokemon.filter((p) => p.is_default === 1);
+    }
+    // 체크 해제 시에는 별도 필터링 없음 - 모든 포켓몬 표시
+
+    // 3. 타입 필터링
+    if (filters.selectedTypes.length > 0) {
+      filteredPokemon = filteredPokemon.filter((p) => {
+        const pokemonTypes = pokemonTypesData.filter((pt) => pt.pokemon_id === p.id);
+        const pokemonTypeIds = pokemonTypes.map((pt) => pt.type_id);
+        return filters.selectedTypes.some((typeId) => pokemonTypeIds.includes(typeId));
+      });
+    }
+
+    // 4. 특성 필터링
+    if (filters.selectedAbilityId) {
+      filteredPokemon = filteredPokemon.filter((p) => {
+        const pokemonAbilities = pokemonAbilitiesData.filter((pa) => pa.pokemon_id === p.id);
+        return pokemonAbilities.some((pa) => pa.ability_id === filters.selectedAbilityId);
+      });
+    }
+
+    // 5. DexPokemonSummary로 변환
+    let summaries = transformPokemonForDex(filteredPokemon, filters.dexGenerationId);
+
+    // 6. 이름 검색 필터링
+    if (searchQuery.trim()) {
+      summaries = summaries.filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      );
+    }
+
+    // 7. 기본 정렬 (하위세대 포함 시 species_id 우선, 그렇지 않으면 기존 정렬 유지)
+    if (!filters.sortByWeight && !filters.sortByHeight && !filters.sortByDexNumber) {
+      if (filters.includeSubGenerations) {
+        // 하위세대 포함 시: species_id 우선 정렬, 같은 species_id 내에서 id 순 정렬
+        summaries.sort((a, b) => {
+          const aPokemon = pokemonData.find((p) => p.id === a.id);
+          const bPokemon = pokemonData.find((p) => p.id === b.id);
+
+          if (!aPokemon || !bPokemon) return 0;
+
+          // species_id로 우선 정렬
+          const speciesComparison = aPokemon.species_id - bPokemon.species_id;
+          if (speciesComparison !== 0) return speciesComparison;
+
+          // 같은 species_id 내에서는 id 순으로 정렬
+          return aPokemon.id - bPokemon.id;
+        });
+      }
+      // 하위세대 미포함 시: 기존 order 기준 정렬 (transformPokemonForDex에서 이미 처리됨)
+    }
+
+    // 8. 사용자 지정 정렬 적용 (체중, 키, 도감번호)
+    if (filters.sortByWeight) {
+      summaries.sort((a, b) => {
+        const aPokemon = pokemonData.find((p) => p.id === a.id);
+        const bPokemon = pokemonData.find((p) => p.id === b.id);
+        if (!aPokemon || !bPokemon) return 0;
+
+        const comparison = aPokemon.weight - bPokemon.weight;
+        return filters.weightOrder === "asc" ? comparison : -comparison;
+      });
+    } else if (filters.sortByHeight) {
+      summaries.sort((a, b) => {
+        const aPokemon = pokemonData.find((p) => p.id === a.id);
+        const bPokemon = pokemonData.find((p) => p.id === b.id);
+        if (!aPokemon || !bPokemon) return 0;
+
+        const comparison = aPokemon.height - bPokemon.height;
+        return filters.heightOrder === "asc" ? comparison : -comparison;
+      });
+    } else if (filters.sortByDexNumber) {
+      summaries.sort((a, b) => {
+        const comparison = a.id - b.id;
+        return filters.dexNumberOrder === "asc" ? comparison : -comparison;
+      });
+    }
+
+    return summaries;
+  }, [searchQuery, pokemonData, pokemonTypesData, pokemonAbilitiesData, filters]);
 
   return (
     <div className="space-y-4">
       <DexFilterBar
-        generationId={generationId}
+        filters={filters}
         searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        showTypeFilter={true}
-        description="세대/게임과 이름, 타입으로 포켓몬을 탐색할 수 있습니다."
+        onFiltersChange={updateFilters}
+        onSearchQueryChange={updateSearchQuery}
+        description="세대/게임과 다양한 조건으로 포켓몬을 탐색할 수 있습니다."
       />
 
       {isLoading && (

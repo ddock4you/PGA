@@ -7,6 +7,8 @@ import type {
   CsvItem,
   CsvAbility,
   CsvAbilityName,
+  CsvPokemonType,
+  CsvPokemonAbility,
 } from "../types/csvTypes";
 
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
@@ -17,6 +19,8 @@ import naturesCsv from "../data/natures.csv?raw";
 import itemsCsv from "../data/items.csv?raw";
 import abilitiesCsv from "../data/abilities.csv?raw";
 import abilityNamesCsv from "../data/ability_names.csv?raw";
+import pokemonTypesCsv from "../data/pokemon_types.csv?raw";
+import pokemonAbilitiesCsv from "../data/pokemon_abilities.csv?raw";
 
 // CSV 텍스트를 파싱하는 유틸리티 함수
 export async function loadCsvData<T>(
@@ -127,5 +131,22 @@ export async function loadAbilityNamesCsv(): Promise<CsvAbilityName[]> {
     ability_id: Number(row.ability_id),
     local_language_id: Number(row.local_language_id),
     name: row.name,
+  }));
+}
+
+export async function loadPokemonTypesCsv(): Promise<CsvPokemonType[]> {
+  return loadCsvData<CsvPokemonType>(pokemonTypesCsv, "pokemon_types.csv", (row) => ({
+    pokemon_id: Number(row.pokemon_id),
+    type_id: Number(row.type_id),
+    slot: Number(row.slot),
+  }));
+}
+
+export async function loadPokemonAbilitiesCsv(): Promise<CsvPokemonAbility[]> {
+  return loadCsvData<CsvPokemonAbility>(pokemonAbilitiesCsv, "pokemon_abilities.csv", (row) => ({
+    pokemon_id: Number(row.pokemon_id),
+    ability_id: Number(row.ability_id),
+    is_hidden: Number(row.is_hidden),
+    slot: Number(row.slot),
   }));
 }

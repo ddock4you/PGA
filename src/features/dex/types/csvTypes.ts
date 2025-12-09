@@ -67,3 +67,16 @@ export interface CsvAbilityName {
   local_language_id: number;
   name: string;
 }
+
+export interface CsvPokemonType {
+  pokemon_id: number;
+  type_id: number;
+  slot: number;
+}
+
+export interface CsvPokemonAbility {
+  pokemon_id: number;
+  ability_id: number;
+  is_hidden: number;
+  slot: number;
+}
