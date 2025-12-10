@@ -97,7 +97,7 @@ export function DexFilterBar({
               onFiltersChange({
                 ...filters,
                 sortByWeight: enabled,
-                weightOrder: order
+                weightOrder: order,
               });
             }}
             sortByHeight={filters.sortByHeight}
@@ -106,7 +106,7 @@ export function DexFilterBar({
               onFiltersChange({
                 ...filters,
                 sortByHeight: enabled,
-                heightOrder: order
+                heightOrder: order,
               });
             }}
             sortByDexNumber={filters.sortByDexNumber}
@@ -115,7 +115,7 @@ export function DexFilterBar({
               onFiltersChange({
                 ...filters,
                 sortByDexNumber: enabled,
-                dexNumberOrder: order
+                dexNumberOrder: order,
               });
             }}
           />

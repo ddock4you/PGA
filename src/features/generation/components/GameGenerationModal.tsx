@@ -7,11 +7,12 @@ import {
 } from "@/components/ui/dialog";
 import { GenerationRow } from "./GenerationRow";
 import { GENERATION_GAME_MAPPING } from "../constants/generationData";
+import type { GameVersion } from "../types/generationTypes";
 
 interface GameGenerationModalProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (generationId: string, gameId: string) => void;
+  onSelect: (generationId: string, version: GameVersion) => void;
 }
 
 export function GameGenerationModal({ open, onClose, onSelect }: GameGenerationModalProps) {
@@ -32,7 +33,7 @@ export function GameGenerationModal({ open, onClose, onSelect }: GameGenerationM
             <GenerationRow
               key={generation.id}
               generation={generation}
-              onGameSelect={(gameId) => onSelect(generation.id, gameId)}
+              onGameSelect={(version) => onSelect(generation.id, version)}
             />
           ))}
         </div>

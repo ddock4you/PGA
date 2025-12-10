@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GameGenerationSelector } from "@/features/generation/components/GameGenerationSelector";
+import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";
 
 interface PokemonDetailHeaderProps {
@@ -11,7 +12,7 @@ interface PokemonDetailHeaderProps {
 }
 
 export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetailHeaderProps) {
-  const { setSelectedGenerationId, setSelectedGameId } = usePreferences();
+  const { setSelectedGenerationId, setSelectedGameId, setSelectedVersionGroup } = usePreferences();
   const headerRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -47,7 +48,7 @@ export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetai
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-10 flex flex-col gap-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-10 flex flex-col gap-6 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
     >
       {/* 상단 컨트롤 및 타이틀 행 */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -55,9 +56,15 @@ export function PokemonDetailHeader({ pokemon, species, language }: PokemonDetai
           <GameGenerationSelector
             variant="compact"
             showGenerationOnly={false}
-            onGenerationSelect={(generationId, gameId) => {
+            onGenerationSelect={(generationId, version) => {
               setSelectedGenerationId(generationId);
-              if (gameId) setSelectedGameId(gameId);
+              if (version) {
+                setSelectedGameId(version.id);
+                setSelectedVersionGroup(version.versionGroup);
+              } else {
+                setSelectedGameId(null);
+                setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[generationId] ?? null);
+              }
             }}
           />
         </div>

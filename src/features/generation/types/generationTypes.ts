@@ -3,6 +3,7 @@ export interface GameVersion {
   name: string;
   color: string; // Tailwind CSS 클래스
   generationId: string;
+  versionGroup: string;
 }
 
 export interface GenerationInfo {

@@ -12,6 +12,7 @@ interface PreferencesState {
   secondaryLanguage: LanguageCode | null;
   selectedGameId: string | null;
   selectedGenerationId: string | null;
+  selectedVersionGroup: string | null;
 }
 
 interface PreferencesContextValue {
@@ -22,6 +23,7 @@ interface PreferencesContextValue {
   setSecondaryLanguage: (lang: LanguageCode | null) => void;
   setSelectedGameId: (gameId: string | null) => void;
   setSelectedGenerationId: (generationId: string | null) => void;
+  setSelectedVersionGroup: (group: string | null) => void;
 }
 
 const PREFERENCES_STORAGE_KEY = "pga.preferences.v1";
@@ -32,6 +34,7 @@ const defaultState: PreferencesState = {
   secondaryLanguage: null,
   selectedGameId: null,
   selectedGenerationId: null,
+  selectedVersionGroup: null,
 };
 
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
@@ -137,6 +140,11 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
         setState((prev) => ({
           ...prev,
           selectedGenerationId: generationId,
+        })),
+      setSelectedVersionGroup: (group) =>
+        setState((prev) => ({
+          ...prev,
+          selectedVersionGroup: group,
         })),
     }),
     [state]

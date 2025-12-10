@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import type { GenerationInfo } from "../types/generationTypes";
+import type { GameVersion, GenerationInfo } from "../types/generationTypes";
 
 interface GenerationRowProps {
   generation: GenerationInfo;
-  onGameSelect: (gameId: string) => void;
+  onGameSelect: (version: GameVersion) => void;
 }
 
 export function GenerationRow({ generation, onGameSelect }: GenerationRowProps) {
@@ -20,7 +20,7 @@ export function GenerationRow({ generation, onGameSelect }: GenerationRowProps) 
             variant="secondary"
             size="sm"
             className={`${version.color} text-white hover:opacity-80 transition-opacity`}
-            onClick={() => onGameSelect(version.id)}
+            onClick={() => onGameSelect(version)}
           >
             {version.name}
           </Button>

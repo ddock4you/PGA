@@ -20,7 +20,7 @@ interface PokemonDetailTabsProps {
 export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonDetailTabsProps) {
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="sticky z-20 grid w-full grid-cols-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 top-[var(--header-height)]">
+      <TabsList className="sticky z-20 grid w-full grid-cols-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 top-(--header-height)">
         <TabsTrigger value="overview">개요</TabsTrigger>
         <TabsTrigger value="moves">기술</TabsTrigger>
         <TabsTrigger value="evolution">진화</TabsTrigger>
@@ -38,7 +38,11 @@ export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonD
       </TabsContent>
 
       <TabsContent value="moves" className="mt-4">
-        <PokemonMovesSection moves={pokemon.moves} />
+        <PokemonMovesSection
+          moves={pokemon.moves}
+          species={species}
+          evolutionChain={evolutionChain}
+        />
       </TabsContent>
 
       <TabsContent value="evolution" className="mt-4">

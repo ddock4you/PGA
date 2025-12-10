@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { useSearchIndex } from "@/features/search/hooks/useSearchIndex";
 import { filterEntriesByQuery, type SearchEntry } from "@/features/search/api/searchIndexApi";
+import {
+  GENERATION_VERSION_GROUP_MAP,
+  getVersionGroupByGameId,
+} from "@/features/generation/constants/generationData";
 import { buildSearchQueryString, parseSearchQueryString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -157,9 +161,14 @@ type TabType = "all" | "pokemon" | "moves" | "abilities" | "items";
 export function SearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { state, setPrimaryLanguage, setSelectedGenerationId, setSelectedGameId } =
-    usePreferences();
-  const { primaryLanguage, selectedGenerationId, selectedGameId } = state;
+  const {
+    state,
+    setPrimaryLanguage,
+    setSelectedGenerationId,
+    setSelectedGameId,
+    setSelectedVersionGroup,
+  } = usePreferences();
+  const { primaryLanguage, selectedGenerationId, selectedGameId, selectedVersionGroup } = state;
 
   const [activeTab, setActiveTab] = useState<TabType>("all");
 
@@ -171,17 +180,33 @@ export function SearchPage() {
   useEffect(() => {
     if (parsed.language && parsed.language !== primaryLanguage)
       setPrimaryLanguage(parsed.language as any);
-    if (parsed.generationId && parsed.generationId !== selectedGenerationId)
+
+    if (parsed.generationId && parsed.generationId !== selectedGenerationId) {
       setSelectedGenerationId(parsed.generationId);
-    if (parsed.gameId && parsed.gameId !== selectedGameId) setSelectedGameId(parsed.gameId);
+      if (!parsed.gameId) {
+        setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[parsed.generationId] ?? null);
+      }
+    }
+
+    if (parsed.gameId && parsed.gameId !== selectedGameId) {
+      setSelectedGameId(parsed.gameId);
+      const versionGroup =
+        getVersionGroupByGameId(parsed.gameId) ??
+        (parsed.generationId
+          ? GENERATION_VERSION_GROUP_MAP[parsed.generationId]
+          : selectedVersionGroup);
+      setSelectedVersionGroup(versionGroup ?? null);
+    }
   }, [
     parsed,
     primaryLanguage,
     selectedGenerationId,
     selectedGameId,
+    selectedVersionGroup,
     setPrimaryLanguage,
     setSelectedGenerationId,
     setSelectedGameId,
+    setSelectedVersionGroup,
   ]);
 
   const effectiveGenerationId = parsed.generationId ?? selectedGenerationId ?? "1";

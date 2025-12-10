@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GameGenerationSelector } from "@/features/generation/components/GameGenerationSelector";
+import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import { HomePage } from "./pages/HomePage";
 import { DexPage } from "./pages/DexPage";
 import { SearchPage } from "./pages/SearchPage";
@@ -13,7 +14,13 @@ import { AbilityDetailPage } from "./pages/AbilityDetailPage";
 import { ItemDetailPage } from "./pages/ItemDetailPage";
 
 function AppLayout() {
-  const { state, toggleTheme, setSelectedGenerationId, setSelectedGameId } = usePreferences();
+  const {
+    state,
+    toggleTheme,
+    setSelectedGenerationId,
+    setSelectedGameId,
+    setSelectedVersionGroup,
+  } = usePreferences();
   const { t } = useTranslation();
   const themeLabel = state.theme === "dark" ? "다크" : "라이트";
 
@@ -42,9 +49,15 @@ function AppLayout() {
             <div className="hidden items-center gap-2 sm:flex">
               <GameGenerationSelector
                 variant="compact"
-                onGenerationSelect={(generationId, gameId) => {
+                onGenerationSelect={(generationId, version) => {
                   setSelectedGenerationId(generationId);
-                  if (gameId) setSelectedGameId(gameId);
+                  if (version) {
+                    setSelectedGameId(version.id);
+                    setSelectedVersionGroup(version.versionGroup);
+                  } else {
+                    setSelectedGameId(null);
+                    setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[generationId] ?? null);
+                  }
                 }}
               />
               <Button variant="ghost" size="sm" type="button" aria-label="언어 선택 (추후 구현)">
