@@ -22,6 +22,7 @@ export interface MoveMeta {
 export interface MoveRow extends MoveMeta {
   level?: number;
   tmNumber?: number;
+  isHm?: boolean;
   versionGroups?: string;
   method?: string;
   stageName?: string;

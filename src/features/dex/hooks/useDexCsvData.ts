@@ -3,6 +3,7 @@ import {
   loadPokemonCsv,
   loadMovesCsv,
   loadMachinesCsv,
+  loadVersionGroupsCsv,
   loadNaturesCsv,
   loadItemsCsv,
   loadAbilitiesCsv,
@@ -14,6 +15,7 @@ import type {
   CsvPokemon,
   CsvMove,
   CsvMachine,
+  CsvVersionGroup,
   CsvNature,
   CsvItem,
   CsvAbility,
@@ -48,6 +50,16 @@ export function useDexCsvData() {
   const machinesQuery = useQuery({
     queryKey: ["dex-csv", "machines"],
     queryFn: loadMachinesCsv,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+
+  const versionGroupsQuery = useQuery({
+    queryKey: ["dex-csv", "version-groups"],
+    queryFn: loadVersionGroupsCsv,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
@@ -120,6 +132,7 @@ export function useDexCsvData() {
     pokemonQuery.isLoading ||
     movesQuery.isLoading ||
     machinesQuery.isLoading ||
+    versionGroupsQuery.isLoading ||
     naturesQuery.isLoading ||
     abilitiesQuery.isLoading ||
     abilityNamesQuery.isLoading ||
@@ -132,6 +145,7 @@ export function useDexCsvData() {
     pokemonQuery.isError ||
     movesQuery.isError ||
     machinesQuery.isError ||
+    versionGroupsQuery.isError ||
     naturesQuery.isError ||
     abilitiesQuery.isError ||
     abilityNamesQuery.isError ||
@@ -143,8 +157,8 @@ export function useDexCsvData() {
   const errors = [
     pokemonQuery.error,
     movesQuery.error,
-    movesQuery.error,
     machinesQuery.error,
+    versionGroupsQuery.error,
     naturesQuery.error,
     abilitiesQuery.error,
     abilityNamesQuery.error,
@@ -158,6 +172,7 @@ export function useDexCsvData() {
     pokemonData: pokemonQuery.data ?? [],
     movesData: movesQuery.data ?? [],
     machinesData: machinesQuery.data ?? [],
+    versionGroupsData: versionGroupsQuery.data ?? [],
     naturesData: naturesQuery.data ?? [],
     abilitiesData: abilitiesQuery.data ?? [],
     abilityNamesData: abilityNamesQuery.data ?? [],
@@ -174,6 +189,7 @@ export function useDexCsvData() {
     pokemonQuery,
     movesQuery,
     machinesQuery,
+    versionGroupsQuery,
     naturesQuery,
     abilitiesQuery,
     abilityNamesQuery,

@@ -64,7 +64,13 @@ export const TmHmMovesTable = ({
             <TableBody>
               {rows.map((move, index) => (
                 <TableRow key={`${move.name}-${move.tmNumber ?? "tm"}-${index}`}>
-                  <TableCell className="font-medium">{move.tmNumber ?? "-"}</TableCell>
+                  <TableCell className="font-medium">
+                    {move.tmNumber !== undefined
+                      ? move.isHm
+                        ? `HM${move.tmNumber.toString().padStart(2, "0")}`
+                        : `TM${move.tmNumber.toString().padStart(2, "0")}`
+                      : "-"}
+                  </TableCell>
                   <TableCell className="capitalize">{move.name.replace(/-/g, " ")}</TableCell>
                   {renderCommonCells(move)}
                 </TableRow>

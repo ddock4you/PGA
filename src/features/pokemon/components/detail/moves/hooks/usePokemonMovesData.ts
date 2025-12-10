@@ -3,11 +3,7 @@ import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
 import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
-import {
-  getDamageClassName,
-  getGenerationIdFromVersionGroup,
-  getTypeName,
-} from "@/features/dex/utils/dataTransforms";
+import { getDamageClassName, getTypeName } from "@/features/dex/utils/dataTransforms";
 import { usePreviousStagePokemons } from "@/features/pokemon/hooks/usePreviousStagePokemons";
 import { SPECIAL_METHODS } from "../../moveConstants";
 import type { MoveRow, MoveMeta, PokemonMovesSectionProps } from "../types/moveTypes";
@@ -16,7 +12,13 @@ import { parseIdFromUrl, getGenerationFromVersionGroupUrl } from "../utils/moveU
 export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   const { moves, species, evolutionChain } = props;
   const { state } = usePreferences();
-  const { movesData, machinesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
+  const {
+    movesData,
+    machinesData,
+    versionGroupsData,
+    isLoading: isCsvLoading,
+    isError: isCsvError,
+  } = useDexCsvData();
   const selectedGenerationId = state.selectedGenerationId || "1";
   const selectedGenerationNumber = Number(selectedGenerationId);
   const targetVersionGroup =
@@ -92,14 +94,42 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   }, [moves, buildRowFromDetail, targetVersionGroup]);
 
   const tmRows = useMemo(() => {
-    if (!machinesData) return [];
-    const generationNum = Number(selectedGenerationId);
+    if (!machinesData || !versionGroupsData) return [];
+
+    // targetVersionGroup에 해당하는 version_group_id 찾기
+    const targetVersionGroupData = versionGroupsData.find(
+      (vg) => vg.identifier === targetVersionGroup
+    );
+    if (!targetVersionGroupData) return [];
+
+    // 해당 포켓몬이 machine 방법으로 배울 수 있는 기술들의 move_id를 추출
+    const learnableMachineMoveIds = new Set<number>();
+    for (const move of moves) {
+      const machineDetail = move.version_group_details.find(
+        (versionDetail) =>
+          versionDetail.move_learn_method.name === "machine" &&
+          versionDetail.version_group.name === targetVersionGroup
+      );
+      if (machineDetail) {
+        const parsedId = parseIdFromUrl(move.move.url);
+        if (parsedId !== undefined) {
+          learnableMachineMoveIds.add(parsedId);
+        }
+      }
+    }
+
     return machinesData
       .filter(
-        (machine) => getGenerationIdFromVersionGroup(machine.version_group_id) === generationNum
+        (machine) =>
+          machine.version_group_id === targetVersionGroupData.id &&
+          learnableMachineMoveIds.has(machine.move_id)
       )
       .map((machine) => {
         const meta = moveMetadata.byId[machine.move_id];
+        // TM/HM 구분: item_id가 397-404는 HM, 나머지는 TM
+        const isHm = machine.item_id >= 397 && machine.item_id <= 404;
+        // HM일 때는 machine_number에서 100을 빼서 번호 표시 (예: 101 -> 1)
+        const displayNumber = isHm ? machine.machine_number - 100 : machine.machine_number;
         return {
           name: meta?.name ?? `move-${machine.move_id}`,
           type: meta?.type ?? "-",
@@ -107,11 +137,18 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
           power: meta?.power ?? null,
           accuracy: meta?.accuracy ?? null,
           pp: meta?.pp ?? 0,
-          tmNumber: machine.machine_number,
+          tmNumber: displayNumber,
+          isHm,
         };
       })
-      .sort((a, b) => (a.tmNumber ?? 0) - (b.tmNumber ?? 0));
-  }, [machinesData, moveMetadata, selectedGenerationId]);
+      .sort((a, b) => {
+        // HM을 먼저 정렬, 그 다음 TM을 번호순으로 정렬
+        if (a.isHm && !b.isHm) return -1; // a(HM)가 먼저
+        if (!a.isHm && b.isHm) return 1; // b(HM)가 먼저
+        // 같은 타입(HM 또는 TM) 내에서는 번호순 정렬
+        return (a.tmNumber ?? 0) - (b.tmNumber ?? 0);
+      });
+  }, [machinesData, versionGroupsData, moveMetadata, moves, targetVersionGroup]);
 
   const tutorMoves = useMemo(() => {
     // Tutor moves: 특정 버전 그룹에 존재하는 경우만 표시 (3세대부터 도입)

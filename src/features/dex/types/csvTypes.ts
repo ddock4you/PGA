@@ -80,3 +80,10 @@ export interface CsvPokemonAbility {
   is_hidden: number;
   slot: number;
 }
+
+export interface CsvVersionGroup {
+  id: number;
+  identifier: string;
+  generation_id: number;
+  order: number;
+}

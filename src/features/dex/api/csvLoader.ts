@@ -9,12 +9,14 @@ import type {
   CsvAbilityName,
   CsvPokemonType,
   CsvPokemonAbility,
+  CsvVersionGroup,
 } from "../types/csvTypes";
 
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
 import pokemonCsv from "../data/pokemon.csv?raw";
 import movesCsv from "../data/moves.csv?raw";
 import machinesCsv from "../data/machines.csv?raw";
+import versionGroupsCsv from "../data/version_groups.csv?raw";
 import naturesCsv from "../data/natures.csv?raw";
 import itemsCsv from "../data/items.csv?raw";
 import abilitiesCsv from "../data/abilities.csv?raw";
@@ -26,7 +28,7 @@ import pokemonAbilitiesCsv from "../data/pokemon_abilities.csv?raw";
 export async function loadCsvData<T>(
   csvText: string,
   filename: string,
-  transformRow?: (row: any) => T
+  transformRow?: (row: Record<string, unknown>) => T
 ): Promise<T[]> {
   return new Promise((resolve, reject) => {
     Papa.parse(csvText, {
@@ -38,12 +40,12 @@ export async function loadCsvData<T>(
           console.warn(`CSV parsing warnings for ${filename}:`, results.errors);
         }
 
-        const data = results.data as any[];
+        const data = results.data as Record<string, unknown>[];
         const transformedData = transformRow ? data.map(transformRow) : (data as T[]);
 
         resolve(transformedData);
       },
-      error: (error: any) => {
+      error: (error: Papa.ParseError) => {
         reject(new Error(`Failed to parse ${filename}: ${error.message}`));
       },
     });
@@ -54,7 +56,7 @@ export async function loadCsvData<T>(
 export async function loadPokemonCsv(): Promise<CsvPokemon[]> {
   return loadCsvData<CsvPokemon>(pokemonCsv, "pokemon.csv", (row) => ({
     id: Number(row.id),
-    identifier: row.identifier,
+    identifier: row.identifier as string,
     species_id: Number(row.species_id),
     height: Number(row.height),
     weight: Number(row.weight),
@@ -67,7 +69,7 @@ export async function loadPokemonCsv(): Promise<CsvPokemon[]> {
 export async function loadMovesCsv(): Promise<CsvMove[]> {
   return loadCsvData<CsvMove>(movesCsv, "moves.csv", (row) => ({
     id: Number(row.id),
-    identifier: row.identifier,
+    identifier: row.identifier as string,
     generation_id: Number(row.generation_id),
     type_id: Number(row.type_id),
     power: row.power === "" ? null : Number(row.power),
@@ -94,10 +96,19 @@ export async function loadMachinesCsv(): Promise<CsvMachine[]> {
   }));
 }
 
+export async function loadVersionGroupsCsv(): Promise<CsvVersionGroup[]> {
+  return loadCsvData<CsvVersionGroup>(versionGroupsCsv, "version_groups.csv", (row) => ({
+    id: Number(row.id),
+    identifier: row.identifier as string,
+    generation_id: Number(row.generation_id),
+    order: Number(row.order),
+  }));
+}
+
 export async function loadNaturesCsv(): Promise<CsvNature[]> {
   return loadCsvData<CsvNature>(naturesCsv, "natures.csv", (row) => ({
     id: Number(row.id),
-    identifier: row.identifier,
+    identifier: row.identifier as string,
     decreased_stat_id: Number(row.decreased_stat_id),
     increased_stat_id: Number(row.increased_stat_id),
     hates_flavor_id: Number(row.hates_flavor_id),
@@ -109,7 +120,7 @@ export async function loadNaturesCsv(): Promise<CsvNature[]> {
 export async function loadItemsCsv(): Promise<CsvItem[]> {
   return loadCsvData<CsvItem>(itemsCsv, "items.csv", (row) => ({
     id: Number(row.id),
-    identifier: row.identifier,
+    identifier: row.identifier as string,
     category_id: Number(row.category_id),
     cost: Number(row.cost),
     fling_power: row.fling_power === "" ? null : Number(row.fling_power),
@@ -120,7 +131,7 @@ export async function loadItemsCsv(): Promise<CsvItem[]> {
 export async function loadAbilitiesCsv(): Promise<CsvAbility[]> {
   return loadCsvData<CsvAbility>(abilitiesCsv, "abilities.csv", (row) => ({
     id: Number(row.id),
-    identifier: row.identifier,
+    identifier: row.identifier as string,
     generation_id: Number(row.generation_id),
     is_main_series: Number(row.is_main_series),
   }));
@@ -130,7 +141,7 @@ export async function loadAbilityNamesCsv(): Promise<CsvAbilityName[]> {
   return loadCsvData<CsvAbilityName>(abilityNamesCsv, "ability_names.csv", (row) => ({
     ability_id: Number(row.ability_id),
     local_language_id: Number(row.local_language_id),
-    name: row.name,
+    name: row.name as string,
   }));
 }
 
