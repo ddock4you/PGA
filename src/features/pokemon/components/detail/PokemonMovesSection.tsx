@@ -58,6 +58,11 @@ const parseIdFromUrl = (url?: string): number | undefined => {
 
 const formatStat = (value?: number | null) => (value === null || value === undefined ? "-" : value);
 
+const getGenerationFromVersionGroupUrl = (url?: string) => {
+  const id = parseIdFromUrl(url);
+  return id !== undefined ? getGenerationIdFromVersionGroup(id) : undefined;
+};
+
 export function PokemonMovesSection(props: PokemonMovesSectionProps) {
   const { moves, species, evolutionChain } = props;
   const { state } = usePreferences();
@@ -174,27 +179,27 @@ export function PokemonMovesSection(props: PokemonMovesSectionProps) {
       .sort((a, b) => (a.tmNumber ?? 0) - (b.tmNumber ?? 0));
   }, [machinesData, moveMetadata, selectedGenerationId]);
 
-  const buildMethodRows = useCallback(
-    (methodName: string) =>
-      moves
-        .flatMap((move) =>
-          move.version_group_details
-            .filter(
-              (detail) =>
-                detail.move_learn_method.name === methodName &&
-                detail.version_group.name === targetVersionGroup
-            )
-            .map((detail) => buildRowFromDetail(move, detail))
-        )
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [moves, buildRowFromDetail, targetVersionGroup]
-  );
+  const tutorMoves = useMemo(() => {
+    // Tutor moves: 특정 버전 그룹에 존재하는 경우만 표시 (3세대부터 도입)
+    if (selectedGenerationNumber < 3) return [];
 
-  const eggMoves = useMemo(() => buildMethodRows("egg"), [buildMethodRows]);
-  const tutorMoves = useMemo(() => buildMethodRows("tutor"), [buildMethodRows]);
+    const rows = moves
+      .flatMap((move) =>
+        move.version_group_details
+          .filter(
+            (detail) =>
+              detail.move_learn_method.name === "tutor" &&
+              detail.version_group.name === targetVersionGroup
+          )
+          .map((detail) => buildRowFromDetail(move, detail))
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return rows;
+  }, [moves, buildRowFromDetail, targetVersionGroup, selectedGenerationNumber]);
 
   const otherMethodRows = useMemo(() => {
-    const excluded = new Set(["level-up", "machine", "egg", "tutor"]);
+    const excluded = new Set(["level-up", "machine", "tutor"]);
     return moves
       .flatMap((move) =>
         move.version_group_details
@@ -224,11 +229,6 @@ export function PokemonMovesSection(props: PokemonMovesSectionProps) {
     map.forEach((rows) => rows.sort((a, b) => a.name.localeCompare(b.name)));
     return map;
   }, [moves, buildRowFromDetail, targetVersionGroup]);
-
-  const getGenerationFromVersionGroupUrl = (url?: string) => {
-    const id = parseIdFromUrl(url);
-    return id !== undefined ? getGenerationIdFromVersionGroup(id) : undefined;
-  };
 
   const previousGenerationRows = useMemo(() => {
     const rows: MoveRow[] = [];
@@ -423,16 +423,6 @@ export function PokemonMovesSection(props: PokemonMovesSectionProps) {
           )}
         </CardContent>
       </Card>
-
-      {renderCollectionTable({
-        title: `교배 기술 - ${targetVersionGroup}`,
-        rows: eggMoves,
-        emptyMessage: "이 세대에서 교배로 배울 수 있는 기술이 없습니다.",
-        loadingMessage: "교배 기술을 정리하는 중입니다...",
-        leadingCell: () => <span className="text-xs text-muted-foreground">교배</span>,
-        extraHeaders: ["버전그룹", "습득 방식"],
-        leadingHeader: "습득",
-      })}
 
       {renderCollectionTable({
         title: `NPC / 튜터 기술 - ${targetVersionGroup}`,
