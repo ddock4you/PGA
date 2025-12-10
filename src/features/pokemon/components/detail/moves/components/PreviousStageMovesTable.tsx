@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -60,7 +61,14 @@ export const PreviousStageMovesTable = ({ rows, isLoading }: PreviousStageMovesT
                 <TableRow key={`${move.name}-${move.stageName ?? "stage"}-${index}`}>
                   <TableCell className="capitalize font-medium">{move.stageName}</TableCell>
                   <TableCell className="font-medium">{move.level ?? "-"}</TableCell>
-                  <TableCell className="capitalize">{move.name.replace(/-/g, " ")}</TableCell>
+                  <TableCell>
+                    <Link
+                      to={`/moves/${move.name}`}
+                      className="capitalize text-primary hover:underline"
+                    >
+                      {move.name.replace(/-/g, " ")}
+                    </Link>
+                  </TableCell>
                   {renderCommonCells(move)}
                 </TableRow>
               ))}

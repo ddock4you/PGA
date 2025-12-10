@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
@@ -56,7 +57,12 @@ export function PokemonDetailInfo({ pokemon, species }: PokemonDetailInfoProps) 
         <CardContent className="space-y-2 text-sm">
           {pokemon.abilities.map((a) => (
             <div key={a.ability.name} className="flex items-center justify-between">
-              <span className="capitalize">{a.ability.name.replace("-", " ")}</span>
+              <Link
+                to={`/abilities/${a.ability.name}`}
+                className="capitalize text-primary hover:underline"
+              >
+                {a.ability.name.replace("-", " ")}
+              </Link>
               {a.is_hidden && <Badge variant="outline">숨겨진 특성</Badge>}
             </div>
           ))}

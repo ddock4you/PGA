@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -71,7 +72,14 @@ export const TmHmMovesTable = ({
                         : `TM${move.tmNumber.toString().padStart(2, "0")}`
                       : "-"}
                   </TableCell>
-                  <TableCell className="capitalize">{move.name.replace(/-/g, " ")}</TableCell>
+                  <TableCell>
+                    <Link
+                      to={`/moves/${move.name}`}
+                      className="capitalize text-primary hover:underline"
+                    >
+                      {move.name.replace(/-/g, " ")}
+                    </Link>
+                  </TableCell>
                   {renderCommonCells(move)}
                 </TableRow>
               ))}
