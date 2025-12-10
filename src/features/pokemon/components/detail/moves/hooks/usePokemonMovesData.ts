@@ -7,7 +7,7 @@ import { getDamageClassName, getTypeName } from "@/features/dex/utils/dataTransf
 import { usePreviousStagePokemons } from "@/features/pokemon/hooks/usePreviousStagePokemons";
 import { SPECIAL_METHODS } from "../../moveConstants";
 import type { MoveRow, MoveMeta, PokemonMovesSectionProps } from "../types/moveTypes";
-import { parseIdFromUrl, getGenerationFromVersionGroupUrl } from "../utils/moveUtils";
+import { parseIdFromUrl } from "../utils/moveUtils";
 
 export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   const { moves, species, evolutionChain } = props;
@@ -202,31 +202,71 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   }, [moves, buildRowFromDetail, targetVersionGroup]);
 
   const previousGenerationRows = useMemo(() => {
+    if (!versionGroupsData) return [];
+
     const rows: MoveRow[] = [];
+
+    // 선택된 버전 그룹의 세대 ID 찾기
+    const targetVersionGroupData = versionGroupsData.find(
+      (vg) => vg.identifier === targetVersionGroup
+    );
+    if (!targetVersionGroupData) return [];
+
+    const targetGenerationId = targetVersionGroupData.generation_id;
+
     moves.forEach((move) => {
-      const generations = move.version_group_details
-        .map((detail) => getGenerationFromVersionGroupUrl(detail.version_group.url))
-        .filter((gen): gen is number => gen !== undefined);
-
-      if (generations.length === 0) return;
-
-      const hasOlder = generations.some((gen) => gen < selectedGenerationNumber);
-      const hasCurrentOrNewer = generations.some((gen) => gen >= selectedGenerationNumber);
-
-      if (!(hasOlder && !hasCurrentOrNewer)) return;
-
-      const uniqueGroups = Array.from(
-        new Set(move.version_group_details.map((detail) => detail.version_group.name))
+      // 선택된 버전 그룹에서 이 기술을 배울 수 있는지 확인
+      const canLearnInTargetVersion = move.version_group_details.some(
+        (detail) => detail.version_group.name === targetVersionGroup
       );
 
-      const row = { ...buildRowFromDetail(move, move.version_group_details[0]) };
-      row.versionGroups = uniqueGroups.join(", ");
-      row.method = move.version_group_details[0]?.move_learn_method.name ?? "-";
-      row.generationLabel = `≤ ${Math.min(...generations)}세대`;
-      rows.push(row);
+      // 선택된 버전 그룹에서 배울 수 없으면 이전 세대에서만 배울 수 있는지 확인
+      if (!canLearnInTargetVersion) {
+        // 이 기술의 모든 버전 그룹 세대 ID 수집
+        const allGenerations = move.version_group_details
+          .map((detail) => {
+            const versionGroupData = versionGroupsData.find(
+              (vg) => vg.identifier === detail.version_group.name
+            );
+            return versionGroupData?.generation_id;
+          })
+          .filter((gen): gen is number => gen !== undefined);
+
+        if (allGenerations.length === 0) return;
+
+        // 선택된 세대보다 높은 세대에서도 배울 수 있는지 확인
+        const maxGeneration = Math.max(...allGenerations);
+        const hasNewerGenerations = maxGeneration >= targetGenerationId;
+
+        // 이전 세대에서만 배울 수 있는 기술인지 확인 (선택된 세대 이상에서는 배울 수 없음)
+        if (!hasNewerGenerations) {
+          // 이전 세대의 버전 그룹 상세 정보만 필터링
+          const previousVersionDetails = move.version_group_details.filter((detail) => {
+            const versionGroupData = versionGroupsData.find(
+              (vg) => vg.identifier === detail.version_group.name
+            );
+            return versionGroupData && versionGroupData.generation_id < targetGenerationId;
+          });
+
+          if (previousVersionDetails.length > 0) {
+            const uniqueGroups = Array.from(
+              new Set(previousVersionDetails.map((detail) => detail.version_group.name))
+            );
+
+            // 첫 번째 이전 버전 그룹의 상세 정보를 사용하여 row 생성
+            const firstPreviousDetail = previousVersionDetails[0];
+            const row = { ...buildRowFromDetail(move, firstPreviousDetail) };
+            row.versionGroups = uniqueGroups.join(", ");
+            row.method = firstPreviousDetail.move_learn_method.name;
+            row.generationLabel = `≤ ${maxGeneration}세대`;
+            rows.push(row);
+          }
+        }
+      }
     });
+
     return rows.sort((a, b) => a.name.localeCompare(b.name));
-  }, [moves, buildRowFromDetail, selectedGenerationNumber]);
+  }, [moves, buildRowFromDetail, versionGroupsData, targetVersionGroup]);
 
   const { stages: previousStages, isLoading: isPreviousStagesLoading } = usePreviousStagePokemons(
     evolutionChain,
