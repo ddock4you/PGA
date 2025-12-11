@@ -29,6 +29,12 @@ export interface CsvMove {
   super_contest_effect_id: number | null;
 }
 
+export interface CsvMoveName {
+  move_id: number;
+  local_language_id: number;
+  name: string;
+}
+
 export interface CsvMachine {
   machine_number: number;
   version_group_id: number;
@@ -55,6 +61,12 @@ export interface CsvItem {
   fling_effect_id: number | null;
 }
 
+export interface CsvItemName {
+  item_id: number;
+  local_language_id: number;
+  name: string;
+}
+
 export interface CsvAbility {
   id: number;
   identifier: string;
@@ -66,6 +78,13 @@ export interface CsvAbilityName {
   ability_id: number;
   local_language_id: number;
   name: string;
+}
+
+export interface CsvPokemonSpeciesName {
+  pokemon_species_id: number;
+  local_language_id: number;
+  name: string;
+  genus: string;
 }
 
 export interface CsvPokemonType {

@@ -3,32 +3,92 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
-import { useSearchIndex } from "@/features/search/hooks/useSearchIndex";
-import { filterEntriesByQuery, type SearchEntry } from "@/features/search/api/searchIndexApi";
+import { useUnifiedSearchIndex } from "@/features/search/hooks/useUnifiedSearchIndex";
+import { filterUnifiedEntriesByQuery } from "@/features/search/utils/searchLogic";
+import type { UnifiedSearchEntry } from "@/features/search/types/unifiedSearchTypes";
 import {
   GENERATION_VERSION_GROUP_MAP,
   getVersionGroupByGameId,
 } from "@/features/generation/constants/generationData";
 import { buildSearchQueryString, parseSearchQueryString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-// Highlight component
-function HighlightText({ text, query }: { text: string; query: string }) {
-  if (!query) return <>{text}</>;
+// 검색 결과 로딩 스켈레톤
+function SearchResultsSkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="space-y-3 py-4">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-12" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <Skeleton key={j} className="h-4 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
-  const parts = text.split(new RegExp(`(${query})`, "gi"));
+// 검색 결과 없음 컴포넌트
+function NoResults({ query }: { query: string }) {
+  return (
+    <div className="text-center py-12">
+      <div className="text-4xl mb-4">🔍</div>
+      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+        "{query}"에 대한 검색 결과가 없습니다
+      </h3>
+      <p className="text-sm text-muted-foreground">다른 검색어나 철자를 확인해보세요</p>
+    </div>
+  );
+}
+
+// 검색 시작 안내 컴포넌트
+function SearchPrompt() {
+  return (
+    <div className="text-center py-12">
+      <div className="text-4xl mb-4">⚡</div>
+      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+        포켓몬, 기술, 특성, 도구 검색
+      </h3>
+      <p className="text-sm text-muted-foreground">한국어, 영어, 일본어로 검색할 수 있습니다</p>
+    </div>
+  );
+}
+
+// Highlight component - 다국어 지원
+function HighlightText({
+  entry,
+  query,
+  primaryLanguage,
+}: {
+  entry: UnifiedSearchEntry;
+  query: string;
+  primaryLanguage: string;
+}) {
+  if (!query)
+    return <>{entry.names[primaryLanguage as keyof typeof entry.names] || entry.names.en}</>;
+
+  // 우선순위: 1차 언어 → 영어 → 다른 언어
+  const displayText =
+    entry.names[primaryLanguage as keyof typeof entry.names] ||
+    entry.names.en ||
+    Object.values(entry.names)[0];
+
+  const parts = displayText.split(new RegExp(`(${query})`, "gi"));
 
   return (
     <>
-      {parts.map((part, i) =>
+      {parts.map((part: string, i: number) =>
         part.toLowerCase() === query.toLowerCase() ? (
           <span key={i} className="bg-yellow-200 font-medium text-foreground dark:bg-yellow-900/50">
             {part}
@@ -100,8 +160,9 @@ function SearchSummaryHeader({
 
 interface SearchResultSectionProps {
   title: string;
-  entries: SearchEntry[];
+  entries: UnifiedSearchEntry[];
   query: string;
+  primaryLanguage: string;
   linkPrefix: string;
   limit?: number;
   onMoreClick?: () => void;
@@ -111,6 +172,7 @@ function SearchResultSection({
   title,
   entries,
   query,
+  primaryLanguage,
   linkPrefix,
   limit,
   onMoreClick,
@@ -140,14 +202,16 @@ function SearchResultSection({
         <CardContent className="space-y-1 py-3">
           {displayEntries.map((entry) => (
             <Link
-              key={`${title}-${entry.id}-${entry.name}`}
+              key={`${title}-${entry.id}-${entry.names.en}`}
               to={`${linkPrefix}/${entry.id}`}
-              className="block rounded-md p-2 text-sm transition-colors hover:bg-muted"
+              className="block rounded-md p-3 text-sm transition-colors hover:bg-muted active:bg-muted/80 touch-manipulation border border-transparent hover:border-border/50"
             >
-              <HighlightText text={entry.name} query={query} />
-              {entry.id > 0 && (
-                <span className="ml-2 text-xs text-muted-foreground">No.{entry.id}</span>
-              )}
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1 min-w-0">
+                  <HighlightText entry={entry} query={query} primaryLanguage={primaryLanguage} />
+                </div>
+                <span className="ml-2 text-xs text-muted-foreground shrink-0">No.{entry.id}</span>
+              </div>
             </Link>
           ))}
         </CardContent>
@@ -172,14 +236,11 @@ export function SearchPage() {
 
   const [activeTab, setActiveTab] = useState<TabType>("all");
 
-  // Detailed Filters State (UI Only)
-  const [typeFilter, setTypeFilter] = useState("all");
-
   const parsed = useMemo(() => parseSearchQueryString(location.search), [location.search]);
 
   useEffect(() => {
     if (parsed.language && parsed.language !== primaryLanguage)
-      setPrimaryLanguage(parsed.language as any);
+      setPrimaryLanguage(parsed.language as "ko" | "en" | "ja");
 
     if (parsed.generationId && parsed.generationId !== selectedGenerationId) {
       setSelectedGenerationId(parsed.generationId);
@@ -209,45 +270,56 @@ export function SearchPage() {
     setSelectedVersionGroup,
   ]);
 
-  const effectiveGenerationId = parsed.generationId ?? selectedGenerationId ?? "1";
-  const effectiveLanguage = parsed.language ?? primaryLanguage;
-
-  const {
-    data: searchIndex,
-    isLoading,
-    isError,
-  } = useSearchIndex(effectiveGenerationId, effectiveLanguage);
+  const { data: unifiedSearchIndex, isLoading, isError } = useUnifiedSearchIndex();
 
   const results = useMemo(() => {
-    if (!searchIndex || !parsed.q) return { pokemon: [], moves: [], abilities: [], items: [] };
+    if (!unifiedSearchIndex || !parsed.q)
+      return { pokemon: [], moves: [], abilities: [], items: [] };
+
+    const allResults = filterUnifiedEntriesByQuery(
+      unifiedSearchIndex,
+      parsed.q,
+      primaryLanguage,
+      (parsed.language as "ko" | "en" | "ja" | undefined) || undefined
+    );
+
     return {
-      pokemon: filterEntriesByQuery(searchIndex.pokemon, parsed.q),
-      moves: filterEntriesByQuery(searchIndex.moves, parsed.q),
-      abilities: filterEntriesByQuery(searchIndex.abilities, parsed.q),
-      items: filterEntriesByQuery(searchIndex.items, parsed.q),
+      pokemon: allResults.filter((entry) => entry.category === "pokemon"),
+      moves: allResults.filter((entry) => entry.category === "move"),
+      abilities: allResults.filter((entry) => entry.category === "ability"),
+      items: allResults.filter((entry) => entry.category === "item"),
     };
-  }, [parsed.q, searchIndex]);
+  }, [parsed.q, unifiedSearchIndex, primaryLanguage, parsed.language]);
 
   const handleSearchSubmit = (nextQuery: string) => {
     const trimmed = nextQuery.trim();
     if (!trimmed) return;
+    // 통합 검색에서는 세대/게임 제한이 없으므로 기본값 사용
     const searchQuery = buildSearchQueryString({
       q: trimmed,
-      generationId: effectiveGenerationId,
-      gameId: parsed.gameId ?? state.selectedGameId,
-      language: effectiveLanguage,
+      generationId: "unified", // 통합 검색 표시
+      gameId: null,
+      language: primaryLanguage,
     });
     navigate(`/search?${searchQuery}`);
   };
 
   const renderContent = () => {
-    if (isLoading) return <p className="text-sm text-muted-foreground">검색 인덱스 로딩 중...</p>;
-    if (isError) return <p className="text-sm text-destructive">인덱스 로딩 오류 발생</p>;
-    if (!parsed.q) return <p className="text-sm text-muted-foreground">검색어를 입력하세요.</p>;
+    if (isLoading) return <SearchResultsSkeleton />;
+    if (isError) {
+      return (
+        <Alert className="border-destructive">
+          <AlertDescription>
+            검색 데이터를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침하거나 잠시 후 다시
+            시도해주세요.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    if (!parsed.q) return <SearchPrompt />;
 
     const hasAnyResults = Object.values(results).some((arr) => arr.length > 0);
-    if (!hasAnyResults)
-      return <p className="text-sm text-muted-foreground">검색 결과가 없습니다.</p>;
+    if (!hasAnyResults) return <NoResults query={parsed.q} />;
 
     if (activeTab === "all") {
       return (
@@ -256,6 +328,7 @@ export function SearchPage() {
             title="포켓몬"
             entries={results.pokemon}
             query={parsed.q}
+            primaryLanguage={primaryLanguage}
             linkPrefix="/dex"
             limit={3}
             onMoreClick={() => setActiveTab("pokemon")}
@@ -264,6 +337,7 @@ export function SearchPage() {
             title="기술"
             entries={results.moves}
             query={parsed.q}
+            primaryLanguage={primaryLanguage}
             linkPrefix="/moves"
             limit={3}
             onMoreClick={() => setActiveTab("moves")}
@@ -272,6 +346,7 @@ export function SearchPage() {
             title="특성"
             entries={results.abilities}
             query={parsed.q}
+            primaryLanguage={primaryLanguage}
             linkPrefix="/abilities"
             limit={3}
             onMoreClick={() => setActiveTab("abilities")}
@@ -280,6 +355,7 @@ export function SearchPage() {
             title="도구"
             entries={results.items}
             query={parsed.q}
+            primaryLanguage={primaryLanguage}
             linkPrefix="/items"
             limit={3}
             onMoreClick={() => setActiveTab("items")}
@@ -289,7 +365,7 @@ export function SearchPage() {
     }
 
     // Individual tabs
-    let entries: SearchEntry[] = [];
+    let entries: UnifiedSearchEntry[] = [];
     let linkPrefix = "";
     if (activeTab === "pokemon") {
       entries = results.pokemon;
@@ -307,37 +383,20 @@ export function SearchPage() {
 
     return (
       <div className="space-y-4">
-        {/* 상세 필터 UI (MVP: 포켓몬/기술 탭일 때만 표시) */}
-        {(activeTab === "pokemon" || activeTab === "moves") && (
-          <div className="flex items-center gap-2 rounded-md border bg-muted/20 p-2">
-            <span className="text-xs font-medium text-muted-foreground">상세 필터:</span>
-            <div className="w-32">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-7 text-xs">
-                  <SelectValue placeholder="타입 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">모든 타입</SelectItem>
-                  <SelectItem value="fire">불꽃</SelectItem>
-                  <SelectItem value="water">물</SelectItem>
-                  <SelectItem value="grass">풀</SelectItem>
-                  <SelectItem value="electric">전기</SelectItem>
-                  {/* 추가 타입들... */}
-                </SelectContent>
-              </Select>
-            </div>
-            <span className="ml-auto text-[10px] text-muted-foreground">
-              * 상세 필터는 추후 데이터 연동 예정
-            </span>
-          </div>
-        )}
-
         <SearchResultSection
           title={getTabLabel(activeTab)}
           entries={entries}
           query={parsed.q}
+          primaryLanguage={primaryLanguage}
           linkPrefix={linkPrefix}
         />
+        {entries.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              "{getTabLabel(activeTab)}" 카테고리에서 검색된 결과가 없습니다
+            </p>
+          </div>
+        )}
       </div>
     );
   };
@@ -361,30 +420,41 @@ export function SearchPage() {
     <section className="space-y-6">
       <SearchSummaryHeader
         query={parsed.q}
-        generationId={effectiveGenerationId}
-        language={effectiveLanguage}
+        generationId="통합"
+        language={primaryLanguage}
         onSubmit={handleSearchSubmit}
       />
 
-      <nav className="flex flex-wrap gap-2 text-xs">
-        {(["all", "pokemon", "moves", "abilities", "items"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`rounded-full px-3 py-1 font-medium transition-colors ${
-              activeTab === tab
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            {getTabLabel(tab)} (
-            {tab === "all"
-              ? Object.values(results).reduce((acc, cur) => acc + cur.length, 0)
-              : results[tab as keyof typeof results]?.length || 0}
-            )
-          </button>
-        ))}
+      <nav className="overflow-x-auto pb-2">
+        <div className="flex gap-2 text-xs min-w-max px-1">
+          {(["all", "pokemon", "moves", "abilities", "items"] as const).map((tab) => {
+            const count =
+              tab === "all"
+                ? Object.values(results).reduce((acc, cur) => acc + cur.length, 0)
+                : results[tab as keyof typeof results]?.length || 0;
+
+            const isDisabled = tab !== "all" && count === 0;
+
+            return (
+              <button
+                key={tab}
+                type="button"
+                disabled={isDisabled}
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-full px-3 py-2 font-medium transition-colors whitespace-nowrap touch-manipulation ${
+                  activeTab === tab
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : isDisabled
+                    ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 active:bg-muted/90"
+                }`}
+              >
+                {getTabLabel(tab)}
+                <span className="ml-1 text-[10px] opacity-75">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       {renderContent()}

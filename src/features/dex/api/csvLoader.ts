@@ -2,11 +2,14 @@ import Papa from "papaparse";
 import type {
   CsvPokemon,
   CsvMove,
+  CsvMoveName,
   CsvMachine,
   CsvNature,
   CsvItem,
+  CsvItemName,
   CsvAbility,
   CsvAbilityName,
+  CsvPokemonSpeciesName,
   CsvPokemonType,
   CsvPokemonAbility,
   CsvVersionGroup,
@@ -15,12 +18,15 @@ import type {
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
 import pokemonCsv from "../data/pokemon.csv?raw";
 import movesCsv from "../data/moves.csv?raw";
+import moveNamesCsv from "../data/move_names.csv?raw";
 import machinesCsv from "../data/machines.csv?raw";
 import versionGroupsCsv from "../data/version_groups.csv?raw";
 import naturesCsv from "../data/natures.csv?raw";
 import itemsCsv from "../data/items.csv?raw";
+import itemNamesCsv from "../data/item_names.csv?raw";
 import abilitiesCsv from "../data/abilities.csv?raw";
 import abilityNamesCsv from "../data/ability_names.csv?raw";
+import pokemonSpeciesNamesCsv from "../data/pokemon_species_names.csv?raw";
 import pokemonTypesCsv from "../data/pokemon_types.csv?raw";
 import pokemonAbilitiesCsv from "../data/pokemon_abilities.csv?raw";
 
@@ -87,6 +93,14 @@ export async function loadMovesCsv(): Promise<CsvMove[]> {
   }));
 }
 
+export async function loadMoveNamesCsv(): Promise<CsvMoveName[]> {
+  return loadCsvData<CsvMoveName>(moveNamesCsv, "move_names.csv", (row) => ({
+    move_id: Number(row.move_id),
+    local_language_id: Number(row.local_language_id),
+    name: row.name as string,
+  }));
+}
+
 export async function loadMachinesCsv(): Promise<CsvMachine[]> {
   return loadCsvData<CsvMachine>(machinesCsv, "machines.csv", (row) => ({
     machine_number: Number(row.machine_number),
@@ -128,6 +142,14 @@ export async function loadItemsCsv(): Promise<CsvItem[]> {
   }));
 }
 
+export async function loadItemNamesCsv(): Promise<CsvItemName[]> {
+  return loadCsvData<CsvItemName>(itemNamesCsv, "item_names.csv", (row) => ({
+    item_id: Number(row.item_id),
+    local_language_id: Number(row.local_language_id),
+    name: row.name as string,
+  }));
+}
+
 export async function loadAbilitiesCsv(): Promise<CsvAbility[]> {
   return loadCsvData<CsvAbility>(abilitiesCsv, "abilities.csv", (row) => ({
     id: Number(row.id),
@@ -143,6 +165,19 @@ export async function loadAbilityNamesCsv(): Promise<CsvAbilityName[]> {
     local_language_id: Number(row.local_language_id),
     name: row.name as string,
   }));
+}
+
+export async function loadPokemonSpeciesNamesCsv(): Promise<CsvPokemonSpeciesName[]> {
+  return loadCsvData<CsvPokemonSpeciesName>(
+    pokemonSpeciesNamesCsv,
+    "pokemon_species_names.csv",
+    (row) => ({
+      pokemon_species_id: Number(row.pokemon_species_id),
+      local_language_id: Number(row.local_language_id),
+      name: row.name as string,
+      genus: row.genus as string,
+    })
+  );
 }
 
 export async function loadPokemonTypesCsv(): Promise<CsvPokemonType[]> {
