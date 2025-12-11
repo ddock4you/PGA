@@ -2,11 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 import { DexGenerationSelector } from "./DexGenerationSelector";
 import { DexTypeFilter } from "./DexTypeFilter";
 import { DexAbilityFilterNew as DexAbilityFilter } from "./DexAbilityFilterNew";
 import { DexSortOptions } from "./DexSortOptions";
 import type { DexFilters } from "../types/filterTypes";
+import { DEFAULT_DEX_FILTERS } from "../types/filterTypes";
 
 interface DexFilterBarProps {
   filters: DexFilters;
@@ -26,6 +29,11 @@ export function DexFilterBar({
   const updateFilter = <K extends keyof DexFilters>(key: K, value: DexFilters[K]) => {
     onFiltersChange({ ...filters, [key]: value });
   };
+
+  const handleResetFilters = () => {
+    onFiltersChange(DEFAULT_DEX_FILTERS);
+    onSearchQueryChange("");
+  };
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -33,51 +41,62 @@ export function DexFilterBar({
         <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 text-xs">
-        {/* 1행: 게임/세대 선택, 하위세대 포함, 기본 포켓몬만 보기 */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="space-y-2">
+        {/* 1행: 게임/세대 선택, 초기화 버튼 */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-medium text-muted-foreground">게임/세대</label>
-            <DexGenerationSelector
-              generationId={filters.dexGenerationId}
-              selectedGameVersion={filters.selectedGameVersion}
-              onGenerationChange={(genId, gameVersion) => {
-                onFiltersChange({
-                  ...filters,
-                  dexGenerationId: genId,
-                  selectedGameVersion: gameVersion,
-                });
-              }}
+            <div className="flex gap-2">
+              <DexGenerationSelector
+                generationId={filters.dexGenerationId}
+                selectedGameVersion={filters.selectedGameVersion}
+                onGenerationChange={(genId, gameVersion) => {
+                  onFiltersChange({
+                    ...filters,
+                    dexGenerationId: genId,
+                    selectedGameVersion: gameVersion,
+                  });
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-9 px-3 text-xs"
+                title="모든 필터 초기화"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                초기화
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 2행: 하위세대 포함, 기본 포켓몬만 보기 */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="include-sub-generations"
+              checked={filters.includeSubGenerations}
+              onCheckedChange={(checked) =>
+                updateFilter("includeSubGenerations", checked as boolean)
+              }
+              className="h-3 w-3"
             />
+            <Label htmlFor="include-sub-generations" className="text-xs">
+              하위세대 포함
+            </Label>
           </div>
 
-          <div className="flex items-end space-x-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="include-sub-generations"
-                checked={filters.includeSubGenerations}
-                onCheckedChange={(checked) =>
-                  updateFilter("includeSubGenerations", checked as boolean)
-                }
-                className="h-3 w-3"
-              />
-              <Label htmlFor="include-sub-generations" className="text-xs">
-                하위세대 포함
-              </Label>
-            </div>
-          </div>
-
-          <div className="flex items-end">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="only-default-forms"
-                checked={filters.onlyDefaultForms}
-                onCheckedChange={(checked) => updateFilter("onlyDefaultForms", checked as boolean)}
-                className="h-3 w-3"
-              />
-              <Label htmlFor="only-default-forms" className="text-xs">
-                기본 포켓몬만 보기
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="only-default-forms"
+              checked={filters.onlyDefaultForms}
+              onCheckedChange={(checked) => updateFilter("onlyDefaultForms", checked as boolean)}
+              className="h-3 w-3"
+            />
+            <Label htmlFor="only-default-forms" className="text-xs">
+              기본 포켓몬만 보기
+            </Label>
           </div>
         </div>
 
