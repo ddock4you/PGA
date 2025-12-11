@@ -1,8 +1,10 @@
 // 도감 필터 관련 타입 정의
+import type { GameVersion } from "@/features/generation/types/generationTypes";
 
 export interface DexFilters {
   // 1행 - 게임/세대 선택
   dexGenerationId: string; // 도감용 세대 ID
+  selectedGameVersion?: GameVersion; // 선택된 게임 버전 정보
   includeSubGenerations: boolean; // 하위세대 포함
 
   // 1행 - 기본 포켓몬 필터
@@ -33,6 +35,7 @@ export type SortOrder = "asc" | "desc";
 // 필터 초기값
 export const DEFAULT_DEX_FILTERS: DexFilters = {
   dexGenerationId: "9",
+  selectedGameVersion: undefined,
   includeSubGenerations: false,
   onlyDefaultForms: false,
   selectedTypes: [],

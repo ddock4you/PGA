@@ -47,19 +47,6 @@ function AppLayout() {
               </NavLink>
             </nav>
             <div className="hidden items-center gap-2 sm:flex">
-              <GameGenerationSelector
-                variant="compact"
-                onGenerationSelect={(generationId, version) => {
-                  setSelectedGenerationId(generationId);
-                  if (version) {
-                    setSelectedGameId(version.id);
-                    setSelectedVersionGroup(version.versionGroup);
-                  } else {
-                    setSelectedGameId(null);
-                    setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[generationId] ?? null);
-                  }
-                }}
-              />
               <Button variant="ghost" size="sm" type="button" aria-label="언어 선택 (추후 구현)">
                 언어
               </Button>

@@ -1,20 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GameGenerationModal } from "@/features/generation/components/GameGenerationModal";
+import type { GameVersion } from "@/features/generation/types/generationTypes";
 
 interface DexGenerationSelectorProps {
   generationId: string;
-  onGenerationChange: (generationId: string) => void;
+  selectedGameVersion?: GameVersion;
+  onGenerationChange: (generationId: string, gameVersion?: GameVersion) => void;
 }
 
 export function DexGenerationSelector({
   generationId,
+  selectedGameVersion,
   onGenerationChange,
 }: DexGenerationSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSelect = (selectedGenId: string, _gameId: string) => {
-    onGenerationChange(selectedGenId);
+  const handleSelect = (selectedGenId: string, gameVersion: GameVersion) => {
+    onGenerationChange(selectedGenId, gameVersion);
     setIsModalOpen(false);
   };
 
@@ -33,6 +36,14 @@ export function DexGenerationSelector({
     return genNames[genId] || genId;
   };
 
+  const getDisplayText = () => {
+    if (selectedGameVersion) {
+      const generationName = getGenerationDisplayName(generationId);
+      return `${selectedGameVersion.name} (${generationName})`;
+    }
+    return getGenerationDisplayName(generationId);
+  };
+
   return (
     <>
       <Button
@@ -41,7 +52,7 @@ export function DexGenerationSelector({
         onClick={() => setIsModalOpen(true)}
         className="h-9 px-3 text-xs"
       >
-        {getGenerationDisplayName(generationId)}
+        {getDisplayText()}
       </Button>
 
       <GameGenerationModal

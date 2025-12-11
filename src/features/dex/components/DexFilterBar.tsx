@@ -39,7 +39,14 @@ export function DexFilterBar({
             <label className="text-xs font-medium text-muted-foreground">게임/세대</label>
             <DexGenerationSelector
               generationId={filters.dexGenerationId}
-              onGenerationChange={(genId) => updateFilter("dexGenerationId", genId)}
+              selectedGameVersion={filters.selectedGameVersion}
+              onGenerationChange={(genId, gameVersion) => {
+                onFiltersChange({
+                  ...filters,
+                  dexGenerationId: genId,
+                  selectedGameVersion: gameVersion,
+                });
+              }}
             />
           </div>
 
