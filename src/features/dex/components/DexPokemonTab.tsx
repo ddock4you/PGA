@@ -22,8 +22,14 @@ export function DexPokemonTab() {
   const { filters, searchQuery, updateFilters, updateSearchQuery, updatePagination } =
     useDexFilters();
 
-  const { pokemonData, pokemonTypesData, pokemonAbilitiesData, isLoading, isError } =
-    useDexCsvData();
+  const {
+    pokemonData,
+    pokemonTypesData,
+    pokemonAbilitiesData,
+    pokemonSpeciesNamesData,
+    isLoading,
+    isError,
+  } = useDexCsvData();
 
   const handleOpen = (pokemon: DexPokemonSummary) => {
     navigate(`/dex/${pokemon.id}`);
@@ -88,13 +94,22 @@ export function DexPokemonTab() {
     }
 
     // 5. DexPokemonSummary로 변환
-    let summaries = transformPokemonForDex(filteredPokemon);
+    let summaries = transformPokemonForDex(
+      filteredPokemon,
+      pokemonTypesData,
+      pokemonSpeciesNamesData
+    );
 
-    // 6. 이름 검색 필터링
+    // 6. 이름 검색 필터링 (한글/영문 모두 지원)
     if (searchQuery.trim()) {
-      summaries = summaries.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-      );
+      const query = searchQuery.trim().toLowerCase();
+      summaries = summaries.filter((p) => {
+        const koreanMatch = p.name.toLowerCase().includes(query);
+        // 영문 이름도 확인 (pokemonData에서 찾기)
+        const pokemon = pokemonData.find((pd) => pd.id === p.id);
+        const englishMatch = pokemon ? pokemon.identifier.toLowerCase().includes(query) : false;
+        return koreanMatch || englishMatch;
+      });
     }
 
     // 7. 기본 정렬: species_id 우선 정렬 (항상 적용)
@@ -144,7 +159,14 @@ export function DexPokemonTab() {
     }
 
     return summaries;
-  }, [searchQuery, pokemonData, pokemonTypesData, pokemonAbilitiesData, filters]);
+  }, [
+    searchQuery,
+    pokemonData,
+    pokemonTypesData,
+    pokemonAbilitiesData,
+    pokemonSpeciesNamesData,
+    filters,
+  ]);
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(pokemonSummaries.length / filters.itemsPerPage);

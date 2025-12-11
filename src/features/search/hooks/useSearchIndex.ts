@@ -12,7 +12,7 @@ export function useSearchIndex(
         throw new Error("generationId is required to build search index");
       }
       const lang = primaryLanguage ?? "en";
-      return buildFullSearchIndex(generationId, lang);
+      return buildFullSearchIndex(generationId);
     },
     enabled: generationId != null,
     meta: {

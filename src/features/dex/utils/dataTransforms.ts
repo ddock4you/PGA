@@ -6,6 +6,8 @@ import type {
   CsvItem,
   CsvAbility,
   CsvAbilityName,
+  CsvPokemonSpeciesName,
+  CsvPokemonType,
 } from "../types/csvTypes";
 
 // 타입 ID와 이름 매핑 (PokéAPI 기준)
@@ -51,6 +53,53 @@ export const TYPE_COLORS: Record<string, string> = {
   dark: "bg-gray-800 text-white",
   fairy: "bg-pink-400 text-black",
 };
+
+// 타입 ID와 한글 이름 매핑
+export const TYPE_ID_TO_KOREAN_NAME: Record<number, string> = {
+  1: "노말",
+  2: "격투",
+  3: "비행",
+  4: "독",
+  5: "땅",
+  6: "바위",
+  7: "벌레",
+  8: "고스트",
+  9: "강철",
+  10: "불꽃",
+  11: "물",
+  12: "풀",
+  13: "전기",
+  14: "에스퍼",
+  15: "얼음",
+  16: "드래곤",
+  17: "악",
+  18: "페어리",
+};
+
+// 한글 타입 이름을 영문으로 변환하는 함수
+export function getEnglishTypeName(koreanTypeName: string): string {
+  const koreanToEnglish: Record<string, string> = {
+    노말: "normal",
+    격투: "fighting",
+    비행: "flying",
+    독: "poison",
+    땅: "ground",
+    바위: "rock",
+    벌레: "bug",
+    고스트: "ghost",
+    강철: "steel",
+    불꽃: "fire",
+    물: "water",
+    풀: "grass",
+    전기: "electric",
+    에스퍼: "psychic",
+    얼음: "ice",
+    드래곤: "dragon",
+    악: "dark",
+    페어리: "fairy",
+  };
+  return koreanToEnglish[koreanTypeName] || koreanTypeName.toLowerCase();
+}
 
 // 데미지 클래스 ID와 이름 매핑
 const DAMAGE_CLASS_ID_TO_NAME: Record<number, string> = {
@@ -130,7 +179,7 @@ export function shouldShowVariantPokemon(
 
 // 헬퍼 함수들
 export function getTypeName(typeId: number): string {
-  return TYPE_ID_TO_NAME[typeId] || "unknown";
+  return TYPE_ID_TO_KOREAN_NAME[typeId] || "unknown";
 }
 
 export function getDamageClassName(damageClassId: number): string {
@@ -194,9 +243,14 @@ export interface DexPokemonSummary {
   id: number;
   name: string;
   number: string;
+  types: string[];
 }
 
-export function transformPokemonForDex(csvData: CsvPokemon[]): DexPokemonSummary[] {
+export function transformPokemonForDex(
+  csvData: CsvPokemon[],
+  pokemonTypesData: CsvPokemonType[],
+  pokemonSpeciesNamesData: CsvPokemonSpeciesName[]
+): DexPokemonSummary[] {
   return csvData
     .sort((a, b) => {
       // species_id로 우선 정렬 (같은 종족 그룹화)
@@ -209,11 +263,26 @@ export function transformPokemonForDex(csvData: CsvPokemon[]): DexPokemonSummary
 
       return a.id - b.id; // 최종적으로 id 순 정렬
     })
-    .map((p) => ({
-      id: p.id,
-      name: p.identifier, // 영문 이름 (나중에 다국어 매핑)
-      number: `No.${p.id.toString().padStart(4, "0")}`,
-    }));
+    .map((p) => {
+      // 한글 이름 찾기 (없으면 영문 사용)
+      const koreanName =
+        pokemonSpeciesNamesData.find(
+          (name) => name.pokemon_species_id === p.species_id && name.local_language_id === 3 // 한국어
+        )?.name || p.identifier;
+
+      // 타입 정보 찾기
+      const pokemonTypes = pokemonTypesData
+        .filter((pt) => pt.pokemon_id === p.id)
+        .sort((a, b) => a.slot - b.slot) // slot 순으로 정렬
+        .map((pt) => TYPE_ID_TO_KOREAN_NAME[pt.type_id] || getTypeName(pt.type_id));
+
+      return {
+        id: p.id,
+        name: koreanName,
+        number: `No.${p.id.toString().padStart(4, "0")}`,
+        types: pokemonTypes,
+      };
+    });
 }
 
 // 기술 데이터 변환

@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, TYPE_ID_TO_NAME } from "../utils/dataTransforms";
+import { TYPE_COLORS, TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "../utils/dataTransforms";
 
 interface DexTypeFilterProps {
   selectedTypes: number[];
@@ -24,7 +24,7 @@ export function DexTypeFilter({ selectedTypes, onTypesChange }: DexTypeFilterPro
       <label className="text-xs font-medium text-muted-foreground">타입</label>
       <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
         {typeIds.map((typeId) => {
-          const typeName = TYPE_ID_TO_NAME[typeId];
+          const typeNameKorean = TYPE_ID_TO_KOREAN_NAME[typeId];
           const isSelected = selectedTypes.includes(typeId);
 
           return (
@@ -37,10 +37,12 @@ export function DexTypeFilter({ selectedTypes, onTypesChange }: DexTypeFilterPro
               />
               <Badge
                 variant="secondary"
-                className={`text-xs px-2 py-0.5 cursor-pointer hover:opacity-80 ${TYPE_COLORS[typeName]}`}
+                className={`text-xs px-2 py-0.5 cursor-pointer hover:opacity-80 ${
+                  TYPE_COLORS[getEnglishTypeName(typeNameKorean)]
+                }`}
                 onClick={() => handleTypeToggle(typeId)}
               >
-                {typeName}
+                {typeNameKorean}
               </Badge>
             </div>
           );
