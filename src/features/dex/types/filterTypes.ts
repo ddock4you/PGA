@@ -37,7 +37,7 @@ export const DEFAULT_DEX_FILTERS: DexFilters = {
   dexGenerationId: "9",
   selectedGameVersion: undefined,
   includeSubGenerations: false,
-  onlyDefaultForms: false,
+  onlyDefaultForms: false, // 메가/거다이맥스/리전폼 등 모든 변형 포켓몬이 기본적으로 표시되도록 변경
   selectedTypes: [],
   selectedAbilityId: undefined,
   sortByWeight: false,

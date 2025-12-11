@@ -70,17 +70,63 @@ const STAT_ID_TO_NAME: Record<number, string> = {
 };
 
 // 세대별 포켓몬 ID 범위 (시작 ID, 종료 ID)
+// 메가/거다이맥스 포켓몬들은 도입된 세대의 범위에 포함시킴
 export const GENERATION_POKEMON_RANGES: Record<string, [number, number]> = {
   "1": [1, 151],
   "2": [152, 251],
   "3": [252, 386],
   "4": [387, 493],
   "5": [494, 649],
-  "6": [650, 721],
-  "7": [722, 809],
-  "8": [810, 905],
+  "6": [650, 10077], // 메가 포켓몬들 포함 (10033-10077)
+  "7": [722, 10078], // 7세대 메가 포켓몬들 포함
+  "8": [810, 10228], // 거다이맥스 포켓몬들 포함 (10195-10228)
   "9": [906, 1010], // 현재까지 알려진 9세대 범위
 };
+
+// 메가 진화가 가능한 게임 버전들
+export const MEGA_EVOLUTION_SUPPORTED_VERSIONS = new Set([
+  "x",
+  "y", // 6세대
+  "omega-ruby",
+  "alpha-sapphire", // 6세대
+  "sun",
+  "moon", // 7세대 (일부)
+  "ultra-sun",
+  "ultra-moon", // 7세대
+  "lets-go-pikachu",
+  "lets-go-eevee", // 7세대
+]);
+
+// 거다이맥스 진화가 가능한 게임 버전들
+export const GIGANTAMAX_SUPPORTED_VERSIONS = new Set([
+  "sword",
+  "shield", // 8세대
+  "brilliant-diamond",
+  "shining-pearl", // 8세대 리메이크
+  "legends-arceus", // 8세대
+]);
+
+// 특정 게임 버전에서 메가/거다이맥스 포켓몬을 표시할지 결정하는 함수
+export function shouldShowVariantPokemon(
+  pokemonName: string,
+  selectedGameVersionId?: string
+): boolean {
+  if (!selectedGameVersionId) return true; // 게임 버전 미선택 시 모두 표시
+
+  const hasMega = pokemonName.includes("-mega");
+  const hasGmax = pokemonName.includes("-gmax");
+
+  if (hasMega) {
+    return MEGA_EVOLUTION_SUPPORTED_VERSIONS.has(selectedGameVersionId);
+  }
+
+  if (hasGmax) {
+    return GIGANTAMAX_SUPPORTED_VERSIONS.has(selectedGameVersionId);
+  }
+
+  // 기본 포켓몬이나 다른 변형은 항상 표시
+  return true;
+}
 
 // 헬퍼 함수들
 export function getTypeName(typeId: number): string {
@@ -150,15 +196,19 @@ export interface DexPokemonSummary {
   number: string;
 }
 
-export function transformPokemonForDex(
-  csvData: CsvPokemon[],
-  generationId: string
-): DexPokemonSummary[] {
-  const genId = parseInt(generationId, 10);
-
+export function transformPokemonForDex(csvData: CsvPokemon[]): DexPokemonSummary[] {
   return csvData
-    .filter((p) => p.is_default === 1) // 기본 형태만
-    .sort((a, b) => a.order - b.order) // order 기준 정렬
+    .sort((a, b) => {
+      // species_id로 우선 정렬 (같은 종족 그룹화)
+      const speciesComparison = a.species_id - b.species_id;
+      if (speciesComparison !== 0) return speciesComparison;
+
+      // 같은 species_id 내에서는 is_default 우선 (기본 형태가 먼저), 그 다음 id 순
+      const defaultComparison = b.is_default - a.is_default; // is_default=1이 먼저 오도록
+      if (defaultComparison !== 0) return defaultComparison;
+
+      return a.id - b.id; // 최종적으로 id 순 정렬
+    })
     .map((p) => ({
       id: p.id,
       name: p.identifier, // 영문 이름 (나중에 다국어 매핑)

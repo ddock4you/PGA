@@ -2,15 +2,15 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDexCsvData } from "../hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
-import { transformPokemonForDex, GENERATION_POKEMON_RANGES } from "../utils/dataTransforms";
+import {
+  transformPokemonForDex,
+  GENERATION_POKEMON_RANGES,
+  shouldShowVariantPokemon,
+} from "../utils/dataTransforms";
 import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 
-interface DexPokemonTabProps {
-  generationId: string;
-}
-
-export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
+export function DexPokemonTab() {
   const navigate = useNavigate();
   const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
 
@@ -47,6 +47,13 @@ export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
 
     filteredPokemon = filteredPokemon.filter((p) => p.id >= minId && p.id <= maxId);
 
+    // 1.5. 게임 버전별 메가/거다이맥스 포켓몬 필터링
+    if (filters.selectedGameVersion) {
+      filteredPokemon = filteredPokemon.filter((p) =>
+        shouldShowVariantPokemon(p.identifier, filters.selectedGameVersion!.id)
+      );
+    }
+
     // 2. 기본 포켓몬만 필터링
     // 체크 시: is_default = 1인 포켓몬만 표시
     // 체크 해제 시: 모든 포켓몬 표시 (is_default = 0, 1 모두)
@@ -73,7 +80,7 @@ export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
     }
 
     // 5. DexPokemonSummary로 변환
-    let summaries = transformPokemonForDex(filteredPokemon, filters.dexGenerationId);
+    let summaries = transformPokemonForDex(filteredPokemon);
 
     // 6. 이름 검색 필터링
     if (searchQuery.trim()) {
@@ -82,25 +89,24 @@ export function DexPokemonTab({ generationId }: DexPokemonTabProps) {
       );
     }
 
-    // 7. 기본 정렬 (하위세대 포함 시 species_id 우선, 그렇지 않으면 기존 정렬 유지)
+    // 7. 기본 정렬: species_id 우선 정렬 (항상 적용)
     if (!filters.sortByWeight && !filters.sortByHeight && !filters.sortByDexNumber) {
-      if (filters.includeSubGenerations) {
-        // 하위세대 포함 시: species_id 우선 정렬, 같은 species_id 내에서 id 순 정렬
-        summaries.sort((a, b) => {
-          const aPokemon = pokemonData.find((p) => p.id === a.id);
-          const bPokemon = pokemonData.find((p) => p.id === b.id);
+      summaries.sort((a, b) => {
+        const aPokemon = pokemonData.find((p) => p.id === a.id);
+        const bPokemon = pokemonData.find((p) => p.id === b.id);
 
-          if (!aPokemon || !bPokemon) return 0;
+        if (!aPokemon || !bPokemon) return 0;
 
-          // species_id로 우선 정렬
-          const speciesComparison = aPokemon.species_id - bPokemon.species_id;
-          if (speciesComparison !== 0) return speciesComparison;
+        // species_id로 우선 정렬 (같은 종족 그룹화)
+        const speciesComparison = aPokemon.species_id - bPokemon.species_id;
+        if (speciesComparison !== 0) return speciesComparison;
 
-          // 같은 species_id 내에서는 id 순으로 정렬
-          return aPokemon.id - bPokemon.id;
-        });
-      }
-      // 하위세대 미포함 시: 기존 order 기준 정렬 (transformPokemonForDex에서 이미 처리됨)
+        // 같은 species_id 내에서는 is_default 우선 (기본 형태가 먼저), 그 다음 id 순
+        const defaultComparison = bPokemon.is_default - aPokemon.is_default; // is_default=1이 먼저 오도록
+        if (defaultComparison !== 0) return defaultComparison;
+
+        return aPokemon.id - bPokemon.id; // 최종적으로 id 순 정렬
+      });
     }
 
     // 8. 사용자 지정 정렬 적용 (체중, 키, 도감번호)

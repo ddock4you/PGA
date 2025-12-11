@@ -33,6 +33,7 @@ export interface PokeApiPokemonSpecies {
 export interface PokeApiPokemon {
   id: number;
   name: string;
+  species: PokeApiNamedResource; // 추가: species 정보 (메가/거다이맥스 포켓몬에서 species_id 추출용)
   sprites: {
     front_default: string;
     other?: {

@@ -14,11 +14,16 @@ export function usePokemonDetail(idOrName: string | number) {
     enabled: !!idOrName,
   });
 
+  // Pokemon 데이터에서 species_id 추출
+  const speciesId = pokemonQuery.data?.species?.url
+    ? parseInt(pokemonQuery.data.species.url.split("/").filter(Boolean).pop() || "1", 10)
+    : null;
+
   // 2. Pokemon Species 정보 (한글 이름, 도감 설명, 진화 체인 URL 등)
   const speciesQuery = useQuery({
-    queryKey: ["pokemon-species", idOrName],
-    queryFn: () => fetchPokemonSpecies(idOrName),
-    enabled: !!idOrName,
+    queryKey: ["pokemon-species", speciesId],
+    queryFn: () => fetchPokemonSpecies(speciesId!),
+    enabled: !!speciesId,
   });
 
   // 3. Evolution Chain 정보 (Species에 있는 URL 사용)
