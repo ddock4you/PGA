@@ -21,9 +21,7 @@ function extractId(url: string, resourceName: string): number {
   return match ? Number.parseInt(match[1] ?? "0", 10) : 0;
 }
 
-export async function buildFullSearchIndex(
-  generationId: number | string
-): Promise<SearchIndex> {
+export async function buildFullSearchIndex(generationId: number | string): Promise<SearchIndex> {
   // 병렬 호출
   const [speciesList, generationData, itemList] = await Promise.all([
     fetchPokemonSpeciesListByGeneration(generationId),
@@ -32,7 +30,7 @@ export async function buildFullSearchIndex(
   ]);
 
   const pokemon = speciesList.map((s) => ({
-    id: extractId(s.url, "pokemon-species"),
+    id: extractId(s.url || "", "pokemon-species"),
     name: s.name,
   }));
 

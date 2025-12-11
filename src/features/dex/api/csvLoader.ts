@@ -41,7 +41,7 @@ export async function loadCsvData<T>(
       header: true,
       skipEmptyLines: true,
       dynamicTyping: true,
-      complete: (results) => {
+      complete: (results: Papa.ParseResult<unknown>) => {
         if (results.errors.length > 0) {
           console.warn(`CSV parsing warnings for ${filename}:`, results.errors);
         }
@@ -50,9 +50,6 @@ export async function loadCsvData<T>(
         const transformedData = transformRow ? data.map(transformRow) : (data as T[]);
 
         resolve(transformedData);
-      },
-      error: (error: Papa.ParseError) => {
-        reject(new Error(`Failed to parse ${filename}: ${error.message}`));
       },
     });
   });

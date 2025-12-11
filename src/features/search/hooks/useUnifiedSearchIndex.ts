@@ -13,6 +13,6 @@ export function useUnifiedSearchIndex() {
     gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days - 메모리에 오래 유지
     refetchOnWindowFocus: false, // 윈도우 포커스 시 리페치 불필요
     refetchOnReconnect: false, // 재연결 시 리페치 불필요
-    refetchOnMount: false, // 마운트 시 리페치 불필요 (캐시된 데이터 사용)
+    refetchOnMount: "always", // 마운트 시 항상 리페치 (캐시가 없으면 로드)
   });
 }
