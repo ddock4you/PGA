@@ -342,6 +342,7 @@ export interface DexAbilitySummary {
   name: string;
   generation: number;
   description: string;
+  identifier: string;
 }
 
 export function transformAbilitiesForDex(
@@ -371,6 +372,7 @@ export function transformAbilitiesForDex(
         name: displayName,
         generation: ability.generation_id,
         description: "특성 효과 정보", // 추후 상세 설명으로 교체 가능
+        identifier: ability.identifier,
       };
     })
     .sort((a, b) => a.id - b.id);

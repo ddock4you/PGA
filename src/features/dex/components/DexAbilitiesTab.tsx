@@ -43,15 +43,20 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
   // 2. 특성 데이터 변환 및 필터링
   const allAbilities = useMemo(() => {
     if (!abilitiesData || !abilityNamesData) return [];
-    return transformAbilitiesForDex(abilitiesData, abilityNamesData);
+    return transformAbilitiesForDex(abilitiesData, abilityNamesData, 3, 9); // 한국어 우선, 영어 보조
   }, [abilitiesData, abilityNamesData]);
 
   const filteredAbilities = useMemo(() => {
     if (!allAbilities) return [];
     if (!searchQuery.trim()) return allAbilities;
-    return allAbilities.filter((ability) =>
-      ability.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-    );
+
+    const query = searchQuery.trim().toLowerCase();
+    return allAbilities.filter((ability) => {
+      const nameMatch = ability.name.toLowerCase().includes(query);
+      const identifierMatch = ability.identifier.toLowerCase().includes(query);
+
+      return nameMatch || identifierMatch;
+    });
   }, [allAbilities, searchQuery]);
 
   // 3. 페이지네이션 계산

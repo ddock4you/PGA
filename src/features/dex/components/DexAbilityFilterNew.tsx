@@ -35,13 +35,16 @@ export function DexAbilityFilterNew({
   const groupedAbilities = useMemo(() => {
     if (!abilitiesData || !abilityNamesData) return {};
 
-    const grouped: Record<string, Array<{ id: number; name: string; identifier: string }>> = {};
+    const grouped: Record<
+      string,
+      Array<{ id: number; name: string; identifier: string; searchText: string }>
+    > = {};
 
     abilitiesData
       .filter((ability) => ability.generation_id <= parseInt(generationId))
       .forEach((ability) => {
         const nameData = abilityNamesData.find(
-          (name) => name.ability_id === ability.id && name.local_language_id === 1 // 한국어
+          (name) => name.ability_id === ability.id && name.local_language_id === 3 // 한국어
         );
         const abilityName = nameData?.name || ability.identifier;
 
@@ -53,6 +56,7 @@ export function DexAbilityFilterNew({
           id: ability.id,
           name: abilityName,
           identifier: ability.identifier,
+          searchText: `${abilityName} ${ability.identifier}`, // 검색용 텍스트 (한글 + 영어)
         });
       });
 
@@ -71,13 +75,14 @@ export function DexAbilityFilterNew({
     if (!ability) return null;
 
     const nameData = abilityNamesData.find(
-      (name) => name.ability_id === ability.id && name.local_language_id === 1
+      (name) => name.ability_id === ability.id && name.local_language_id === 3
     );
 
     return {
       id: ability.id,
       name: nameData?.name || ability.identifier,
       identifier: ability.identifier,
+      searchText: `${nameData?.name || ability.identifier} ${ability.identifier}`,
     };
   }, [selectedAbilityId, abilitiesData, abilityNamesData]);
 
@@ -114,6 +119,7 @@ export function DexAbilityFilterNew({
               <CommandEmpty>특성을 찾을 수 없습니다.</CommandEmpty>
               {/* 모든 특성 선택 옵션 */}
               <CommandItem
+                value="모든 특성 all abilities"
                 onSelect={() => {
                   onAbilityChange(undefined);
                   setOpen(false);
@@ -130,6 +136,7 @@ export function DexAbilityFilterNew({
                   {abilities.map((ability) => (
                     <CommandItem
                       key={ability.id}
+                      value={ability.searchText}
                       onSelect={() => {
                         onAbilityChange(ability.id);
                         setOpen(false);
