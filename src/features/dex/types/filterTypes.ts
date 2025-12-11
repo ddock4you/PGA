@@ -27,6 +27,10 @@ export interface DexFilters {
   // 5행 - 도감번호 정렬
   sortByDexNumber: boolean;
   dexNumberOrder: "asc" | "desc";
+
+  // 페이지네이션
+  currentPage: number;
+  itemsPerPage: number;
 }
 
 // 정렬 옵션 타입
@@ -46,4 +50,6 @@ export const DEFAULT_DEX_FILTERS: DexFilters = {
   heightOrder: "desc",
   sortByDexNumber: false,
   dexNumberOrder: "asc",
+  currentPage: 1,
+  itemsPerPage: 30,
 };

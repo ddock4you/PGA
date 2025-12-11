@@ -1,4 +1,5 @@
-import { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
+import type { ReactNode } from "react";
 import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
 
 // Context 타입 정의
@@ -7,6 +8,7 @@ interface DexFilterContextType {
   searchQuery: string;
   updateFilters: (filters: DexFilters | Partial<DexFilters>) => void;
   updateSearchQuery: (query: string) => void;
+  updatePagination: (page: number) => void;
   resetFilters: () => void;
 }
 
@@ -21,6 +23,7 @@ const DEX_SEARCH_STORAGE_KEY = "dex-search-query";
 type DexFilterAction =
   | { type: "UPDATE_FILTERS"; payload: Partial<DexFilters> }
   | { type: "UPDATE_SEARCH"; payload: string }
+  | { type: "UPDATE_PAGINATION"; payload: number }
   | { type: "RESET_FILTERS" }
   | { type: "LOAD_FROM_STORAGE"; payload: { filters: DexFilters; searchQuery: string } };
 
@@ -30,12 +33,16 @@ function dexFilterReducer(
   action: DexFilterAction
 ) {
   switch (action.type) {
-    case "UPDATE_FILTERS":
+    case "UPDATE_FILTERS": {
       const newFilters = { ...state.filters, ...action.payload };
       return { ...state, filters: newFilters };
+    }
 
     case "UPDATE_SEARCH":
       return { ...state, searchQuery: action.payload };
+
+    case "UPDATE_PAGINATION":
+      return { ...state, filters: { ...state.filters, currentPage: action.payload } };
 
     case "RESET_FILTERS":
       return { filters: { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" }, searchQuery: "" };
@@ -101,18 +108,29 @@ export function DexFilterProvider({ children }: DexFilterProviderProps) {
     saveToStorage(state.filters, state.searchQuery);
   }, [state.filters, state.searchQuery]);
 
+  const updateFilters = useCallback((newFilters: DexFilters | Partial<DexFilters>) => {
+    dispatch({ type: "UPDATE_FILTERS", payload: newFilters });
+  }, []);
+
+  const updateSearchQuery = useCallback((query: string) => {
+    dispatch({ type: "UPDATE_SEARCH", payload: query });
+  }, []);
+
+  const updatePagination = useCallback((page: number) => {
+    dispatch({ type: "UPDATE_PAGINATION", payload: page });
+  }, []);
+
+  const resetFilters = useCallback(() => {
+    dispatch({ type: "RESET_FILTERS" });
+  }, []);
+
   const contextValue: DexFilterContextType = {
     filters: state.filters,
     searchQuery: state.searchQuery,
-    updateFilters: (newFilters) => {
-      dispatch({ type: "UPDATE_FILTERS", payload: newFilters });
-    },
-    updateSearchQuery: (query) => {
-      dispatch({ type: "UPDATE_SEARCH", payload: query });
-    },
-    resetFilters: () => {
-      dispatch({ type: "RESET_FILTERS" });
-    },
+    updateFilters,
+    updateSearchQuery,
+    updatePagination,
+    resetFilters,
   };
 
   return <DexFilterContext.Provider value={contextValue}>{children}</DexFilterContext.Provider>;

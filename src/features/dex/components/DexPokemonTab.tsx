@@ -1,5 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useDexCsvData } from "../hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
 import {
@@ -12,7 +19,8 @@ import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 
 export function DexPokemonTab() {
   const navigate = useNavigate();
-  const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
+  const { filters, searchQuery, updateFilters, updateSearchQuery, updatePagination } =
+    useDexFilters();
 
   const { pokemonData, pokemonTypesData, pokemonAbilitiesData, isLoading, isError } =
     useDexCsvData();
@@ -138,6 +146,38 @@ export function DexPokemonTab() {
     return summaries;
   }, [searchQuery, pokemonData, pokemonTypesData, pokemonAbilitiesData, filters]);
 
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(pokemonSummaries.length / filters.itemsPerPage);
+  const paginatedPokemonSummaries = useMemo(() => {
+    const start = (filters.currentPage - 1) * filters.itemsPerPage;
+    return pokemonSummaries.slice(start, start + filters.itemsPerPage);
+  }, [pokemonSummaries, filters.currentPage, filters.itemsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    updatePagination(page);
+  };
+
+  // 필터 변경 시 페이지네이션을 1페이지로 리셋
+  useEffect(() => {
+    updatePagination(1);
+  }, [
+    filters.dexGenerationId,
+    filters.selectedGameVersion,
+    filters.includeSubGenerations,
+    filters.onlyDefaultForms,
+    filters.selectedTypes,
+    filters.selectedAbilityId,
+    filters.sortByWeight,
+    filters.weightOrder,
+    filters.sortByHeight,
+    filters.heightOrder,
+    filters.sortByDexNumber,
+    filters.dexNumberOrder,
+    searchQuery,
+    updatePagination,
+  ]);
+
   return (
     <div className="space-y-4">
       <DexFilterBar
@@ -163,10 +203,42 @@ export function DexPokemonTab() {
       )}
 
       <section className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2 md:grid-cols-3">
-        {pokemonSummaries.map((pokemon) => (
+        {paginatedPokemonSummaries.map((pokemon) => (
           <DexPokemonCard key={pokemon.id} {...pokemon} onClick={() => handleOpen(pokemon)} />
         ))}
       </section>
+
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePageChange(filters.currentPage - 1)}
+                className={
+                  filters.currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+
+            <PaginationItem>
+              <div className="flex items-center px-4 text-sm">
+                {filters.currentPage} / {totalPages}
+              </div>
+            </PaginationItem>
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => handlePageChange(filters.currentPage + 1)}
+                className={
+                  filters.currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

@@ -25,7 +25,7 @@ interface DexAbilitiesTabProps {
   generationId: string;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 30;
 
 export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
   const navigate = useNavigate();

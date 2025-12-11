@@ -26,7 +26,7 @@ interface DexMovesTabProps {
   generationId: string;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 30;
 
 export function DexMovesTab({ generationId }: DexMovesTabProps) {
   const navigate = useNavigate();

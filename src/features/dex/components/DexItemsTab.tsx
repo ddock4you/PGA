@@ -25,7 +25,7 @@ interface DexItemsTabProps {
   generationId: string; // 도구는 API 한계로 세대 필터 적용이 어려우나 인터페이스는 유지
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 30;
 
 export function DexItemsTab({ generationId }: DexItemsTabProps) {
   const navigate = useNavigate();
