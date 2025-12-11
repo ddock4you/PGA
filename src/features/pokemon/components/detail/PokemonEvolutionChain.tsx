@@ -10,7 +10,7 @@ interface PokemonEvolutionChainProps {
 
 export function PokemonEvolutionChain({ chain }: PokemonEvolutionChainProps) {
   return (
-    <Card>
+    <Card id="evolution-chain">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">진화 경로</CardTitle>
       </CardHeader>

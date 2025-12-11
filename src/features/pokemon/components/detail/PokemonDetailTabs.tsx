@@ -3,6 +3,7 @@ import type {
   PokeApiPokemon,
   PokeApiPokemonSpecies,
   PokeApiEvolutionChain,
+  PokeApiEncounter,
 } from "../../api/pokemonApi";
 import { PokemonStatsChart } from "./PokemonStatsChart";
 import { PokemonTypeEffectiveness } from "./PokemonTypeEffectiveness";
@@ -15,11 +16,21 @@ interface PokemonDetailTabsProps {
   pokemon: PokeApiPokemon;
   species: PokeApiPokemonSpecies;
   evolutionChain?: PokeApiEvolutionChain;
+  encounters?: PokeApiEncounter[];
+  activeTab?: string;
+  onTabChange?: (value: string) => void;
 }
 
-export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonDetailTabsProps) {
+export function PokemonDetailTabs({
+  pokemon,
+  species,
+  evolutionChain,
+  encounters,
+  activeTab = "overview",
+  onTabChange,
+}: PokemonDetailTabsProps) {
   return (
-    <Tabs defaultValue="overview" className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="sticky z-20 grid w-full grid-cols-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 top-(--header-height)">
         <TabsTrigger value="overview">개요</TabsTrigger>
         <TabsTrigger value="moves">기술</TabsTrigger>
@@ -54,7 +65,13 @@ export function PokemonDetailTabs({ pokemon, species, evolutionChain }: PokemonD
       </TabsContent>
 
       <TabsContent value="info" className="mt-4">
-        <PokemonDetailInfo pokemon={pokemon} species={species} />
+        <PokemonDetailInfo
+          pokemon={pokemon}
+          species={species}
+          encounters={encounters}
+          evolutionChain={evolutionChain}
+          onTabChange={onTabChange}
+        />
       </TabsContent>
     </Tabs>
   );

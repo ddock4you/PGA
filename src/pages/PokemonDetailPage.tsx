@@ -1,19 +1,56 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePokemonDetail } from "@/features/pokemon/hooks/usePokemonDetail";
 import { PokemonDetailHeader } from "@/features/pokemon/components/detail/PokemonDetailHeader";
 import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
 import { PokemonDetailTabs } from "@/features/pokemon/components/detail/PokemonDetailTabs";
+import { smoothScrollToElement, SCROLL_CONSTANTS } from "@/hooks/useSmoothScroll";
+
+// 스크롤 관련 설정 (공통 hook에서 가져옴)
+// 필요시 SCROLL_CONSTANTS를 직접 수정하거나 다른 값 사용 가능
+const SCROLL_DURATION = SCROLL_CONSTANTS.DEFAULT_DURATION;
+const SCROLL_DELAY = SCROLL_CONSTANTS.TAB_SWITCH_DELAY;
 
 export function PokemonDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { i18n } = useTranslation();
+  const [activeTab, setActiveTab] = useState("overview");
   const language = i18n.language.startsWith("ko") ? "ko" : "en";
 
-  const { pokemon, species, evolutionChain, isLoading, isError } = usePokemonDetail(id ?? "");
+  const { pokemon, species, evolutionChain, encounters, isLoading, isError } = usePokemonDetail(
+    id ?? ""
+  );
+
+  // URL 쿼리 파라미터에서 스크롤 타겟 확인 및 처리
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const scrollTo = urlParams.get("scrollTo");
+
+    if (scrollTo === "obtaining-methods") {
+      // 정보 탭으로 전환
+      setActiveTab("info");
+
+      // 탭 전환이 완료될 때까지 대기 후 스크롤 시작
+      setTimeout(() => {
+        smoothScrollToElement("obtaining-methods", SCROLL_DURATION);
+      }, SCROLL_DELAY);
+    }
+  }, [location.search]);
+
+  // 진화 탭으로 변경 시 스크롤 처리
+  useEffect(() => {
+    if (activeTab === "evolution") {
+      // 탭 전환이 완료될 때까지 대기 후 진화 섹션으로 스크롤
+      setTimeout(() => {
+        smoothScrollToElement("evolution-chain", SCROLL_DURATION);
+      }, SCROLL_DELAY);
+    }
+  }, [activeTab]);
 
   if (!id) return null;
 
@@ -53,7 +90,14 @@ export function PokemonDetailPage() {
 
       <PokemonDetailHeader pokemon={pokemon} species={species} language={language} />
       <PokemonDetailOverview pokemon={pokemon} species={species} language={language} />
-      <PokemonDetailTabs pokemon={pokemon} species={species} evolutionChain={evolutionChain} />
+      <PokemonDetailTabs
+        pokemon={pokemon}
+        species={species}
+        evolutionChain={evolutionChain}
+        encounters={encounters}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
     </div>
   );
 }

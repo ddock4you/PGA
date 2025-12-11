@@ -93,6 +93,21 @@ export interface PokeApiEvolutionChain {
   chain: PokeApiEvolutionChainLink;
 }
 
+export interface PokeApiEncounter {
+  location_area: PokeApiNamedResource;
+  version_details: {
+    max_chance: number;
+    encounter_details: {
+      min_level: number;
+      max_level: number;
+      condition_values: PokeApiNamedResource[];
+      chance: number;
+      method: PokeApiNamedResource;
+    }[];
+    version: PokeApiNamedResource;
+  }[];
+}
+
 interface PokeApiPokemonSpeciesListResponse {
   pokemon_species: PokeApiPokemonSpecies[];
 }
@@ -121,4 +136,10 @@ export async function fetchPokemonSpecies(
 
 export async function fetchEvolutionChain(url: string): Promise<PokeApiEvolutionChain> {
   return fetchFromPokeApi<PokeApiEvolutionChain>(url, { absoluteUrl: url });
+}
+
+export async function fetchPokemonEncounters(
+  idOrName: number | string
+): Promise<PokeApiEncounter[]> {
+  return fetchFromPokeApi<PokeApiEncounter[]>(`/pokemon/${idOrName}/encounters`);
 }

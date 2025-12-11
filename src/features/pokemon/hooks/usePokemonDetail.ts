@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchPokemon, fetchPokemonSpecies, fetchEvolutionChain } from "../api/pokemonApi";
+import {
+  fetchPokemon,
+  fetchPokemonSpecies,
+  fetchEvolutionChain,
+  fetchPokemonEncounters,
+} from "../api/pokemonApi";
 
 export function usePokemonDetail(idOrName: string | number) {
   // 1. Pokemon 기본 정보
@@ -24,15 +29,32 @@ export function usePokemonDetail(idOrName: string | number) {
     enabled: !!evolutionChainUrl,
   });
 
+  // 4. Encounters 정보 (야생 출현 정보)
+  const encountersQuery = useQuery({
+    queryKey: ["pokemon-encounters", idOrName],
+    queryFn: () => fetchPokemonEncounters(idOrName),
+    enabled: !!idOrName,
+  });
+
   return {
     pokemon: pokemonQuery.data,
     species: speciesQuery.data,
     evolutionChain: evolutionChainQuery.data,
+    encounters: encountersQuery.data,
     isLoading:
       pokemonQuery.isLoading ||
       speciesQuery.isLoading ||
-      (!!evolutionChainUrl && evolutionChainQuery.isLoading),
-    isError: pokemonQuery.isError || speciesQuery.isError || evolutionChainQuery.isError,
-    error: pokemonQuery.error || speciesQuery.error || evolutionChainQuery.error,
+      (!!evolutionChainUrl && evolutionChainQuery.isLoading) ||
+      encountersQuery.isLoading,
+    isError:
+      pokemonQuery.isError ||
+      speciesQuery.isError ||
+      evolutionChainQuery.isError ||
+      encountersQuery.isError,
+    error:
+      pokemonQuery.error ||
+      speciesQuery.error ||
+      evolutionChainQuery.error ||
+      encountersQuery.error,
   };
 }
