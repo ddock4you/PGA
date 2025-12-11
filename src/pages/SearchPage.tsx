@@ -182,6 +182,17 @@ function SearchResultSection({
 
   if (count === 0) return null;
 
+  // 컨텐츠 타입에 따른 카드 스타일 클래스 결정
+  const getCardClassName = (title: string) => {
+    if (title.includes("포켓몬")) return "card-pokemon";
+    if (title.includes("기술")) return "card-move";
+    if (title.includes("특성")) return "card-ability";
+    if (title.includes("도구")) return "card-item";
+    return ""; // 기본값
+  };
+
+  const cardClassName = getCardClassName(title);
+
   return (
     <section className="space-y-2">
       <div className="flex items-baseline justify-between">
@@ -198,7 +209,7 @@ function SearchResultSection({
           </button>
         )}
       </div>
-      <Card>
+      <Card className={cardClassName}>
         <CardContent className="space-y-1 py-3">
           {displayEntries.map((entry) => (
             <Link

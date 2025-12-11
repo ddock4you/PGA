@@ -91,7 +91,7 @@ export function DexMovesTab({ generationId }: DexMovesTabProps) {
         </p>
       ) : (
         <>
-          <div className="rounded-md border">
+          <div className="rounded-md border card-move">
             <Table>
               <TableHeader>
                 <TableRow>

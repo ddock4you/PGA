@@ -29,7 +29,7 @@ interface PreferencesContextValue {
 const PREFERENCES_STORAGE_KEY = "pga.preferences.v1";
 
 const defaultState: PreferencesState = {
-  theme: "dark",
+  theme: "light",
   primaryLanguage: "ko",
   secondaryLanguage: null,
   selectedGameId: null,

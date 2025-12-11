@@ -16,7 +16,7 @@ export function DexPokemonCard(props: DexPokemonCardProps) {
 
   return (
     <Card
-      className="bg-card/80 cursor-pointer transition hover:bg-card/90"
+      className="card-pokemon cursor-pointer transition hover:bg-card/90 border"
       onClick={onClick}
       role="button"
       aria-label={`${name} 상세 보기`}

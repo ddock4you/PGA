@@ -100,7 +100,7 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
         </p>
       ) : (
         <>
-          <div className="rounded-md border">
+          <div className="rounded-md border card-ability">
             <Table>
               <TableHeader>
                 <TableRow>

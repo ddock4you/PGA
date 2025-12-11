@@ -109,7 +109,7 @@ export function DexItemsTab({ generationId }: DexItemsTabProps) {
         </p>
       ) : (
         <>
-          <div className="rounded-md border">
+          <div className="rounded-md border card-item">
             <Table>
               <TableHeader>
                 <TableRow>
