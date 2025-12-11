@@ -1,5 +1,4 @@
 import { Link, NavLink, Outlet, Route, Routes } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { HomePage } from "./pages/HomePage";
@@ -13,7 +12,6 @@ import { ItemDetailPage } from "./pages/ItemDetailPage";
 
 function AppLayout() {
   const { state, toggleTheme } = usePreferences();
-  const { t } = useTranslation();
   const themeLabel = state.theme === "dark" ? "다크" : "라이트";
 
   return (
@@ -21,7 +19,7 @@ function AppLayout() {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <Link to="/" className="text-base font-semibold">
-            {t("app.title")}
+            포켓몬 게임 어시스턴트
           </Link>
           <div className="flex items-center gap-4 text-xs sm:text-sm">
             <nav className="flex items-center gap-3">
@@ -29,13 +27,13 @@ function AppLayout() {
                 to="/dex"
                 className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
               >
-                {t("nav.dex")}
+                도감
               </NavLink>
               <NavLink
                 to="/training"
                 className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
               >
-                {t("nav.training")}
+                배틀 트레이닝
               </NavLink>
             </nav>
             <div className="hidden items-center gap-2 sm:flex">

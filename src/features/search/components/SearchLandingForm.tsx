@@ -58,9 +58,6 @@ function clearSearchHistory() {
 
 export function SearchLandingForm() {
   const navigate = useNavigate();
-  const {
-    state: { primaryLanguage },
-  } = usePreferences();
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
@@ -75,7 +72,7 @@ export function SearchLandingForm() {
   const suggestions = useMemo(() => {
     if (!query.trim() || !unifiedSearchIndex) return [];
 
-    const results = filterUnifiedEntriesByQuery(unifiedSearchIndex, query, primaryLanguage);
+    const results = filterUnifiedEntriesByQuery(unifiedSearchIndex, query);
 
     // 최대 8개까지만 제안, 카테고리별로 균등하게 분배
     const suggestionsByCategory: Record<string, typeof results> = {};
@@ -89,7 +86,7 @@ export function SearchLandingForm() {
     });
 
     return Object.values(suggestionsByCategory).flat().slice(0, 8);
-  }, [query, unifiedSearchIndex, primaryLanguage]);
+  }, [query, unifiedSearchIndex]);
 
   const navigateToSearch = (searchQuery: string) => {
     addToSearchHistory(searchQuery);
@@ -97,7 +94,6 @@ export function SearchLandingForm() {
       q: searchQuery,
       generationId: "unified",
       gameId: null,
-      language: primaryLanguage,
     });
     navigate(`/search?${searchParams}`);
   };
@@ -145,22 +141,11 @@ export function SearchLandingForm() {
                   {suggestions.map((suggestion) => (
                     <CommandItem
                       key={`${suggestion.category}-${suggestion.id}`}
-                      value={
-                        suggestion.names[primaryLanguage as keyof typeof suggestion.names] ||
-                        suggestion.names.en
-                      }
-                      onSelect={() =>
-                        handleSuggestionSelect(
-                          suggestion.names[primaryLanguage as keyof typeof suggestion.names] ||
-                            suggestion.names.en
-                        )
-                      }
+                      value={suggestion.name}
+                      onSelect={() => handleSuggestionSelect(suggestion.name)}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span>
-                          {suggestion.names[primaryLanguage as keyof typeof suggestion.names] ||
-                            suggestion.names.en}
-                        </span>
+                        <span>{suggestion.name}</span>
                         <span className="text-xs text-muted-foreground ml-2 capitalize">
                           {suggestion.category}
                         </span>

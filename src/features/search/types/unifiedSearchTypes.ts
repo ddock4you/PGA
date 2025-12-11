@@ -3,11 +3,7 @@
 export interface UnifiedSearchEntry {
   id: number;
   category: "pokemon" | "move" | "ability" | "item";
-  names: {
-    ja: string;
-    ko: string;
-    en: string;
-  };
+  name: string;
   // 추가 메타데이터 (선택사항 - 검색 결과 표시 시 유용)
   metadata?: {
     type?: string; // 포켓몬 타입 (콤마 구분)

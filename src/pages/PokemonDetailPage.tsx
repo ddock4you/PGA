@@ -1,5 +1,4 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,9 +17,8 @@ export function PokemonDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
-  const language = i18n.language.startsWith("ko") ? "ko" : "en";
+  const language = "ko";
 
   const { pokemon, species, evolutionChain, encounters, isLoading, isError } = usePokemonDetail(
     id ?? ""

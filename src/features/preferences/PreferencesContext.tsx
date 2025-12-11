@@ -1,15 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import i18n from "i18next";
 
 type Theme = "light" | "dark";
 
-type LanguageCode = "ko" | "en" | "ja";
-
 interface PreferencesState {
   theme: Theme;
-  primaryLanguage: LanguageCode;
-  secondaryLanguage: LanguageCode | null;
   selectedGameId: string | null;
   selectedGenerationId: string | null;
   selectedVersionGroup: string | null;
@@ -19,8 +14,6 @@ interface PreferencesContextValue {
   state: PreferencesState;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
-  setPrimaryLanguage: (lang: LanguageCode) => void;
-  setSecondaryLanguage: (lang: LanguageCode | null) => void;
   setSelectedGameId: (gameId: string | null) => void;
   setSelectedGenerationId: (generationId: string | null) => void;
   setSelectedVersionGroup: (group: string | null) => void;
@@ -30,8 +23,6 @@ const PREFERENCES_STORAGE_KEY = "pga.preferences.v1";
 
 const defaultState: PreferencesState = {
   theme: "light",
-  primaryLanguage: "ko",
-  secondaryLanguage: null,
   selectedGameId: null,
   selectedGenerationId: null,
   selectedVersionGroup: null,
@@ -101,12 +92,6 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     }
   }, [state]);
 
-  // primaryLanguage 변경 시 i18n에 반영
-  useEffect(() => {
-    if (!i18n.isInitialized) return;
-
-    void i18n.changeLanguage(state.primaryLanguage);
-  }, [state.primaryLanguage]);
 
   const value = useMemo<PreferencesContextValue>(
     () => ({
@@ -120,16 +105,6 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
         setState((prev) => ({
           ...prev,
           theme: prev.theme === "dark" ? "light" : "dark",
-        })),
-      setPrimaryLanguage: (lang) =>
-        setState((prev) => ({
-          ...prev,
-          primaryLanguage: lang,
-        })),
-      setSecondaryLanguage: (lang) =>
-        setState((prev) => ({
-          ...prev,
-          secondaryLanguage: lang,
         })),
       setSelectedGameId: (gameId) =>
         setState((prev) => ({

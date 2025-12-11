@@ -67,11 +67,11 @@ function createPokemonEntries(
   nameGroups: Map<number, Array<{ local_language_id: number; name: string }>>
 ): UnifiedSearchEntry[] {
   return pokemonData.map((pokemon) => {
-    const names = getLocalizedNamesForId(pokemon.species_id, nameGroups);
+    const name = getLocalizedNamesForId(pokemon.species_id, nameGroups);
     return {
       id: pokemon.id,
       category: "pokemon" as const,
-      names,
+      name,
       // metadata: 추가적인 메타데이터가 필요하면 여기에 추가
     };
   });
@@ -86,11 +86,11 @@ function createMoveEntries(movesData: CsvMove[], moveNames: CsvMoveName[]): Unif
   );
 
   return movesData.map((move) => {
-    const names = getLocalizedNamesForId(move.id, moveNameGroups);
+    const name = getLocalizedNamesForId(move.id, moveNameGroups);
     return {
       id: move.id,
       category: "move" as const,
-      names,
+      name,
       metadata: {
         power: move.power ?? undefined,
         // 다른 메타데이터 추가 가능
@@ -111,11 +111,11 @@ function createAbilityEntries(
   );
 
   return abilitiesData.map((ability) => {
-    const names = getLocalizedNamesForId(ability.id, abilityNameGroups);
+    const name = getLocalizedNamesForId(ability.id, abilityNameGroups);
     return {
       id: ability.id,
       category: "ability" as const,
-      names,
+      name,
     };
   });
 }
@@ -129,11 +129,11 @@ function createItemEntries(itemsData: CsvItem[], itemNames: CsvItemName[]): Unif
   );
 
   return itemsData.map((item) => {
-    const names = getLocalizedNamesForId(item.id, itemNameGroups);
+    const name = getLocalizedNamesForId(item.id, itemNameGroups);
     return {
       id: item.id,
       category: "item" as const,
-      names,
+      name,
       metadata: {
         category: item.category_id?.toString(),
         cost: item.cost,

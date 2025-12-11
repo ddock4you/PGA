@@ -1,52 +1,23 @@
-import type {
-  UnifiedSearchEntry,
-  UnifiedSearchIndex,
-  LanguageCode,
-} from "../types/unifiedSearchTypes";
+import type { UnifiedSearchEntry, UnifiedSearchIndex } from "../types/unifiedSearchTypes";
 
 // 검색 우선순위 점수
 const SEARCH_SCORES = {
-  PRIMARY_EXACT: 100, // 1차 언어 완전 일치
-  PRIMARY_STARTS: 80, // 1차 언어 시작 부분 일치
-  PRIMARY_CONTAINS: 60, // 1차 언어 포함
-  SECONDARY_EXACT: 50, // 2차 언어 완전 일치
-  SECONDARY_STARTS: 40, // 2차 언어 시작 부분 일치
-  SECONDARY_CONTAINS: 30, // 2차 언어 포함
-  ENGLISH_EXACT: 20, // 영어 완전 일치
-  ENGLISH_STARTS: 15, // 영어 시작 부분 일치
-  ENGLISH_CONTAINS: 10, // 영어 포함
+  EXACT: 100, // 완전 일치
+  STARTS: 80, // 시작 부분 일치
+  CONTAINS: 60, // 포함
 } as const;
 
 // 단일 엔트리에 대한 검색 점수 계산
-function calculateSearchScore(
-  entry: UnifiedSearchEntry,
-  query: string,
-  primaryLang: LanguageCode,
-  secondaryLang?: LanguageCode
-): number {
+function calculateSearchScore(entry: UnifiedSearchEntry, query: string): number {
   const normalizedQuery = query.toLowerCase().trim();
   if (!normalizedQuery) return 0;
 
-  const primaryName = entry.names[primaryLang]?.toLowerCase() || "";
-  const secondaryName = secondaryLang ? entry.names[secondaryLang]?.toLowerCase() || "" : "";
-  const englishName = entry.names.en?.toLowerCase() || "";
+  const name = entry.name?.toLowerCase() || "";
 
-  // 1차 언어 완전 일치 (최고 우선순위)
-  if (primaryName === normalizedQuery) return SEARCH_SCORES.PRIMARY_EXACT;
-  if (primaryName.startsWith(normalizedQuery)) return SEARCH_SCORES.PRIMARY_STARTS;
-  if (primaryName.includes(normalizedQuery)) return SEARCH_SCORES.PRIMARY_CONTAINS;
-
-  // 2차 언어 완전 일치
-  if (secondaryName) {
-    if (secondaryName === normalizedQuery) return SEARCH_SCORES.SECONDARY_EXACT;
-    if (secondaryName.startsWith(normalizedQuery)) return SEARCH_SCORES.SECONDARY_STARTS;
-    if (secondaryName.includes(normalizedQuery)) return SEARCH_SCORES.SECONDARY_CONTAINS;
-  }
-
-  // 영어 완전 일치
-  if (englishName === normalizedQuery) return SEARCH_SCORES.ENGLISH_EXACT;
-  if (englishName.startsWith(normalizedQuery)) return SEARCH_SCORES.ENGLISH_STARTS;
-  if (englishName.includes(normalizedQuery)) return SEARCH_SCORES.ENGLISH_CONTAINS;
+  // 완전 일치 (최고 우선순위)
+  if (name === normalizedQuery) return SEARCH_SCORES.EXACT;
+  if (name.startsWith(normalizedQuery)) return SEARCH_SCORES.STARTS;
+  if (name.includes(normalizedQuery)) return SEARCH_SCORES.CONTAINS;
 
   return 0; // 일치하지 않음
 }
@@ -54,9 +25,7 @@ function calculateSearchScore(
 // 통합 검색 필터링 함수
 export function filterUnifiedEntriesByQuery(
   index: UnifiedSearchIndex,
-  query: string,
-  primaryLang: LanguageCode,
-  secondaryLang?: LanguageCode
+  query: string
 ): UnifiedSearchEntry[] {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return [];
@@ -68,7 +37,7 @@ export function filterUnifiedEntriesByQuery(
   const scoredEntries = allEntries
     .map((entry) => ({
       entry,
-      score: calculateSearchScore(entry, trimmedQuery, primaryLang, secondaryLang),
+      score: calculateSearchScore(entry, trimmedQuery),
     }))
     .filter((item) => item.score > 0); // 일치하는 결과만 필터링
 
@@ -86,9 +55,7 @@ export function filterUnifiedEntriesByQuery(
 // 카테고리별 검색 함수
 export function filterEntriesByCategoryAndQuery(
   entries: UnifiedSearchEntry[],
-  query: string,
-  primaryLang: LanguageCode,
-  secondaryLang?: LanguageCode
+  query: string
 ): UnifiedSearchEntry[] {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return [];
@@ -96,7 +63,7 @@ export function filterEntriesByCategoryAndQuery(
   const scoredEntries = entries
     .map((entry) => ({
       entry,
-      score: calculateSearchScore(entry, trimmedQuery, primaryLang, secondaryLang),
+      score: calculateSearchScore(entry, trimmedQuery),
     }))
     .filter((item) => item.score > 0);
 
@@ -111,13 +78,8 @@ export function filterEntriesByCategoryAndQuery(
 }
 
 // 검색 결과 요약 함수
-export function getSearchSummary(
-  index: UnifiedSearchIndex,
-  query: string,
-  primaryLang: LanguageCode,
-  secondaryLang?: LanguageCode
-) {
-  const allResults = filterUnifiedEntriesByQuery(index, query, primaryLang, secondaryLang);
+export function getSearchSummary(index: UnifiedSearchIndex, query: string) {
+  const allResults = filterUnifiedEntriesByQuery(index, query);
 
   const summary = {
     total: allResults.length,

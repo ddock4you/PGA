@@ -31,20 +31,20 @@ export function DexPage() {
 
         <TabsContent value="pokemon" className="mt-4">
           <DexFilterProvider>
-            <DexPokemonTab generationId={effectiveGenerationId} />
+            <DexPokemonTab />
           </DexFilterProvider>
         </TabsContent>
 
         <TabsContent value="moves" className="mt-4">
-          <DexMovesTab generationId={effectiveGenerationId} />
+          <DexMovesTab />
         </TabsContent>
 
         <TabsContent value="abilities" className="mt-4">
-          <DexAbilitiesTab generationId={effectiveGenerationId} />
+          <DexAbilitiesTab />
         </TabsContent>
 
         <TabsContent value="items" className="mt-4">
-          <DexItemsTab generationId={effectiveGenerationId} />
+          <DexItemsTab />
         </TabsContent>
       </Tabs>
     </section>

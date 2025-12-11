@@ -22,8 +22,7 @@ function extractId(url: string, resourceName: string): number {
 }
 
 export async function buildFullSearchIndex(
-  generationId: number | string,
-  _primaryLanguage: string
+  generationId: number | string
 ): Promise<SearchIndex> {
   // 병렬 호출
   const [speciesList, generationData, itemList] = await Promise.all([

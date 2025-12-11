@@ -66,23 +66,10 @@ function SearchPrompt() {
 }
 
 // Highlight component - 다국어 지원
-function HighlightText({
-  entry,
-  query,
-  primaryLanguage,
-}: {
-  entry: UnifiedSearchEntry;
-  query: string;
-  primaryLanguage: string;
-}) {
-  if (!query)
-    return <>{entry.names[primaryLanguage as keyof typeof entry.names] || entry.names.en}</>;
+function HighlightText({ entry, query }: { entry: UnifiedSearchEntry; query: string }) {
+  if (!query) return <>{entry.name}</>;
 
-  // 우선순위: 1차 언어 → 영어 → 다른 언어
-  const displayText =
-    entry.names[primaryLanguage as keyof typeof entry.names] ||
-    entry.names.en ||
-    Object.values(entry.names)[0];
+  const displayText = entry.name;
 
   const parts = displayText.split(new RegExp(`(${query})`, "gi"));
 
@@ -104,16 +91,10 @@ function HighlightText({
 interface SearchSummaryHeaderProps {
   query: string;
   generationId: string | null;
-  language: string | null;
   onSubmit: (nextQuery: string) => void;
 }
 
-function SearchSummaryHeader({
-  query,
-  generationId,
-  language,
-  onSubmit,
-}: SearchSummaryHeaderProps) {
+function SearchSummaryHeader({ query, generationId, onSubmit }: SearchSummaryHeaderProps) {
   const [localQuery, setLocalQuery] = useState(query);
 
   useEffect(() => {
@@ -150,7 +131,6 @@ function SearchSummaryHeader({
           <label className="mb-1 block font-medium text-muted-foreground">필터 정보</label>
           <div className="flex h-9 items-center gap-2 text-sm">
             <Badge variant="outline">세대: {generationId ?? "-"}</Badge>
-            <Badge variant="outline">언어: {language ?? "-"}</Badge>
           </div>
         </div>
       </form>
@@ -162,7 +142,6 @@ interface SearchResultSectionProps {
   title: string;
   entries: UnifiedSearchEntry[];
   query: string;
-  primaryLanguage: string;
   linkPrefix: string;
   limit?: number;
   onMoreClick?: () => void;
@@ -172,7 +151,6 @@ function SearchResultSection({
   title,
   entries,
   query,
-  primaryLanguage,
   linkPrefix,
   limit,
   onMoreClick,
@@ -213,13 +191,13 @@ function SearchResultSection({
         <CardContent className="space-y-1 py-3">
           {displayEntries.map((entry) => (
             <Link
-              key={`${title}-${entry.id}-${entry.names.en}`}
+              key={`${title}-${entry.id}-${entry.name}`}
               to={`${linkPrefix}/${entry.id}`}
               className="block rounded-md p-3 text-sm transition-colors hover:bg-muted active:bg-muted/80 touch-manipulation border border-transparent hover:border-border/50"
             >
               <div className="flex items-center justify-between w-full">
                 <div className="flex-1 min-w-0">
-                  <HighlightText entry={entry} query={query} primaryLanguage={primaryLanguage} />
+                  <HighlightText entry={entry} query={query} />
                 </div>
                 <span className="ml-2 text-xs text-muted-foreground shrink-0">No.{entry.id}</span>
               </div>
@@ -236,23 +214,15 @@ type TabType = "all" | "pokemon" | "moves" | "abilities" | "items";
 export function SearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    state,
-    setPrimaryLanguage,
-    setSelectedGenerationId,
-    setSelectedGameId,
-    setSelectedVersionGroup,
-  } = usePreferences();
-  const { primaryLanguage, selectedGenerationId, selectedGameId, selectedVersionGroup } = state;
+  const { state, setSelectedGenerationId, setSelectedGameId, setSelectedVersionGroup } =
+    usePreferences();
+  const { selectedGenerationId, selectedGameId, selectedVersionGroup } = state;
 
   const [activeTab, setActiveTab] = useState<TabType>("all");
 
   const parsed = useMemo(() => parseSearchQueryString(location.search), [location.search]);
 
   useEffect(() => {
-    if (parsed.language && parsed.language !== primaryLanguage)
-      setPrimaryLanguage(parsed.language as "ko" | "en" | "ja");
-
     if (parsed.generationId && parsed.generationId !== selectedGenerationId) {
       setSelectedGenerationId(parsed.generationId);
       if (!parsed.gameId) {
@@ -271,11 +241,9 @@ export function SearchPage() {
     }
   }, [
     parsed,
-    primaryLanguage,
     selectedGenerationId,
     selectedGameId,
     selectedVersionGroup,
-    setPrimaryLanguage,
     setSelectedGenerationId,
     setSelectedGameId,
     setSelectedVersionGroup,
@@ -287,12 +255,7 @@ export function SearchPage() {
     if (!unifiedSearchIndex || !parsed.q)
       return { pokemon: [], moves: [], abilities: [], items: [] };
 
-    const allResults = filterUnifiedEntriesByQuery(
-      unifiedSearchIndex,
-      parsed.q,
-      primaryLanguage,
-      (parsed.language as "ko" | "en" | "ja" | undefined) || undefined
-    );
+    const allResults = filterUnifiedEntriesByQuery(unifiedSearchIndex, parsed.q);
 
     return {
       pokemon: allResults.filter((entry) => entry.category === "pokemon"),
@@ -300,7 +263,7 @@ export function SearchPage() {
       abilities: allResults.filter((entry) => entry.category === "ability"),
       items: allResults.filter((entry) => entry.category === "item"),
     };
-  }, [parsed.q, unifiedSearchIndex, primaryLanguage, parsed.language]);
+  }, [parsed.q, unifiedSearchIndex]);
 
   const handleSearchSubmit = (nextQuery: string) => {
     const trimmed = nextQuery.trim();
@@ -310,7 +273,6 @@ export function SearchPage() {
       q: trimmed,
       generationId: "unified", // 통합 검색 표시
       gameId: null,
-      language: primaryLanguage,
     });
     navigate(`/search?${searchQuery}`);
   };
@@ -339,7 +301,6 @@ export function SearchPage() {
             title="포켓몬"
             entries={results.pokemon}
             query={parsed.q}
-            primaryLanguage={primaryLanguage}
             linkPrefix="/dex"
             limit={3}
             onMoreClick={() => setActiveTab("pokemon")}
@@ -348,7 +309,6 @@ export function SearchPage() {
             title="기술"
             entries={results.moves}
             query={parsed.q}
-            primaryLanguage={primaryLanguage}
             linkPrefix="/moves"
             limit={3}
             onMoreClick={() => setActiveTab("moves")}
@@ -357,7 +317,6 @@ export function SearchPage() {
             title="특성"
             entries={results.abilities}
             query={parsed.q}
-            primaryLanguage={primaryLanguage}
             linkPrefix="/abilities"
             limit={3}
             onMoreClick={() => setActiveTab("abilities")}
@@ -366,7 +325,6 @@ export function SearchPage() {
             title="도구"
             entries={results.items}
             query={parsed.q}
-            primaryLanguage={primaryLanguage}
             linkPrefix="/items"
             limit={3}
             onMoreClick={() => setActiveTab("items")}
@@ -398,7 +356,6 @@ export function SearchPage() {
           title={getTabLabel(activeTab)}
           entries={entries}
           query={parsed.q}
-          primaryLanguage={primaryLanguage}
           linkPrefix={linkPrefix}
         />
         {entries.length === 0 && (
@@ -429,12 +386,7 @@ export function SearchPage() {
 
   return (
     <section className="space-y-6">
-      <SearchSummaryHeader
-        query={parsed.q}
-        generationId="통합"
-        language={primaryLanguage}
-        onSubmit={handleSearchSubmit}
-      />
+      <SearchSummaryHeader query={parsed.q} generationId="통합" onSubmit={handleSearchSubmit} />
 
       <nav className="overflow-x-auto pb-2">
         <div className="flex gap-2 text-xs min-w-max px-1">
