@@ -2,10 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import {
   loadPokemonCsv,
   loadMovesCsv,
+  loadMoveNamesCsv,
   loadMachinesCsv,
   loadVersionGroupsCsv,
   loadNaturesCsv,
   loadItemsCsv,
+  loadItemNamesCsv,
   loadAbilitiesCsv,
   loadAbilityNamesCsv,
   loadPokemonSpeciesNamesCsv,
@@ -15,10 +17,12 @@ import {
 import type {
   CsvPokemon,
   CsvMove,
+  CsvMoveName,
   CsvMachine,
   CsvVersionGroup,
   CsvNature,
   CsvItem,
+  CsvItemName,
   CsvAbility,
   CsvAbilityName,
   CsvPokemonSpeciesName,
@@ -42,6 +46,16 @@ export function useDexCsvData() {
   const movesQuery = useQuery({
     queryKey: ["dex-csv", "moves"],
     queryFn: loadMovesCsv,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+
+  const moveNamesQuery = useQuery({
+    queryKey: ["dex-csv", "move-names"],
+    queryFn: loadMoveNamesCsv,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
@@ -139,16 +153,28 @@ export function useDexCsvData() {
     refetchOnMount: false,
   });
 
+  const itemNamesQuery = useQuery({
+    queryKey: ["dex-csv", "item-names"],
+    queryFn: loadItemNamesCsv,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+
   // 모든 쿼리가 로딩 중인지 확인
   const isLoading =
     pokemonQuery.isLoading ||
     movesQuery.isLoading ||
+    moveNamesQuery.isLoading ||
     machinesQuery.isLoading ||
     versionGroupsQuery.isLoading ||
     naturesQuery.isLoading ||
     abilitiesQuery.isLoading ||
     abilityNamesQuery.isLoading ||
     itemsQuery.isLoading ||
+    itemNamesQuery.isLoading ||
     pokemonTypesQuery.isLoading ||
     pokemonAbilitiesQuery.isLoading ||
     pokemonSpeciesNamesQuery.isLoading;
@@ -157,12 +183,14 @@ export function useDexCsvData() {
   const isError =
     pokemonQuery.isError ||
     movesQuery.isError ||
+    moveNamesQuery.isError ||
     machinesQuery.isError ||
     versionGroupsQuery.isError ||
     naturesQuery.isError ||
     abilitiesQuery.isError ||
     abilityNamesQuery.isError ||
     itemsQuery.isError ||
+    itemNamesQuery.isError ||
     pokemonTypesQuery.isError ||
     pokemonAbilitiesQuery.isError ||
     pokemonSpeciesNamesQuery.isError;
@@ -171,12 +199,14 @@ export function useDexCsvData() {
   const errors = [
     pokemonQuery.error,
     movesQuery.error,
+    moveNamesQuery.error,
     machinesQuery.error,
     versionGroupsQuery.error,
     naturesQuery.error,
     abilitiesQuery.error,
     abilityNamesQuery.error,
     itemsQuery.error,
+    itemNamesQuery.error,
     pokemonTypesQuery.error,
     pokemonAbilitiesQuery.error,
     pokemonSpeciesNamesQuery.error,
@@ -186,6 +216,7 @@ export function useDexCsvData() {
     // 데이터
     pokemonData: pokemonQuery.data ?? [],
     movesData: movesQuery.data ?? [],
+    moveNamesData: moveNamesQuery.data ?? [],
     machinesData: machinesQuery.data ?? [],
     versionGroupsData: versionGroupsQuery.data ?? [],
     naturesData: naturesQuery.data ?? [],
@@ -193,6 +224,7 @@ export function useDexCsvData() {
     abilityNamesData: abilityNamesQuery.data ?? [],
     pokemonSpeciesNamesData: pokemonSpeciesNamesQuery.data ?? [],
     itemsData: itemsQuery.data ?? [],
+    itemNamesData: itemNamesQuery.data ?? [],
     pokemonTypesData: pokemonTypesQuery.data ?? [],
     pokemonAbilitiesData: pokemonAbilitiesQuery.data ?? [],
 
@@ -204,6 +236,7 @@ export function useDexCsvData() {
     // 개별 쿼리 상태 (디버깅용)
     pokemonQuery,
     movesQuery,
+    moveNamesQuery,
     machinesQuery,
     versionGroupsQuery,
     naturesQuery,
@@ -211,6 +244,7 @@ export function useDexCsvData() {
     abilityNamesQuery,
     pokemonSpeciesNamesQuery,
     itemsQuery,
+    itemNamesQuery,
     pokemonTypesQuery,
     pokemonAbilitiesQuery,
   };

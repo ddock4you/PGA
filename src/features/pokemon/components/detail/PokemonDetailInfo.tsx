@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import { usePreviousStagePokemons } from "../../hooks/usePreviousStagePokemons";
+import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
+import {
+  getEggGroupKorean,
+  getGrowthRateKorean,
+  getStatNameKorean,
+} from "@/features/dex/utils/dataTransforms";
 import type {
   PokeApiPokemon,
   PokeApiPokemonSpecies,
@@ -29,6 +35,7 @@ export function PokemonDetailInfo({
 }: PokemonDetailInfoProps) {
   const { state } = usePreferences();
   const selectedGameId = state.selectedGameId;
+  const { abilityNamesData, itemsData, pokemonSpeciesNamesData } = useDexCsvData();
 
   // 진화 이전 단계 포켓몬 정보
   const { stages: previousStages } = usePreviousStagePokemons(evolutionChain, species.name);
@@ -36,6 +43,20 @@ export function PokemonDetailInfo({
   const evYields = pokemon.stats
     .filter((s) => s.effort > 0)
     .map((s) => `${s.stat.name} +${s.effort}`);
+
+  // 포켓몬 이름 한글화 헬퍼 함수
+  const getKoreanPokemonName = (speciesName: string) => {
+    // speciesName에서 ID 추출 시도
+    const idMatch = speciesName.match(/(\d+)$/);
+    const id = idMatch ? parseInt(idMatch[1], 10) : null;
+    if (id) {
+      const koreanName = pokemonSpeciesNamesData.find(
+        (name) => name.pokemon_species_id === id && name.local_language_id === 3
+      )?.name;
+      if (koreanName) return koreanName;
+    }
+    return speciesName;
+  };
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -74,17 +95,28 @@ export function PokemonDetailInfo({
           <CardTitle className="text-sm font-medium">특성</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          {pokemon.abilities.map((a) => (
-            <div key={a.ability.name} className="flex items-center justify-between">
-              <Link
-                to={`/abilities/${a.ability.name}`}
-                className="capitalize text-primary hover:underline"
-              >
-                {a.ability.name.replace("-", " ")}
-              </Link>
-              {a.is_hidden && <Badge variant="outline">숨겨진 특성</Badge>}
-            </div>
-          ))}
+          {pokemon.abilities.map((a) => {
+            // 특성 ID 추출 및 한글 이름 찾기
+            const abilityIdMatch = a.ability.url.match(/\/ability\/(\d+)\//);
+            const abilityId = abilityIdMatch ? parseInt(abilityIdMatch[1], 10) : null;
+            const koreanAbilityName = abilityId
+              ? abilityNamesData.find(
+                  (name) => name.ability_id === abilityId && name.local_language_id === 3
+                )?.name || a.ability.name.replace("-", " ")
+              : a.ability.name.replace("-", " ");
+
+            return (
+              <div key={a.ability.name} className="flex items-center justify-between">
+                <Link
+                  to={`/abilities/${a.ability.name}`}
+                  className="capitalize text-primary hover:underline"
+                >
+                  {koreanAbilityName}
+                </Link>
+                {a.is_hidden && <Badge variant="outline">숨겨진 특성</Badge>}
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 
@@ -99,7 +131,7 @@ export function PokemonDetailInfo({
             <div className="flex gap-1">
               {species.egg_groups?.map((g) => (
                 <span key={g.name} className="capitalize">
-                  {g.name}
+                  {getEggGroupKorean(g.name)}
                 </span>
               )) || "-"}
             </div>
@@ -118,17 +150,25 @@ export function PokemonDetailInfo({
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">성장 곡선</span>
-            <span className="capitalize">{species.growth_rate?.name.replace("-", " ") ?? "-"}</span>
+            <span className="capitalize">
+              {species.growth_rate ? getGrowthRateKorean(species.growth_rate.name) : "-"}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">노력치(EV)</span>
             <div className="flex flex-col items-end">
               {evYields.length > 0
-                ? evYields.map((ev) => (
-                    <span key={ev} className="text-xs capitalize">
-                      {ev}
-                    </span>
-                  ))
+                ? evYields.map((ev) => {
+                    // "attack +2" 같은 형식에서 스탯 이름 추출
+                    const statMatch = ev.match(/^(.+)\s\+\d+$/);
+                    const statName = statMatch ? statMatch[1] : ev;
+                    const koreanStatName = getStatNameKorean(statName);
+                    return (
+                      <span key={ev} className="text-xs capitalize">
+                        {ev.replace(statName, koreanStatName)}
+                      </span>
+                    );
+                  })
                 : "-"}
             </div>
           </div>
@@ -178,19 +218,29 @@ export function PokemonDetailInfo({
               })
               .filter((item) => item.rarity > 0) // 확률이 0인 아이템은 표시하지 않음
               .sort((a, b) => b.rarity - a.rarity) // 확률 높은 순으로 정렬
-              .map((item) => (
-                <div key={item.itemName} className="flex items-center justify-between">
-                  <span className="capitalize">{item.itemName.replace("-", " ")}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{item.rarity}%</span>
-                    {item.versionName && selectedGameId && item.versionName !== selectedGameId && (
-                      <Badge variant="outline" className="text-xs">
-                        {item.versionName}
-                      </Badge>
-                    )}
+              .map((item) => {
+                // 아이템 ID 추출 및 한글 이름 찾기
+                const itemIdentifier = item.itemName;
+                const itemData = itemsData.find((i) => i.identifier === itemIdentifier);
+                const koreanItemName =
+                  itemData?.identifier.replace(/-/g, " ") || item.itemName.replace("-", " ");
+
+                return (
+                  <div key={item.itemName} className="flex items-center justify-between">
+                    <span className="capitalize">{koreanItemName}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{item.rarity}%</span>
+                      {item.versionName &&
+                        selectedGameId &&
+                        item.versionName !== selectedGameId && (
+                          <Badge variant="outline" className="text-xs">
+                            {item.versionName}
+                          </Badge>
+                        )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
           ) : (
             <div className="text-muted-foreground">없음</div>
           )}
@@ -302,7 +352,7 @@ export function PokemonDetailInfo({
                       to={`/dex/${stage.speciesName}?scrollTo=obtaining-methods`}
                       className="text-primary hover:underline capitalize"
                     >
-                      {stage.pokemon?.name || stage.speciesName}
+                      {getKoreanPokemonName(stage.speciesName)}
                       {index < previousStages.length - 1 && " → "}
                     </Link>
                   ))}

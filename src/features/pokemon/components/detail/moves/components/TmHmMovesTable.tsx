@@ -8,7 +8,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
+import { getDamageClassKorean } from "@/features/dex/utils/dataTransforms";
 import type { MoveRow } from "../types/moveTypes";
+
+// 타입 이름(영문)으로부터 한글 이름을 찾는 매핑
+const TYPE_NAME_TO_KOREAN_LOCAL: Record<string, string> = {
+  normal: "노말",
+  fighting: "격투",
+  flying: "비행",
+  poison: "독",
+  ground: "땅",
+  rock: "바위",
+  bug: "벌레",
+  ghost: "고스트",
+  steel: "강철",
+  fire: "불꽃",
+  water: "물",
+  grass: "풀",
+  electric: "전기",
+  psychic: "에스퍼",
+  ice: "얼음",
+  dragon: "드래곤",
+  dark: "악",
+  fairy: "페어리",
+};
 
 interface TmHmMovesTableProps {
   rows: MoveRow[];
@@ -18,26 +42,63 @@ interface TmHmMovesTableProps {
 
 const formatStat = (value?: number | null) => (value === null || value === undefined ? "-" : value);
 
-const renderCommonCells = (move: MoveRow) => (
-  <>
-    <TableCell>
-      <span className="capitalize">{move.type}</span>
-    </TableCell>
-    <TableCell className="capitalize">{move.category}</TableCell>
-    <TableCell className="text-right">{formatStat(move.power)}</TableCell>
-    <TableCell className="text-right">
-      {move.accuracy !== null ? `${move.accuracy}%` : "-"}
-    </TableCell>
-    <TableCell className="text-right">{formatStat(move.pp)}</TableCell>
-  </>
-);
-
 export const TmHmMovesTable = ({
   rows,
   selectedGenerationId,
   showCsvFallback,
-}: TmHmMovesTableProps) => (
-  <Card>
+}: TmHmMovesTableProps) => {
+  const { movesData, moveNamesData } = useDexCsvData();
+
+  // 기술 ID로 한글 이름 찾기 함수
+  const getKoreanMoveName = (moveName: string) => {
+    // moveName이 ID인 경우 (숫자)
+    if (/^\d+$/.test(moveName)) {
+      const moveId = parseInt(moveName, 10);
+      // 먼저 한글 이름 찾기
+      const koreanName = moveNamesData.find(
+        (name) => name.move_id === moveId && name.local_language_id === 3
+      )?.name;
+      if (koreanName) return koreanName;
+
+      // 한글 이름이 없으면 영문 identifier 사용
+      const moveData = movesData.find((m) => m.id === moveId);
+      return moveData?.identifier.replace(/-/g, " ") || moveName;
+    }
+    // moveName이 영문 이름인 경우
+    // 먼저 해당 영문 이름으로 move_id 찾기
+    const moveData = movesData.find((m) => m.identifier === moveName);
+    if (moveData) {
+      // 한글 이름 찾기
+      const koreanName = moveNamesData.find(
+        (name) => name.move_id === moveData.id && name.local_language_id === 3
+      )?.name;
+      if (koreanName) return koreanName;
+    }
+    // 한글 이름이 없으면 영문 이름 그대로 사용 (하이픈을 공백으로)
+    return moveName.replace(/-/g, " ");
+  };
+
+  const renderCommonCells = (move: MoveRow) => {
+    const koreanType = TYPE_NAME_TO_KOREAN_LOCAL[move.type] || move.type;
+    const koreanCategory = getDamageClassKorean(move.category) || move.category;
+
+    return (
+      <>
+        <TableCell>
+          <span className="capitalize">{koreanType}</span>
+        </TableCell>
+        <TableCell className="capitalize">{koreanCategory}</TableCell>
+        <TableCell className="text-right">{formatStat(move.power)}</TableCell>
+        <TableCell className="text-right">
+          {move.accuracy !== null ? `${move.accuracy}%` : "-"}
+        </TableCell>
+        <TableCell className="text-right">{formatStat(move.pp)}</TableCell>
+      </>
+    );
+  };
+
+  return (
+    <Card>
     <CardHeader>
       <CardTitle className="text-sm font-medium">
         기술 머신(TMs/HMs) - {selectedGenerationId}세대
@@ -77,7 +138,7 @@ export const TmHmMovesTable = ({
                       to={`/moves/${move.name}`}
                       className="capitalize text-primary hover:underline"
                     >
-                      {move.name.replace(/-/g, " ")}
+                      {getKoreanMoveName(move.name)}
                     </Link>
                   </TableCell>
                   {renderCommonCells(move)}
@@ -89,4 +150,5 @@ export const TmHmMovesTable = ({
       )}
     </CardContent>
   </Card>
-);
+  );
+};
