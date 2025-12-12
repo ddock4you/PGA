@@ -47,8 +47,8 @@ function QuizModeSelector({ selectedMode, onModeChange }: QuizModeSelectorProps)
 }
 
 interface QuizLevelSelectorProps {
-  selectedLevel: 1 | 2 | null;
-  onLevelChange: (level: 1 | 2) => void;
+  selectedLevel: 1 | 2 | 3 | null;
+  onLevelChange: (level: 1 | 2 | 3) => void;
 }
 
 function QuizLevelSelector({ selectedLevel, onLevelChange }: QuizLevelSelectorProps) {
@@ -153,7 +153,35 @@ function Lv1OptionsPanel({
 }
 
 interface Lv2OptionsPanelProps {
-  generationSelection: any;
+  generationSelection:
+    | {
+        type: "single";
+        generation: number;
+        includeSubGenerations: boolean;
+      }
+    | {
+        type: "range";
+        minGeneration: number;
+        maxGeneration: number;
+      }
+    | undefined;
+  onGenerationSingle: (generation: number, includeSubGenerations: boolean) => void;
+  onGenerationRange: (minGen: number, maxGen: number) => void;
+}
+
+interface Lv3OptionsPanelProps {
+  generationSelection:
+    | {
+        type: "single";
+        generation: number;
+        includeSubGenerations: boolean;
+      }
+    | {
+        type: "range";
+        minGeneration: number;
+        maxGeneration: number;
+      }
+    | undefined;
   onGenerationSingle: (generation: number, includeSubGenerations: boolean) => void;
   onGenerationRange: (minGen: number, maxGen: number) => void;
 }
@@ -201,7 +229,12 @@ function Lv2OptionsPanel({
                 }
                 size="sm"
                 onClick={() =>
-                  onGenerationSingle(gen, generationSelection?.includeSubGenerations ?? false)
+                  onGenerationSingle(
+                    gen,
+                    generationSelection?.type === "single"
+                      ? generationSelection.includeSubGenerations
+                      : false
+                  )
                 }
               >
                 {gen}세대
@@ -212,9 +245,16 @@ function Lv2OptionsPanel({
             <input
               type="checkbox"
               id="includeSubGenerations"
-              checked={generationSelection?.includeSubGenerations ?? false}
+              checked={
+                generationSelection?.type === "single"
+                  ? generationSelection.includeSubGenerations
+                  : false
+              }
               onChange={(e) =>
-                onGenerationSingle(generationSelection?.generation ?? 1, e.target.checked)
+                onGenerationSingle(
+                  generationSelection?.type === "single" ? generationSelection.generation : 1,
+                  e.target.checked
+                )
               }
             />
             <label htmlFor="includeSubGenerations" className="text-xs">
@@ -228,9 +268,12 @@ function Lv2OptionsPanel({
           <div className="flex items-center gap-2">
             <select
               className="px-2 py-1 text-sm border rounded"
-              value={generationSelection?.minGeneration ?? 1}
+              value={generationSelection?.type === "range" ? generationSelection.minGeneration : 1}
               onChange={(e) =>
-                onGenerationRange(parseInt(e.target.value), generationSelection?.maxGeneration ?? 9)
+                onGenerationRange(
+                  parseInt(e.target.value),
+                  generationSelection?.type === "range" ? generationSelection.maxGeneration : 9
+                )
               }
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((gen) => (
@@ -242,9 +285,133 @@ function Lv2OptionsPanel({
             <span className="text-sm">부터</span>
             <select
               className="px-2 py-1 text-sm border rounded"
-              value={generationSelection?.maxGeneration ?? 9}
+              value={generationSelection?.type === "range" ? generationSelection.maxGeneration : 9}
               onChange={(e) =>
-                onGenerationRange(generationSelection?.minGeneration ?? 1, parseInt(e.target.value))
+                onGenerationRange(
+                  generationSelection?.type === "range" ? generationSelection.minGeneration : 1,
+                  parseInt(e.target.value)
+                )
+              }
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((gen) => (
+                <option key={gen} value={gen}>
+                  {gen}세대
+                </option>
+              ))}
+            </select>
+            <span className="text-sm">까지</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Lv3OptionsPanel({
+  generationSelection,
+  onGenerationSingle,
+  onGenerationRange,
+}: Lv3OptionsPanelProps) {
+  const [selectionType, setSelectionType] = useState<"single" | "range">("single");
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">세대 범위 선택</h4>
+        <div className="flex gap-2">
+          <Button
+            variant={selectionType === "single" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectionType("single")}
+          >
+            단일 세대
+          </Button>
+          <Button
+            variant={selectionType === "range" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectionType("range")}
+          >
+            세대 범위
+          </Button>
+        </div>
+      </div>
+
+      {selectionType === "single" ? (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">세대 선택</h4>
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((gen) => (
+              <Button
+                key={gen}
+                variant={
+                  generationSelection?.type === "single" && generationSelection.generation === gen
+                    ? "default"
+                    : "outline"
+                }
+                size="sm"
+                onClick={() =>
+                  onGenerationSingle(
+                    gen,
+                    generationSelection?.type === "single"
+                      ? generationSelection.includeSubGenerations
+                      : false
+                  )
+                }
+              >
+                {gen}세대
+              </Button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="includeSubGenerationsLv3"
+              checked={
+                generationSelection?.type === "single"
+                  ? generationSelection.includeSubGenerations
+                  : false
+              }
+              onChange={(e) =>
+                onGenerationSingle(
+                  generationSelection?.type === "single" ? generationSelection.generation : 1,
+                  e.target.checked
+                )
+              }
+            />
+            <label htmlFor="includeSubGenerationsLv3" className="text-xs">
+              하위 세대 포켓몬 추가
+            </label>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">세대 범위</h4>
+          <div className="flex items-center gap-2">
+            <select
+              className="px-2 py-1 text-sm border rounded"
+              value={generationSelection?.type === "range" ? generationSelection.minGeneration : 1}
+              onChange={(e) =>
+                onGenerationRange(
+                  parseInt(e.target.value),
+                  generationSelection?.type === "range" ? generationSelection.maxGeneration : 9
+                )
+              }
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((gen) => (
+                <option key={gen} value={gen}>
+                  {gen}세대
+                </option>
+              ))}
+            </select>
+            <span className="text-sm">부터</span>
+            <select
+              className="px-2 py-1 text-sm border rounded"
+              value={generationSelection?.type === "range" ? generationSelection.maxGeneration : 9}
+              onChange={(e) =>
+                onGenerationRange(
+                  generationSelection?.type === "range" ? generationSelection.minGeneration : 1,
+                  parseInt(e.target.value)
+                )
               }
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((gen) => (
@@ -267,6 +434,7 @@ export function QuizStartScreen() {
   const {
     getLv1Options,
     getLv2Options,
+    getLv3Options,
     updateTotalQuestions,
     updateAllowDualType,
     updateGenerationSingle,
@@ -300,9 +468,15 @@ export function QuizStartScreen() {
                 onTotalQuestionsChange={updateTotalQuestions}
                 onAllowDualTypeChange={updateAllowDualType}
               />
-            ) : (
+            ) : state.level === 2 ? (
               <Lv2OptionsPanel
                 generationSelection={getLv2Options().generationSelection}
+                onGenerationSingle={updateGenerationSingle}
+                onGenerationRange={updateGenerationRange}
+              />
+            ) : (
+              <Lv3OptionsPanel
+                generationSelection={getLv3Options().generationSelection}
                 onGenerationSingle={updateGenerationSingle}
                 onGenerationRange={updateGenerationRange}
               />

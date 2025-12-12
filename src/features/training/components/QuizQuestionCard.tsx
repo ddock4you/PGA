@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TYPE_COLORS, getKoreanTypeName } from "@/features/dex/utils/dataTransforms";
 import type { QuizQuestion } from "../store/types";
 
 interface QuizQuestionCardProps {
@@ -47,11 +48,19 @@ export function QuizQuestionCard({
                 </h3>
                 {showPokemonTypes && question.pokemonData.types.length > 0 && (
                   <div className="flex gap-1 justify-center mt-2">
-                    {question.pokemonData.types.map((type) => (
-                      <Badge key={type} variant="secondary" className="capitalize text-xs">
-                        {type}
-                      </Badge>
-                    ))}
+                    {question.pokemonData.types.map((type) => {
+                      const koreanType = getKoreanTypeName(type);
+                      return (
+                        <Badge
+                          key={type}
+                          className={`capitalize text-xs text-white ${
+                            TYPE_COLORS[koreanType as keyof typeof TYPE_COLORS] || 'bg-gray-500'
+                          }`}
+                        >
+                          {koreanType}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -64,6 +64,10 @@ export function useQuizOptions() {
     generationSelection: state.options.generationSelection,
   });
 
+  const getLv3Options = () => ({
+    generationSelection: state.options.generationSelection,
+  });
+
   return {
     options: state.options,
     updateTotalQuestions,
@@ -73,5 +77,6 @@ export function useQuizOptions() {
     resetOptions,
     getLv1Options,
     getLv2Options,
+    getLv3Options,
   };
 }

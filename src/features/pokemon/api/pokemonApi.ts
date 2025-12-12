@@ -144,3 +144,30 @@ export async function fetchPokemonEncounters(
 ): Promise<PokeApiEncounter[]> {
   return fetchFromPokeApi<PokeApiEncounter[]>(`/pokemon/${idOrName}/encounters`);
 }
+
+/**
+ * 포켓몬의 한국어 이름을 가져오는 함수
+ */
+export async function getKoreanPokemonName(pokemonIdOrName: number | string): Promise<string> {
+  try {
+    // 포켓몬 기본 정보에서 species URL을 얻음
+    const pokemon = await fetchPokemon(pokemonIdOrName);
+    const speciesUrl = pokemon.species.url;
+
+    // species 정보에서 한국어 이름을 찾음
+    const species = await fetchFromPokeApi<PokeApiPokemonSpecies>(speciesUrl, { absoluteUrl: speciesUrl });
+
+    // 한국어 이름 찾기 (language id 3 = Korean)
+    const koreanNameEntry = species.names.find(name => name.language.name === 'ko');
+    if (koreanNameEntry) {
+      return koreanNameEntry.name;
+    }
+
+    // 한국어 이름이 없으면 영어 이름 반환
+    return pokemon.name;
+  } catch (error) {
+    console.warn(`Failed to get Korean name for ${pokemonIdOrName}:`, error);
+    // 에러 시 영어 이름 반환
+    return String(pokemonIdOrName);
+  }
+}
