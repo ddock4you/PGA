@@ -6,15 +6,10 @@ import type { MoveChoice } from "../store/types";
 interface QuizChoice {
   id: string;
   label: string;
-<<<<<<< HEAD
   type?: string; // 타입 배지용
   isCorrect?: boolean;
   isSelected?: boolean;
   multiplier?: number; // 결과 표시용 배율
-=======
-  isCorrect: boolean;
-  isSelected: boolean;
->>>>>>> 0fcf191 (feat: Add Lv.3 difficulty level for advanced move selection training)
 }
 
 interface QuizAnswerButtonsProps {
@@ -36,7 +31,6 @@ export function QuizAnswerButtons({
   showTypeBadge = true,
   showTypeOnResult = true,
 }: QuizAnswerButtonsProps) {
-<<<<<<< HEAD
   const getButtonVariant = (choice: QuizChoice) => {
     if (!selectedChoice || isCorrect === null) {
       return "outline";
@@ -48,25 +42,11 @@ export function QuizAnswerButtons({
 
     if (choice.isSelected) {
       return "destructive"; // 오답: 빨강
-=======
-  const getButtonVariant = (isCorrect: boolean, isSelected: boolean) => {
-    if (!selectedChoice || !isCorrect) {
-      return "outline";
-    }
-
-    if (isCorrect) {
-      return "default";
-    }
-
-    if (isSelected) {
-      return "destructive";
->>>>>>> 0fcf191 (feat: Add Lv.3 difficulty level for advanced move selection training)
     }
 
     return "outline";
   };
 
-<<<<<<< HEAD
   const shouldShowType = (choice: QuizChoice) => {
     // 1. 기본적으로 보여주는 모드(Lv1, Lv2)면 true
     if (showTypeBadge) return true;
@@ -81,42 +61,17 @@ export function QuizAnswerButtons({
     if (multiplier === 0) return "효과가 없었다...";
     if (multiplier <= 0.5) return "효과가 별로였다...";
     return "";
-=======
-  // MoveChoice인지 확인하는 헬퍼 함수
-  const isMoveChoice = (choice: any): choice is MoveChoice => {
-    return "typeName" in choice;
-  };
-
-  const getChoiceCorrect = (choice: QuizChoice | MoveChoice): boolean => {
-    if (isMoveChoice(choice)) {
-      return choice.isCorrect ?? false;
-    }
-    return choice.isCorrect;
-  };
-
-  const getChoiceSelected = (choice: QuizChoice | MoveChoice): boolean => {
-    if (isMoveChoice(choice)) {
-      return choice.isSelected || choice.id === selectedChoice;
-    }
-    return choice.isSelected;
->>>>>>> 0fcf191 (feat: Add Lv.3 difficulty level for advanced move selection training)
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {choices.map((choice) => {
-<<<<<<< HEAD
         const showType = shouldShowType(choice);
         const isAnswerRevealed = selectedChoice !== null;
-=======
-        const choiceIsCorrect = getChoiceCorrect(choice);
-        const choiceIsSelected = getChoiceSelected(choice);
->>>>>>> 0fcf191 (feat: Add Lv.3 difficulty level for advanced move selection training)
 
         return (
           <Button
             key={choice.id}
-<<<<<<< HEAD
             variant={getButtonVariant(choice)}
             onClick={() => onChoiceSelect(choice.id)}
             disabled={disabled || selectedChoice !== null}
@@ -147,45 +102,6 @@ export function QuizAnswerButtons({
                 </div>
               )}
             </div>
-=======
-            variant={getButtonVariant(choiceIsCorrect, choiceIsSelected)}
-            onClick={() => onChoiceSelect(choice.id)}
-            disabled={disabled || selectedChoice !== null}
-            className="h-auto p-3 text-left justify-start"
-          >
-            {isMoveChoice(choice) ? (
-              // MoveChoice 렌더링
-              <div className="flex items-center gap-2 w-full">
-                <span className="flex-1 text-left">{choice.name}</span>
-                <Badge
-                  className={`capitalize flex-shrink-0 text-white ${
-                    TYPE_COLORS[choice.typeName as keyof typeof TYPE_COLORS] || "bg-gray-500"
-                  }`}
-                >
-                  {choice.typeName}
-                </Badge>
-                {choiceIsCorrect && selectedChoice && (
-                  <span className="text-xs text-green-600 ml-2">✓</span>
-                )}
-                {choiceIsSelected && !choiceIsCorrect && (
-                  <span className="text-xs text-red-600 ml-2">✗</span>
-                )}
-              </div>
-            ) : (
-              // 기존 QuizChoice 렌더링
-              <div className="flex items-center gap-2 w-full">
-                <Badge variant="secondary" className="capitalize flex-shrink-0">
-                  {choice.label}
-                </Badge>
-                {choiceIsCorrect && selectedChoice && (
-                  <span className="text-xs text-green-600 ml-auto">✓</span>
-                )}
-                {choiceIsSelected && !choiceIsCorrect && (
-                  <span className="text-xs text-red-600 ml-auto">✗</span>
-                )}
-              </div>
-            )}
->>>>>>> 0fcf191 (feat: Add Lv.3 difficulty level for advanced move selection training)
           </Button>
         );
       })}
