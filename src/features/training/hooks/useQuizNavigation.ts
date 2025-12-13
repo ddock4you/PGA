@@ -12,9 +12,9 @@ export function useQuizNavigation() {
   }, [actions]);
 
   const startQuiz = useCallback(() => {
-    if (!state.level) return;
+    if (state.mode !== "type" && !state.level) return;
     actions.startQuiz();
-  }, [actions, state.level]);
+  }, [actions, state.level, state.mode]);
 
   const nextQuestion = useCallback(() => {
     actions.nextQuestion();
@@ -24,7 +24,7 @@ export function useQuizNavigation() {
     actions.resetQuiz();
   }, [actions]);
 
-  const canStartQuiz = state.level !== null;
+  const canStartQuiz = state.mode === "type" || state.level !== null;
 
   return {
     currentScreen: state.screen,

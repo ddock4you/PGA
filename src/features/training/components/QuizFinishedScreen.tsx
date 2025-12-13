@@ -20,6 +20,20 @@ export function QuizFinishedScreen() {
     return { message: "더 연습해보세요! 📚", color: "text-red-600" };
   };
 
+  const getQuizTitle = () => {
+    if (state.mode === "attack") return "공격 상성 맞추기";
+    if (state.mode === "defense") return "방어 상성 맞추기";
+    if (state.mode === "type") return "포켓몬 속성 맞추기";
+    return "퀴즈";
+  };
+
+  const getQuizBadgeText = () => {
+    if (state.mode === "attack") return "공격 상성";
+    if (state.mode === "defense") return "방어 상성";
+    if (state.mode === "type") return "포켓몬 속성";
+    return "퀴즈";
+  };
+
   const result = getResultMessage();
 
   const handleRestart = () => {
@@ -31,7 +45,8 @@ export function QuizFinishedScreen() {
       <CardHeader className="text-center">
         <CardTitle className="text-xl">퀴즈 완료!</CardTitle>
         <CardDescription>
-          {state.mode === "attack" ? "공격 상성 맞추기" : "방어 상성 맞추기"} Lv.{state.level} 결과
+          {getQuizTitle()}
+          {state.mode !== "type" ? ` Lv.${state.level}` : ""} 결과
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -49,8 +64,8 @@ export function QuizFinishedScreen() {
         <div className="bg-muted rounded-lg p-4 text-center space-y-2">
           <div className="text-sm text-muted-foreground">퀴즈 설정</div>
           <div className="flex justify-center gap-2 flex-wrap">
-            <Badge variant="secondary">{state.mode === "attack" ? "공격 상성" : "방어 상성"}</Badge>
-            <Badge variant="secondary">Lv.{state.level}</Badge>
+            <Badge variant="secondary">{getQuizBadgeText()}</Badge>
+            {state.mode !== "type" && <Badge variant="secondary">Lv.{state.level}</Badge>}
             <Badge variant="secondary">{totalQuestions}문제</Badge>
           </div>
         </div>

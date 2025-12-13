@@ -114,7 +114,13 @@ export function useQuizGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    if (!quizData || !typeMap || state.screen !== "playing" || state.question || isGenerating) {
+    if (
+      !quizData ||
+      (state.mode !== "type" && !typeMap) ||
+      state.screen !== "playing" ||
+      state.question ||
+      isGenerating
+    ) {
       return;
     }
 
@@ -146,6 +152,8 @@ export function useQuizGenerator() {
         } else if (state.mode === "defense") {
           // 방어 모드도 나중에 개편 필요하면 추가
           // 현재는 Attack 모드 개편이 우선
+        } else if (state.mode === "type") {
+          question = generateTypeQuiz(state.options, quizData.pokemons);
         }
 
         if (question) {
@@ -170,7 +178,6 @@ export function useQuizGenerator() {
     state.mode,
     state.level,
     state.options,
-    actions,
     isGenerating,
   ]);
 }
@@ -502,6 +509,101 @@ function generateAttackLevel3(
     text: `${pokemon.name}에게 가장 효과적인 기술은?`,
     choices,
     correctAnswer: answerMove.id.toString(),
+    pokemonData: {
+      id: pokemon.id,
+      name: pokemon.name,
+      sprite: pokemon.spriteUrl,
+      types: pokemon.types,
+    },
+  };
+}
+
+function generateTypeQuiz(options: QuizOptions, pokemons: QuizPokemon[]): QuizQuestion {
+  // 1. 세대 필터링
+  let candidates = pokemons;
+  if (options.generationSelection) {
+    const { type, ...genOpt } = options.generationSelection;
+    if (type === "single") {
+      const targetGen = (genOpt as any).generation;
+      const includeSub = (genOpt as any).includeSubGenerations;
+      candidates = pokemons.filter((p) =>
+        includeSub ? p.generationId <= targetGen : p.generationId === targetGen
+      );
+    } else if (type === "range") {
+      const { minGeneration, maxGeneration } = genOpt as any;
+      candidates = pokemons.filter(
+        (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
+      );
+    }
+  }
+  if (candidates.length === 0) candidates = pokemons;
+
+  // 2. 랜덤 포켓몬 선택
+  const pokemon = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // 3. 문제 생성
+  const isDualType = pokemon.types.length === 2;
+  const questionText = isDualType
+    ? `이 포켓몬의 타입은 무엇일까요? (모두 고르시오)`
+    : `이 포켓몬의 타입은 무엇일까요?`;
+
+  // 4. 선택지 생성 (4개: 정답 타입 + 오답 3개)
+  const allTypes = [
+    "노말",
+    "격투",
+    "비행",
+    "독",
+    "땅",
+    "바위",
+    "벌레",
+    "고스트",
+    "강철",
+    "불꽃",
+    "물",
+    "풀",
+    "전기",
+    "에스퍼",
+    "얼음",
+    "드래곤",
+    "악",
+    "페어리",
+  ];
+
+  // 정답 타입들
+  const correctTypes = pokemon.types;
+
+  // 오답 타입들 (정답에 포함되지 않은 타입들)
+  const wrongTypes = allTypes.filter((type) => !correctTypes.includes(type));
+
+  // 오답 선택 (총 4개 선택지가 되도록)
+  const numWrongTypes = 4 - correctTypes.length; // 듀얼 타입이면 2개, 단일 타입이면 3개
+  const selectedWrongTypes = [];
+  while (selectedWrongTypes.length < numWrongTypes && wrongTypes.length > 0) {
+    const randomIndex = Math.floor(Math.random() * wrongTypes.length);
+    const wrongType = wrongTypes.splice(randomIndex, 1)[0];
+    selectedWrongTypes.push(wrongType);
+  }
+
+  // 선택지 배열 생성 (정답 + 오답)
+  const allChoices = [...correctTypes, ...selectedWrongTypes];
+
+  // 섞기
+  for (let i = allChoices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allChoices[i], allChoices[j]] = [allChoices[j], allChoices[i]];
+  }
+
+  const choices: QuizChoiceData[] = allChoices.map((type) => ({
+    id: type,
+    label: type,
+    type: type,
+  }));
+
+  return {
+    id: `type-${Date.now()}`,
+    text: questionText,
+    choices,
+    correctAnswer: correctTypes.join(","), // 정답은 타입들의 조합
     pokemonData: {
       id: pokemon.id,
       name: pokemon.name,

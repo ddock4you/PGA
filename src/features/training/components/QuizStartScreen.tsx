@@ -6,8 +6,8 @@ import { useQuizNavigation } from "../hooks/useQuizNavigation";
 import { useQuizOptions } from "../hooks/useQuizOptions";
 
 interface QuizModeSelectorProps {
-  selectedMode: "attack" | "defense";
-  onModeChange: (mode: "attack" | "defense") => void;
+  selectedMode: QuizMode;
+  onModeChange: (mode: QuizMode) => void;
 }
 
 function QuizModeSelector({ selectedMode, onModeChange }: QuizModeSelectorProps) {
@@ -21,6 +21,11 @@ function QuizModeSelector({ selectedMode, onModeChange }: QuizModeSelectorProps)
       key: "defense" as const,
       label: "방어 상성 맞추기",
       description: "효과적으로 막을 수 있는 타입을 맞춰보세요",
+    },
+    {
+      key: "type" as const,
+      label: "포켓몬 속성 맞추기",
+      description: "포켓몬의 타입을 맞춰보세요",
     },
   ];
 
@@ -49,9 +54,14 @@ function QuizModeSelector({ selectedMode, onModeChange }: QuizModeSelectorProps)
 interface QuizLevelSelectorProps {
   selectedLevel: 1 | 2 | 3 | null;
   onLevelChange: (level: 1 | 2 | 3) => void;
+  hideForTypeMode?: boolean;
 }
 
-function QuizLevelSelector({ selectedLevel, onLevelChange }: QuizLevelSelectorProps) {
+function QuizLevelSelector({
+  selectedLevel,
+  onLevelChange,
+  hideForTypeMode = false,
+}: QuizLevelSelectorProps) {
   const levels = [
     {
       key: 1 as const,
@@ -72,6 +82,10 @@ function QuizLevelSelector({ selectedLevel, onLevelChange }: QuizLevelSelectorPr
       details: "가장 효과적인 기술을 선택하세요 (타입 숨김)",
     },
   ];
+
+  if (hideForTypeMode) {
+    return null;
+  }
 
   return (
     <div className="space-y-3">
@@ -456,12 +470,23 @@ export function QuizStartScreen() {
       <CardContent className="space-y-6">
         <QuizModeSelector selectedMode={state.mode} onModeChange={actions.setMode} />
 
-        <QuizLevelSelector selectedLevel={state.level} onLevelChange={actions.setLevel} />
+        <QuizLevelSelector
+          selectedLevel={state.level}
+          onLevelChange={actions.setLevel}
+          hideForTypeMode={state.mode === "type"}
+        />
 
-        {state.level && (
+        {((state.level && state.mode !== "type") || state.mode === "type") && (
           <div className="border-t pt-4">
             <h3 className="text-sm font-medium mb-3">퀴즈 옵션</h3>
-            {state.level === 1 ? (
+            {state.mode === "type" ? (
+              // 포켓몬 속성 맞추기는 난이도 없이 바로 옵션 표시
+              <Lv2OptionsPanel
+                generationSelection={getLv2Options().generationSelection}
+                onGenerationSingle={updateGenerationSingle}
+                onGenerationRange={updateGenerationRange}
+              />
+            ) : state.level === 1 ? (
               <Lv1OptionsPanel
                 totalQuestions={getLv1Options().totalQuestions}
                 allowDualType={getLv1Options().allowDualType}
@@ -486,7 +511,11 @@ export function QuizStartScreen() {
 
         <div className="border-t pt-4">
           <Button onClick={handleStartQuiz} disabled={!canStartQuiz} className="w-full" size="lg">
-            {canStartQuiz ? "퀴즈 시작하기" : "퀴즈 종류와 난이도를 선택해주세요"}
+            {canStartQuiz
+              ? "퀴즈 시작하기"
+              : state.mode === "type"
+              ? "퀴즈 종류를 선택해주세요"
+              : "퀴즈 종류와 난이도를 선택해주세요"}
           </Button>
         </div>
       </CardContent>

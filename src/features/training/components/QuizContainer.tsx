@@ -3,6 +3,7 @@ import { QuizStartScreen } from "./QuizStartScreen";
 import { QuizFinishedScreen } from "./QuizFinishedScreen";
 import { AttackQuizContainer } from "./attack/AttackQuizContainer";
 import { DefenseQuizContainer } from "./defense/DefenseQuizContainer";
+import { TypeQuizContainer } from "./type/TypeQuizContainer";
 
 export function QuizContainer() {
   const { state } = useQuizContext();
@@ -17,6 +18,8 @@ export function QuizContainer() {
         return <AttackQuizContainer />;
       } else if (state.mode === "defense") {
         return <DefenseQuizContainer />;
+      } else if (state.mode === "type") {
+        return <TypeQuizContainer />;
       }
       return <QuizStartScreen />; // 폴백
 

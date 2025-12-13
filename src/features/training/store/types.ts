@@ -1,4 +1,4 @@
-export type QuizMode = "attack" | "defense";
+export type QuizMode = "attack" | "defense" | "type";
 export type QuizLevel = 1 | 2 | 3;
 export type QuizScreen = "start" | "playing" | "finished";
 
