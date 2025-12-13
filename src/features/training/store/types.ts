@@ -1,5 +1,5 @@
 export type QuizMode = "attack" | "defense";
-export type QuizLevel = 1 | 2;
+export type QuizLevel = 1 | 2 | 3;
 export type QuizScreen = "start" | "playing" | "finished";
 
 export interface QuizOptions {
@@ -18,10 +18,17 @@ export interface QuizOptions {
       }; // Lv2에서만 사용
 }
 
+export interface QuizChoiceData {
+  id: string;
+  label: string;
+  type?: string; // 기술 타입 등 (배지 표시용)
+  multiplier?: number; // 배율 정보
+}
+
 export interface QuizQuestion {
   id: string;
   text: string;
-  choices: string[];
+  choices: QuizChoiceData[];
   correctAnswer: string;
   pokemonData?: {
     id: number;

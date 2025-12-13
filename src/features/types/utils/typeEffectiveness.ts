@@ -48,33 +48,76 @@ export function computeAttackMultiplier(
     .reduce((acc, value) => acc * value, 1);
 }
 
-export function computeDefenseEffectiveness(
+export type PokemonQuizMultiplier = 0 | 0.25 | 0.5 | 1 | 2 | 4;
+
+export interface TypeEffectivenessDetail {
+  /** 4배 피해 */
+  doubleWeak: TypeName[];
+  /** 2배 피해 */
+  weak: TypeName[];
+  /** 1배 피해 (보통) */
+  normal: TypeName[];
+  /** 0.5배 피해 */
+  resistant: TypeName[];
+  /** 0.25배 피해 */
+  doubleResistant: TypeName[];
+  /** 0배 피해 */
+  immune: TypeName[];
+}
+
+export function computeDefenseEffectivenessDetail(
   primary: TypeName,
   secondary: TypeName | null,
   typeMap: TypeMap
-): TypeEffectiveness {
+): TypeEffectivenessDetail {
   const defenders = secondary ? [primary, secondary] : [primary];
-  const result: TypeEffectiveness = {
-    weakTo: [],
-    resistantTo: [],
-    immuneTo: [],
+  const result: TypeEffectivenessDetail = {
+    doubleWeak: [],
+    weak: [],
+    normal: [],
+    resistant: [],
+    doubleResistant: [],
+    immune: [],
   };
 
-  const allTypeNames = Object.keys(typeMap);
+  const allTypeNames = Object.keys(typeMap).filter((t) => t !== "stellar" && t !== "unknown");
 
   for (const attackType of allTypeNames) {
     const multiplier = computeAttackMultiplier(attackType, defenders, typeMap);
 
     if (multiplier === 0) {
-      result.immuneTo.push(attackType);
-    } else if (multiplier > 1) {
-      result.weakTo.push(attackType);
-    } else if (multiplier < 1) {
-      result.resistantTo.push(attackType);
+      result.immune.push(attackType);
+    } else if (multiplier >= 4) {
+      result.doubleWeak.push(attackType);
+    } else if (multiplier >= 2) {
+      result.weak.push(attackType);
+    } else if (multiplier <= 0.25) {
+      result.doubleResistant.push(attackType);
+    } else if (multiplier <= 0.5) {
+      result.resistant.push(attackType);
+    } else {
+      result.normal.push(attackType);
     }
   }
 
   return result;
+}
+
+// 기존 함수 하위 호환성 유지 (필요하다면) 또는 대체
+export function computeDefenseEffectiveness(
+  primary: TypeName,
+  secondary: TypeName | null,
+  typeMap: TypeMap
+): TypeEffectiveness {
+  // ... 기존 로직 ...
+  // 이번 개편에서는 사용하지 않을 예정이나 기존 코드 호환성을 위해 유지하거나 업데이트
+  // 여기서는 간단히 위의 상세 함수를 호출해서 매핑
+  const detail = computeDefenseEffectivenessDetail(primary, secondary, typeMap);
+  return {
+    weakTo: [...detail.doubleWeak, ...detail.weak],
+    resistantTo: [...detail.doubleResistant, ...detail.resistant],
+    immuneTo: detail.immune,
+  };
 }
 
 export interface OffenseEffectiveness {

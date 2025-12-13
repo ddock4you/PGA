@@ -65,6 +65,12 @@ function QuizLevelSelector({ selectedLevel, onLevelChange }: QuizLevelSelectorPr
       description: "실전처럼 타입 숨김",
       details: "포켓몬 타입이 숨겨집니다",
     },
+    {
+      key: 3 as const,
+      label: "Lv.3",
+      description: "심화 학습",
+      details: "가장 효과적인 기술을 선택하세요 (타입 숨김)",
+    },
   ];
 
   return (

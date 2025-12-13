@@ -1,6 +1,7 @@
 import { useQuizContext } from "../../store";
 import { AttackQuizLevel1 } from "./AttackQuizLevel1";
 import { AttackQuizLevel2 } from "./AttackQuizLevel2";
+import { AttackQuizLevel3 } from "./AttackQuizLevel3";
 
 export function AttackQuizContainer() {
   const { state } = useQuizContext();
@@ -12,6 +13,10 @@ export function AttackQuizContainer() {
 
   if (state.level === 2) {
     return <AttackQuizLevel2 />;
+  }
+
+  if (state.level === 3) {
+    return <AttackQuizLevel3 />;
   }
 
   return null;

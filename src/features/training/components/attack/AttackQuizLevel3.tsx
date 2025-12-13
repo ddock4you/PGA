@@ -1,17 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useQuizContext } from "../../store";
 import { useQuizNavigation } from "../../hooks/useQuizNavigation";
 import { useQuizGenerator } from "../../hooks/useQuizGenerator";
 import { QuizQuestionCard } from "../QuizQuestionCard";
 import { QuizAnswerButtons } from "../QuizAnswerButtons";
 
-export function AttackQuizLevel1() {
+export function AttackQuizLevel3() {
   const { state, actions } = useQuizContext();
   const { nextQuestion } = useQuizNavigation();
 
-  // 퀴즈 데이터 로드 및 문제 생성 자동화
   useQuizGenerator();
 
   const handleChoiceSelect = (choiceId: string) => {
@@ -22,14 +20,13 @@ export function AttackQuizLevel1() {
     nextQuestion();
   };
 
-  // 로딩 상태
   if (state.isLoading && !state.question) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">공격 상성 맞추기 Lv.1</CardTitle>
+          <CardTitle className="text-sm">공격 상성 맞추기 Lv.3</CardTitle>
           <CardDescription className="text-xs">
-            포켓몬 타입을 보고 효과적인 공격 타입을 맞춰보세요
+            포켓몬을 보고 가장 효과적인 기술을 맞춰보세요 (기술 타입 숨김)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -39,26 +36,26 @@ export function AttackQuizLevel1() {
     );
   }
 
-  // 에러 상태
   if (state.error) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">공격 상성 맞추기 Lv.1</CardTitle>
+          <CardTitle className="text-sm">공격 상성 맞추기 Lv.3</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-destructive">{state.error}</p>
+          <p className="text-xs text-destructive">
+            {state.error || "데이터를 불러오는 중 오류가 발생했습니다."}
+          </p>
         </CardContent>
       </Card>
     );
   }
 
-  // 문제 없음
   if (!state.question) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">공격 상성 맞추기 Lv.1</CardTitle>
+          <CardTitle className="text-sm">공격 상성 맞추기 Lv.3</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-xs text-muted-foreground">다음 문제를 준비하는 중입니다...</p>
@@ -76,13 +73,15 @@ export function AttackQuizLevel1() {
     isSelected: choice.id === state.selectedChoice,
   }));
 
+  const correctChoice = state.question.choices.find((c) => c.id === state.question?.correctAnswer);
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm">공격 상성 맞추기 Lv.1</CardTitle>
+          <CardTitle className="text-sm">공격 상성 맞추기 Lv.3</CardTitle>
           <CardDescription className="text-xs">
-            포켓몬 타입을 보고 효과적인 공격 타입을 맞춰보세요
+            포켓몬을 보고 가장 효과적인 기술을 맞춰보세요 (기술 타입 숨김)
           </CardDescription>
         </CardHeader>
       </Card>
@@ -91,24 +90,8 @@ export function AttackQuizLevel1() {
         question={state.question}
         currentQuestion={state.currentQuestion}
         totalQuestions={state.options.totalQuestions}
-        showPokemonTypes={false}
+        showPokemonTypes={state.selectedChoice !== null}
       />
-
-      {/* 방어 타입 표시 - 문제 텍스트에 이미 포함되어 있지만 시각적으로 강조 */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="text-center space-y-2">
-            <div className="text-sm text-muted-foreground">방어 포켓몬 타입</div>
-            <div className="flex gap-2 justify-center">
-              {state.question?.defenderTypes?.map((type) => (
-                <Badge key={type} variant="secondary" className="capitalize">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <QuizAnswerButtons
         choices={questionChoices}
@@ -116,25 +99,21 @@ export function AttackQuizLevel1() {
         isCorrect={state.isCorrect}
         onChoiceSelect={handleChoiceSelect}
         disabled={state.selectedChoice !== null}
-        showTypeBadge={false} // Lv1은 보기가 곧 타입이므로 배지 중복 표시 불필요 (하지만 보기 label이 타입명이므로 배지를 안 써도 됨, 혹은 label을 배지 스타일로?)
-        // QuizAnswerButtons가 label을 텍스트로 보여주고 배지는 type이 있을 때만 보여주도록 했음.
-        // Lv1에서는 choices의 type 필드를 undefined로 두거나, label과 같게 두면 됨.
-        // generateAttackLevel1에서는 type 필드를 안 넣었음 (undefined).
-        // 따라서 배지는 안 나옴.
+        showTypeBadge={false} // 문제 풀 때는 타입 숨김
+        showTypeOnResult={true} // 결과 확인 시에는 타입 표시 (기본값 true)
       />
 
-      {/* 결과 및 다음 버튼 */}
       <Card>
         <CardContent className="pt-4">
           <div className="space-y-3">
-            {state.isCorrect === true && state.question && (
+            {state.isCorrect === true && (
               <p className="text-sm text-green-600 text-center font-bold">
-                정답입니다! {state.question.correctAnswer} 타입이 효과적입니다.
+                정답입니다! {correctChoice?.label} 기술이 효과적입니다.
               </p>
             )}
-            {state.isCorrect === false && state.question && (
+            {state.isCorrect === false && (
               <p className="text-sm text-red-600 text-center font-bold">
-                아쉽네요. 정답은 {state.question.correctAnswer} 타입입니다.
+                아쉽네요. 정답은 {correctChoice?.label} 입니다.
               </p>
             )}
 
