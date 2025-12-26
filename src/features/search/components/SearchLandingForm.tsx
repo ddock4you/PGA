@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +15,7 @@ import { buildSearchQueryString } from "@/lib/utils";
  */
 
 export function SearchLandingForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [query, setQuery] = useState("");
 
   const handleSearch = (searchQuery: string) => {
@@ -25,7 +27,7 @@ export function SearchLandingForm() {
       generationId: "unified",
       gameId: null,
     });
-    navigate(`/search?${searchParams}`);
+    router.push(`/search?${searchParams}`);
   };
 
   const handleSubmit = (event: React.FormEvent) => {
