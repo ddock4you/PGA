@@ -7,7 +7,7 @@ import {
   loadAbilityNamesCsv,
   loadItemNamesCsv,
   loadPokemonSpeciesNamesCsv,
-} from "@/features/dex/api/csvLoader";
+} from "@/data/csvLoader";
 import type {
   CsvPokemon,
   CsvMove,
@@ -16,7 +16,7 @@ import type {
   CsvMoveName,
   CsvAbilityName,
   CsvItemName,
-} from "@/features/dex/types/csvTypes";
+} from "@/types/csvTypes";
 import type { UnifiedSearchIndex, UnifiedSearchEntry } from "../types/unifiedSearchTypes";
 import { groupNamesById, getLocalizedNamesForId } from "../utils/nameMappingUtils";
 

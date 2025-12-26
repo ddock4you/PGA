@@ -8,7 +8,7 @@ import {
   type TypeMap,
   computeAttackMultiplier,
 } from "@/features/types/utils/typeEffectiveness";
-import { TYPE_ID_TO_KOREAN_NAME } from "@/features/dex/utils/dataTransforms";
+import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
 
 // 임시: 한글 타입명 목록 (계산기 로직에 필요)
 const KOREAN_TYPE_NAMES = Object.values(TYPE_ID_TO_KOREAN_NAME);

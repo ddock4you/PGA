@@ -13,22 +13,22 @@ import type {
   CsvPokemonType,
   CsvPokemonAbility,
   CsvVersionGroup,
-} from "../types/csvTypes";
+} from "@/types/csvTypes";
 
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
-import pokemonCsv from "../data/pokemon.csv?raw";
-import movesCsv from "../data/moves.csv?raw";
-import moveNamesCsv from "../data/move_names.csv?raw";
-import machinesCsv from "../data/machines.csv?raw";
-import versionGroupsCsv from "../data/version_groups.csv?raw";
-import naturesCsv from "../data/natures.csv?raw";
-import itemsCsv from "../data/items.csv?raw";
-import itemNamesCsv from "../data/item_names.csv?raw";
-import abilitiesCsv from "../data/abilities.csv?raw";
-import abilityNamesCsv from "../data/ability_names.csv?raw";
-import pokemonSpeciesNamesCsv from "../data/pokemon_species_names.csv?raw";
-import pokemonTypesCsv from "../data/pokemon_types.csv?raw";
-import pokemonAbilitiesCsv from "../data/pokemon_abilities.csv?raw";
+import pokemonCsv from "@/data/pokemon.csv?raw";
+import movesCsv from "@/data/moves.csv?raw";
+import moveNamesCsv from "@/data/move_names.csv?raw";
+import machinesCsv from "@/data/machines.csv?raw";
+import versionGroupsCsv from "@/data/version_groups.csv?raw";
+import naturesCsv from "@/data/natures.csv?raw";
+import itemsCsv from "@/data/items.csv?raw";
+import itemNamesCsv from "@/data/item_names.csv?raw";
+import abilitiesCsv from "@/data/abilities.csv?raw";
+import abilityNamesCsv from "@/data/ability_names.csv?raw";
+import pokemonSpeciesNamesCsv from "@/data/pokemon_species_names.csv?raw";
+import pokemonTypesCsv from "@/data/pokemon_types.csv?raw";
+import pokemonAbilitiesCsv from "@/data/pokemon_abilities.csv?raw";
 
 // CSV 텍스트를 파싱하는 유틸리티 함수
 export async function loadCsvData<T>(

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, getEnglishTypeName } from "../utils/dataTransforms";
+import { TYPE_COLORS, getEnglishTypeName } from "@/utils/dataTransforms";
 
 export interface DexPokemonSummary {
   id: number;

@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { HomePage } from "./pages/HomePage";
 import { DexPage } from "./pages/DexPage";
+import { MovesPage } from "./pages/MovesPage";
+import { AbilitiesPage } from "./pages/AbilitiesPage";
+import { ItemsPage } from "./pages/ItemsPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TrainingPage } from "./pages/TrainingPage";
 import { PokemonDetailPage } from "./pages/PokemonDetailPage";
@@ -27,7 +30,25 @@ function AppLayout() {
                 to="/dex"
                 className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
               >
-                도감
+                포켓몬
+              </NavLink>
+              <NavLink
+                to="/moves"
+                className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
+              >
+                기술
+              </NavLink>
+              <NavLink
+                to="/abilities"
+                className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
+              >
+                특성
+              </NavLink>
+              <NavLink
+                to="/items"
+                className={({ isActive }) => (isActive ? "font-semibold" : "text-muted-foreground")}
+              >
+                도구
               </NavLink>
               <NavLink
                 to="/training"
@@ -68,6 +89,9 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/dex" element={<DexPage />} />
+        <Route path="/moves" element={<MovesPage />} />
+        <Route path="/abilities" element={<AbilitiesPage />} />
+        <Route path="/items" element={<ItemsPage />} />
         <Route path="/dex/:id" element={<PokemonDetailPage />} />
         <Route path="/moves/:id" element={<MoveDetailPage />} />
         <Route path="/abilities/:id" element={<AbilityDetailPage />} />

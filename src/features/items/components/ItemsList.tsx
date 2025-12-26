@@ -17,17 +17,13 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
-import { useDexCsvData } from "../hooks/useDexCsvData";
-import { transformItemsForDex } from "../utils/dataTransforms";
-import type { DexItemSummary } from "../utils/dataTransforms";
-
-interface DexItemsTabProps {
-  generationId: string; // 도구는 API 한계로 세대 필터 적용이 어려우나 인터페이스는 유지
-}
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { transformItemsForDex } from "@/utils/dataTransforms";
+import type { DexItemSummary } from "@/utils/dataTransforms";
 
 const ITEMS_PER_PAGE = 30;
 
-export function DexItemsTab({ generationId }: DexItemsTabProps) {
+export function ItemsList() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);

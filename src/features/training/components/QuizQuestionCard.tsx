@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, getKoreanTypeName } from "@/features/dex/utils/dataTransforms";
+import { TYPE_COLORS, getKoreanTypeName } from "@/utils/dataTransforms";
 import type { QuizQuestion } from "../store/types";
 
 interface QuizQuestionCardProps {
@@ -54,7 +54,7 @@ export function QuizQuestionCard({
                         <Badge
                           key={type}
                           className={`capitalize text-xs text-white ${
-                            TYPE_COLORS[koreanType as keyof typeof TYPE_COLORS] || 'bg-gray-500'
+                            TYPE_COLORS[koreanType as keyof typeof TYPE_COLORS] || "bg-gray-500"
                           }`}
                         >
                           {koreanType}

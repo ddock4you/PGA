@@ -8,7 +8,7 @@ import type {
   CsvAbilityName,
   CsvPokemonSpeciesName,
   CsvPokemonType,
-} from "../types/csvTypes";
+} from "@/types/csvTypes";
 
 // 타입 ID와 이름 매핑 (PokéAPI 기준)
 export const TYPE_ID_TO_NAME: Record<number, string> = {

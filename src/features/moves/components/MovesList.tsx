@@ -16,55 +16,45 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useDexCsvData } from "../hooks/useDexCsvData";
-import { transformAbilitiesForDex } from "../utils/dataTransforms";
-import type { DexAbilitySummary } from "../utils/dataTransforms";
-
-interface DexAbilitiesTabProps {
-  generationId: string;
-}
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { transformMovesForDex } from "@/utils/dataTransforms";
+import { usePreferences } from "@/features/preferences/PreferencesContext";
+import type { DexMoveSummary } from "@/utils/dataTransforms";
 
 const ITEMS_PER_PAGE = 30;
 
-export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
+export function MovesList() {
   const navigate = useNavigate();
+  const { state } = usePreferences();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // 기본값은 1세대. Preferences 에 세대가 설정되어 있으면 그것을 우선 사용.
+  const effectiveGenerationId = state.selectedGenerationId ?? "1";
+
   // 1. CSV 데이터 로딩
-  const {
-    abilitiesData,
-    abilityNamesData,
-    isLoading: isCsvLoading,
-    isError: isCsvError,
-  } = useDexCsvData();
+  const { movesData, machinesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
 
-  // 2. 특성 데이터 변환 및 필터링
-  const allAbilities = useMemo(() => {
-    if (!abilitiesData || !abilityNamesData) return [];
-    return transformAbilitiesForDex(abilitiesData, abilityNamesData, 3, 9); // 한국어 우선, 영어 보조
-  }, [abilitiesData, abilityNamesData]);
+  // 2. 기술 데이터 변환 및 필터링
+  const allMoves = useMemo(() => {
+    if (!movesData || !machinesData) return [];
+    return transformMovesForDex(movesData, machinesData, effectiveGenerationId);
+  }, [movesData, machinesData, effectiveGenerationId]);
 
-  const filteredAbilities = useMemo(() => {
-    if (!allAbilities) return [];
-    if (!searchQuery.trim()) return allAbilities;
-
-    const query = searchQuery.trim().toLowerCase();
-    return allAbilities.filter((ability) => {
-      const nameMatch = ability.name.toLowerCase().includes(query);
-      const identifierMatch = ability.identifier.toLowerCase().includes(query);
-
-      return nameMatch || identifierMatch;
-    });
-  }, [allAbilities, searchQuery]);
+  const filteredMoves = useMemo(() => {
+    if (!allMoves) return [];
+    if (!searchQuery.trim()) return allMoves;
+    return allMoves.filter((m) => m.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+  }, [allMoves, searchQuery]);
 
   // 3. 페이지네이션 계산
-  const totalPages = Math.ceil(filteredAbilities.length / ITEMS_PER_PAGE);
-  const paginatedAbilities = useMemo(() => {
+  const totalPages = Math.ceil(filteredMoves.length / ITEMS_PER_PAGE);
+  const paginatedMoves = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAbilities.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredAbilities, currentPage]);
+    return filteredMoves.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredMoves, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -73,24 +63,21 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1);
+    setCurrentPage(1); // 검색 시 1페이지로 리셋
   };
 
   const handleRowClick = (id: number) => {
-    navigate(`/abilities/${id}`);
-  };
-
-  // 특성 효과 텍스트 (간단한 설명 표시)
-  const getAbilityDescription = (ability: DexAbilitySummary) => {
-    return ability.description;
+    // 상세 페이지 구현 전이라도 라우팅은 연결해둠 (체크리스트 요구사항)
+    // 추후 라우트 설정 필요
+    navigate(`/moves/${id}`);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
-        <label className="text-xs font-medium text-muted-foreground">특성명 검색</label>
+        <label className="text-xs font-medium text-muted-foreground">기술명 검색</label>
         <Input
-          placeholder="특성 이름으로 검색"
+          placeholder="기술 이름으로 검색"
           className="max-w-sm h-9 text-xs"
           value={searchQuery}
           onChange={(event) => handleSearchChange(event.target.value)}
@@ -98,44 +85,52 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
       </div>
 
       {isCsvLoading ? (
-        <p className="pt-2 text-xs text-muted-foreground">특성 리스트를 불러오는 중입니다...</p>
+        <p className="pt-2 text-xs text-muted-foreground">기술 리스트를 불러오는 중입니다...</p>
       ) : isCsvError ? (
         <p className="pt-2 text-xs text-destructive">
-          특성 리스트를 불러오는 중 오류가 발생했습니다.
+          기술 리스트를 불러오는 중 오류가 발생했습니다.
         </p>
       ) : (
         <>
-          <div className="rounded-md border card-ability">
+          <div className="rounded-md border card-move">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">특성명</TableHead>
-                  <TableHead className="w-[100px]">세대</TableHead>
-                  <TableHead>설명</TableHead>
+                  <TableHead className="w-[150px]">기술명</TableHead>
+                  <TableHead>타입</TableHead>
+                  <TableHead>분류</TableHead>
+                  <TableHead className="text-right">위력</TableHead>
+                  <TableHead className="text-right">명중률</TableHead>
+                  <TableHead className="text-right">PP</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedAbilities.length === 0 ? (
+                {paginatedMoves.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={6}
                       className="h-24 text-center text-xs text-muted-foreground"
                     >
                       검색 결과가 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedAbilities.map((ability: DexAbilitySummary) => (
+                  paginatedMoves.map((move: DexMoveSummary) => (
                     <TableRow
-                      key={ability.id}
+                      key={move.id}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleRowClick(ability.id)}
+                      onClick={() => handleRowClick(move.id)}
                     >
-                      <TableCell className="font-medium">{ability.name}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {ability.generation}세대
+                      <TableCell className="font-medium">{move.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="capitalize">
+                          {move.type}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="text-xs">{getAbilityDescription(ability)}</TableCell>
+                      <TableCell className="capitalize">{move.damageClass}</TableCell>
+                      <TableCell className="text-right">{move.power ?? "-"}</TableCell>
+                      <TableCell className="text-right">{move.accuracy ?? "-"}</TableCell>
+                      <TableCell className="text-right">{move.pp}</TableCell>
                     </TableRow>
                   ))
                 )}
@@ -154,11 +149,13 @@ export function DexAbilitiesTab({ generationId }: DexAbilitiesTabProps) {
                     }
                   />
                 </PaginationItem>
+
                 <PaginationItem>
                   <div className="flex items-center px-4 text-sm">
                     {currentPage} / {totalPages}
                   </div>
                 </PaginationItem>
+
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => handlePageChange(currentPage + 1)}

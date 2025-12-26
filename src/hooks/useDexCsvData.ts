@@ -13,7 +13,7 @@ import {
   loadPokemonSpeciesNamesCsv,
   loadPokemonTypesCsv,
   loadPokemonAbilitiesCsv,
-} from "../api/csvLoader";
+} from "@/data/csvLoader";
 import type {
   CsvPokemon,
   CsvMove,
@@ -28,7 +28,7 @@ import type {
   CsvPokemonSpeciesName,
   CsvPokemonType,
   CsvPokemonAbility,
-} from "../types/csvTypes";
+} from "@/types/csvTypes";
 
 // CSV 데이터를 로드하는 커스텀 훅
 // 모든 CSV 데이터를 한 번에 로드하고 캐시

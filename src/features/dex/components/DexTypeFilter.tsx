@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "../utils/dataTransforms";
+import { TYPE_COLORS, TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
 
 interface DexTypeFilterProps {
   selectedTypes: number[];

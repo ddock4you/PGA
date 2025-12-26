@@ -5,12 +5,8 @@ import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import { usePreviousStagePokemons } from "../../hooks/usePreviousStagePokemons";
-import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
-import {
-  getEggGroupKorean,
-  getGrowthRateKorean,
-  getStatNameKorean,
-} from "@/features/dex/utils/dataTransforms";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { getEggGroupKorean, getGrowthRateKorean, getStatNameKorean } from "@/utils/dataTransforms";
 import type {
   PokeApiPokemon,
   PokeApiPokemonSpecies,

@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
-import { getDamageClassKorean } from "@/features/dex/utils/dataTransforms";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { getDamageClassKorean } from "@/utils/dataTransforms";
 import type { MoveRow } from "../types/moveTypes";
 
 // 타입 이름(영문)으로부터 한글 이름을 찾는 매핑

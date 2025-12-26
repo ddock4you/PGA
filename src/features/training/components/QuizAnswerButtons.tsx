@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS } from "@/features/dex/utils/dataTransforms";
+import { TYPE_COLORS } from "@/utils/dataTransforms";
 import type { MoveChoice } from "../store/types";
 
 interface QuizChoice {

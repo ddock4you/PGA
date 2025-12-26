@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
-import { TYPE_ID_TO_KOREAN_NAME } from "@/features/dex/utils/dataTransforms";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
 import type { MoveChoice } from "../store/types";
-import type { CsvMove } from "@/features/dex/types/csvTypes";
+import type { CsvMove } from "@/types/csvTypes";
 
 /**
  * 퀴즈에서 사용할 기술 데이터를 로드하고 매핑하는 훅

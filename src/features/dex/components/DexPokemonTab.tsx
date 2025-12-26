@@ -7,13 +7,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useDexCsvData } from "../hooks/useDexCsvData";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
 import {
   transformPokemonForDex,
   GENERATION_POKEMON_RANGES,
   shouldShowVariantPokemon,
-} from "../utils/dataTransforms";
+} from "@/utils/dataTransforms";
 import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 

@@ -2,8 +2,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useDexCsvData } from "@/features/dex/hooks/useDexCsvData";
-import { getEvolutionTriggerKorean, getTimeOfDayKorean } from "@/features/dex/utils/dataTransforms";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { getEvolutionTriggerKorean, getTimeOfDayKorean } from "@/utils/dataTransforms";
 import type { PokeApiEvolutionChain, PokeApiEvolutionChainLink } from "../../api/pokemonApi";
 
 interface PokemonEvolutionChainProps {

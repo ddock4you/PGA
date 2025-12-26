@@ -1,6 +1,6 @@
 import type { MoveChoice } from "../store/types";
-import type { CsvMove } from "@/features/dex/types/csvTypes";
-import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/features/dex/utils/dataTransforms";
+import type { CsvMove } from "@/types/csvTypes";
+import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
 import type { TypeMap } from "@/features/types/utils/typeEffectiveness";
 
 /**

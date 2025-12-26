@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { DexGenerationSelector } from "./DexGenerationSelector";
 import { DexTypeFilter } from "./DexTypeFilter";
-import { DexAbilityFilterNew as DexAbilityFilter } from "./DexAbilityFilterNew";
 import { DexSortOptions } from "./DexSortOptions";
 import type { DexFilters } from "../types/filterTypes";
 import { DEFAULT_DEX_FILTERS } from "../types/filterTypes";
@@ -105,12 +104,6 @@ export function DexFilterBar({
           <DexTypeFilter
             selectedTypes={filters.selectedTypes}
             onTypesChange={(types) => updateFilter("selectedTypes", types)}
-          />
-
-          <DexAbilityFilter
-            generationId={filters.dexGenerationId}
-            selectedAbilityId={filters.selectedAbilityId}
-            onAbilityChange={(abilityId) => updateFilter("selectedAbilityId", abilityId)}
           />
         </div>
 
