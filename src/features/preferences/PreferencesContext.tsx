@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -91,7 +93,6 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
       // 저장 실패는 조용히 무시
     }
   }, [state]);
-
 
   const value = useMemo<PreferencesContextValue>(
     () => ({

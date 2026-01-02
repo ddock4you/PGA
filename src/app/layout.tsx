@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/query-provider";
 import { ClientProviders } from "@/components/client-providers";
+import { ClientLayout } from "@/components/ClientLayout";
+import { PreferencesProvider } from "@/features/preferences/PreferencesContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +25,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <body className={inter.className}>
         <QueryProvider>
-          <ClientProviders>{children}</ClientProviders>
+          <ClientProviders>
+            <PreferencesProvider>
+              <div className="min-h-screen bg-background text-foreground">
+                <ClientLayout>{children}</ClientLayout>
+              </div>
+            </PreferencesProvider>
+          </ClientProviders>
         </QueryProvider>
       </body>
     </html>
