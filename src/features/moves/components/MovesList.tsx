@@ -1,5 +1,6 @@
+"use client";
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -26,7 +26,7 @@ import type { DexMoveSummary } from "@/utils/dataTransforms";
 const ITEMS_PER_PAGE = 30;
 
 export function MovesList() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { state } = usePreferences();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,9 +67,7 @@ export function MovesList() {
   };
 
   const handleRowClick = (id: number) => {
-    // 상세 페이지 구현 전이라도 라우팅은 연결해둠 (체크리스트 요구사항)
-    // 추후 라우트 설정 필요
-    navigate(`/moves/${id}`);
+    router.push(`/moves/${id}`);
   };
 
   return (

@@ -1,5 +1,6 @@
+"use client";
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -24,7 +24,7 @@ import type { DexAbilitySummary } from "@/utils/dataTransforms";
 const ITEMS_PER_PAGE = 30;
 
 export function AbilitiesList() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -73,7 +73,7 @@ export function AbilitiesList() {
   };
 
   const handleRowClick = (id: number) => {
-    navigate(`/abilities/${id}`);
+    router.push(`/abilities/${id}`);
   };
 
   // 특성 효과 텍스트 (간단한 설명 표시)

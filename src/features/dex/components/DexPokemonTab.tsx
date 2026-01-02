@@ -1,5 +1,6 @@
+"use client";
 import { useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +19,7 @@ import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
 
 export function DexPokemonTab() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { filters, searchQuery, updateFilters, updateSearchQuery, updatePagination } =
     useDexFilters();
 
@@ -32,7 +33,7 @@ export function DexPokemonTab() {
   } = useDexCsvData();
 
   const handleOpen = (pokemon: DexPokemonSummary) => {
-    navigate(`/dex/${pokemon.id}`);
+    router.push(`/dex/${pokemon.id}`);
   };
 
   // 필터링된 포켓몬 목록 생성

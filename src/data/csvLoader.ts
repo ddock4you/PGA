@@ -16,19 +16,19 @@ import type {
 } from "@/types/csvTypes";
 
 // Vite의 ?raw import를 사용해서 CSV 파일들을 정적으로 로드
-import pokemonCsv from "@/data/pokemon.csv?raw";
-import movesCsv from "@/data/moves.csv?raw";
-import moveNamesCsv from "@/data/move_names.csv?raw";
-import machinesCsv from "@/data/machines.csv?raw";
-import versionGroupsCsv from "@/data/version_groups.csv?raw";
-import naturesCsv from "@/data/natures.csv?raw";
-import itemsCsv from "@/data/items.csv?raw";
-import itemNamesCsv from "@/data/item_names.csv?raw";
-import abilitiesCsv from "@/data/abilities.csv?raw";
-import abilityNamesCsv from "@/data/ability_names.csv?raw";
-import pokemonSpeciesNamesCsv from "@/data/pokemon_species_names.csv?raw";
-import pokemonTypesCsv from "@/data/pokemon_types.csv?raw";
-import pokemonAbilitiesCsv from "@/data/pokemon_abilities.csv?raw";
+import pokemonCsv from "@/data/pokemon.csv";
+import movesCsv from "@/data/moves.csv";
+import moveNamesCsv from "@/data/move_names.csv";
+import machinesCsv from "@/data/machines.csv";
+import versionGroupsCsv from "@/data/version_groups.csv";
+import naturesCsv from "@/data/natures.csv";
+import itemsCsv from "@/data/items.csv";
+import itemNamesCsv from "@/data/item_names.csv";
+import abilitiesCsv from "@/data/abilities.csv";
+import abilityNamesCsv from "@/data/ability_names.csv";
+import pokemonSpeciesNamesCsv from "@/data/pokemon_species_names.csv";
+import pokemonTypesCsv from "@/data/pokemon_types.csv";
+import pokemonAbilitiesCsv from "@/data/pokemon_abilities.csv";
 
 // CSV 텍스트를 파싱하는 유틸리티 함수
 export async function loadCsvData<T>(
@@ -36,7 +36,7 @@ export async function loadCsvData<T>(
   filename: string,
   transformRow?: (row: Record<string, unknown>) => T
 ): Promise<T[]> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     Papa.parse(csvText, {
       header: true,
       skipEmptyLines: true,

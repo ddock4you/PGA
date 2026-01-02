@@ -11,6 +11,21 @@ const nextConfig = {
       },
     ];
   },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.csv$/,
+      use: "raw-loader",
+    });
+    return config;
+  },
+  turbopack: {
+    rules: {
+      "*.csv": {
+        loaders: ["raw-loader"],
+        as: "*.ts",
+      },
+    },
+  },
 };
 
 module.exports = nextConfig;

@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GameGenerationModal } from "@/features/generation/components/GameGenerationModal";

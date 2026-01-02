@@ -1,5 +1,6 @@
+"use client";
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -24,7 +24,7 @@ import type { DexItemSummary } from "@/utils/dataTransforms";
 const ITEMS_PER_PAGE = 30;
 
 export function ItemsList() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -61,7 +61,7 @@ export function ItemsList() {
   };
 
   const handleRowClick = (id: number) => {
-    navigate(`/items/${id}`);
+    router.push(`/items/${id}`);
   };
 
   // 도구 효과 텍스트 (CSV에 없으므로 기본 설명)

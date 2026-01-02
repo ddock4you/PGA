@@ -1,7 +1,9 @@
+"use client";
+
 import { QuizProvider } from "@/features/training/store";
 import { QuizContainer } from "@/features/training/components/QuizContainer";
 
-export function TrainingPage() {
+export function TrainingPageClient() {
   return (
     <QuizProvider>
       <QuizContainer />

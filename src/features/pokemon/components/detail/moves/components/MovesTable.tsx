@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+"use client";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -140,7 +141,7 @@ export const MovesTable = ({
                     {leadingCell && <TableCell>{leadingCell(move)}</TableCell>}
                     <TableCell>
                       <Link
-                        to={`/moves/${move.name}`}
+                        href={`/moves/${move.name}`}
                         className="capitalize text-primary hover:underline"
                       >
                         {getKoreanMoveName(move.name)}

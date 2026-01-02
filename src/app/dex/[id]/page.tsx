@@ -1,18 +1,19 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchPokemon, fetchPokemonSpecies } from "@/lib/pokeapi";
+import { fetchPokemon, fetchPokemonSpecies } from "@/features/pokemon/api/pokemonApi";
 import { PokemonDetailClient } from "./PokemonDetailClient";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
+    const resolvedParams = await params;
     const [pokemon, species] = await Promise.all([
-      fetchPokemon(params.id),
-      fetchPokemonSpecies(params.id),
+      fetchPokemon(resolvedParams.id),
+      fetchPokemonSpecies(resolvedParams.id),
     ]);
 
     // 한국어 이름 찾기
@@ -98,16 +99,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PokemonDetailPage({ params }: PageProps) {
   try {
     // 서버 사이드에서 데이터 미리 가져오기
+    const resolvedParams = await params;
     const [pokemon, species] = await Promise.all([
-      fetchPokemon(params.id),
-      fetchPokemonSpecies(params.id),
+      fetchPokemon(resolvedParams.id),
+      fetchPokemonSpecies(resolvedParams.id),
     ]);
 
     return (
       <PokemonDetailClient
         initialPokemon={pokemon}
         initialSpecies={species}
-        pokemonId={params.id}
+        pokemonId={resolvedParams.id}
       />
     );
   } catch (error) {

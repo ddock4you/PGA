@@ -1,3 +1,4 @@
+"use client";
 import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";

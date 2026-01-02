@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { QuizProvider } from "@/features/training/store";
-import { QuizContainer } from "@/features/training/components/QuizContainer";
+import { TrainingPageClient } from "@/features/training/components/TrainingPageClient";
 
 export const metadata: Metadata = {
   title: "배틀 트레이닝 - 포켓몬 게임 어시스턴트",
@@ -14,12 +13,4 @@ export const metadata: Metadata = {
 
 export default function TrainingPage() {
   return <TrainingPageClient />;
-}
-
-function TrainingPageClient() {
-  return (
-    <QuizProvider>
-      <QuizContainer />
-    </QuizProvider>
-  );
 }
