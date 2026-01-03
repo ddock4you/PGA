@@ -1,44 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useItem } from "@/features/items/hooks/useItemsQueries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 
 interface ItemDetailClientProps {
-  initialItem: any;
-  itemId: string;
+  item: any;
 }
 
-export function ItemDetailClient({ initialItem, itemId }: ItemDetailClientProps) {
+export function ItemDetailClient({ item }: ItemDetailClientProps) {
   const router = useRouter();
-  const { data: item, isLoading, isError } = useItem(itemId, {
-    initialData: initialItem,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">도구 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !item) {
-    return (
-      <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-destructive">도구 정보를 불러오지 못했습니다.</p>
-        <Button variant="outline" onClick={() => router.back()}>
-          뒤로 가기
-        </Button>
-      </div>
-    );
-  }
 
   const getEffectText = (entries: typeof item.effect_entries) => {
     const ko = entries.find((e) => e.language.name === "ko");

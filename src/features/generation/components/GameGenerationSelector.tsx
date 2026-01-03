@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GameGenerationModal } from "./GameGenerationModal";
@@ -18,9 +18,18 @@ export function GameGenerationSelector({
 }: GameGenerationSelectorProps) {
   const { state } = usePreferences();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // 현재 선택된 게임/세대 표시 텍스트
   const displayText = useMemo(() => {
+    if (!hasMounted) {
+      return "게임/세대 선택";
+    }
+
     if (showGenerationOnly) {
       return state.selectedGenerationId ? `${state.selectedGenerationId}세대` : "세대 선택";
     }

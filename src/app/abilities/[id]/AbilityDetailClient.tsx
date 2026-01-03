@@ -3,10 +3,7 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { loadPokemonSpeciesNamesCsv, loadVersionGroupsCsv } from "@/data/csvLoader";
-import type { CsvPokemonSpeciesName, CsvVersionGroup } from "@/types/csvTypes";
-import { useAbility } from "@/features/abilities/hooks/useAbilitiesQueries";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedAbilityName } from "@/hooks/useLocalizedAbilityName";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 import { Button } from "@/components/ui/button";
@@ -14,23 +11,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 
+type AbilityEffectEntry = {
+  language: { name: string };
+  effect?: string;
+  short_effect?: string;
+};
+
+type AbilityFlavorTextEntry = {
+  language: { name: string };
+  version_group: { name: string };
+  flavor_text: string;
+};
+
+type AbilityPokemonEntry = {
+  is_hidden: boolean;
+  pokemon: { name: string; url: string };
+};
+
 interface AbilityDetailClientProps {
-  initialAbility: any;
-  abilityId: string;
+  ability: any;
 }
 
-export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
+export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
   const router = useRouter();
-  const { data: ability, isLoading, isError } = useAbility(abilityId);
 
-  const { data: pokemonSpeciesNamesData = [] } = useQuery<CsvPokemonSpeciesName[]>({
-    queryKey: ["dex-csv", "pokemon-species-names"],
-    queryFn: loadPokemonSpeciesNamesCsv,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
-  });
+  const { pokemonSpeciesNamesData, versionGroupsData } = useDexCsvData();
 
   const koreanSpeciesNameMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -41,15 +46,6 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
     });
     return map;
   }, [pokemonSpeciesNamesData]);
-
-  const { data: versionGroupsData = [] } = useQuery<CsvVersionGroup[]>({
-    queryKey: ["dex-csv", "version-groups"],
-    queryFn: loadVersionGroupsCsv,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
-  });
 
   const versionGroupRankMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -74,31 +70,8 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
 
   const { getArtworkUrl } = usePokemonArtwork();
 
-  // 로딩/에러 상태 핸들링
-  if (isLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">특성 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !ability) {
-    return (
-      <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-destructive">특성 정보를 불러오지 못했습니다.</p>
-        <Button variant="outline" onClick={() => router.back()}>
-          뒤로 가기
-        </Button>
-      </div>
-    );
-  }
-
   // Effect entries 중 한국어/영어를 우선으로 하는 설명 텍스트 추출
-  const getEffectText = (entries: typeof ability.effect_entries) => {
+  const getEffectText = (entries: AbilityEffectEntry[]) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
     return {
@@ -111,10 +84,12 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
   const { effect } = getEffectText(ability.effect_entries);
   const abilityDisplayName = getLocalizedAbilityName(ability);
   // 한국어 flavor_text_entries 중 가장 최신 버전그룹 선택
+  const flavorTextEntries = ability.flavor_text_entries as AbilityFlavorTextEntry[];
+
   const flavorTextEntry =
-    ability.flavor_text_entries
-      .filter((entry) => entry.language.name === "ko")
-      .reduce<(typeof ability.flavor_text_entries)[0] | undefined>((chosen, entry) => {
+    flavorTextEntries
+      .filter((entry: AbilityFlavorTextEntry) => entry.language.name === "ko")
+      .reduce<AbilityFlavorTextEntry | undefined>((chosen, entry) => {
         const currentRank = versionGroupRankMap[entry.version_group.name] ?? -1;
         const chosenRank = chosen ? versionGroupRankMap[chosen.version_group.name] ?? -1 : -1;
         if (!chosen || currentRank >= chosenRank) {
@@ -161,7 +136,7 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {ability.pokemon.map((p) => {
+              {(ability.pokemon as AbilityPokemonEntry[]).map((p) => {
                 const displayName = getPokemonDisplayName(p.pokemon);
                 const portrait = getArtworkUrl(p.pokemon);
                 const match = p.pokemon.url.match(/\/pokemon\/(\d+)\//);

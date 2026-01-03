@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useMemo, useState, useEffect } from "react";
 import type { PokeApiEvolutionChain, PokeApiPokemon } from "../api/pokemonApi";
 import { fetchPokemon } from "../api/pokemonApi";
 
@@ -31,6 +30,31 @@ export interface PreviousStagePokemon {
   isError: boolean;
 }
 
+const pokemonCache = new Map<string, PokeApiPokemon>();
+const pokemonPromises = new Map<string, Promise<PokeApiPokemon>>();
+
+async function fetchPokemonWithCache(idOrName: string): Promise<PokeApiPokemon> {
+  const key = idOrName.toString();
+  if (pokemonCache.has(key)) {
+    return pokemonCache.get(key)!;
+  }
+
+  if (pokemonPromises.has(key)) {
+    return pokemonPromises.get(key)!;
+  }
+
+  const promise = fetchPokemon(idOrName);
+  pokemonPromises.set(key, promise);
+
+  try {
+    const result = await promise;
+    pokemonCache.set(key, result);
+    return result;
+  } finally {
+    pokemonPromises.delete(key);
+  }
+}
+
 export function usePreviousStagePokemons(
   evolutionChain?: PokeApiEvolutionChain,
   currentSpeciesName?: string
@@ -41,28 +65,70 @@ export function usePreviousStagePokemons(
     if (!path || path.length <= 1) return [];
     return path.slice(0, -1);
   }, [evolutionChain, currentSpeciesName]);
-
-  const queries = useQueries({
-    queries: previousSpecies.map((speciesName) => ({
-      queryKey: ["pokemon", speciesName],
-      queryFn: () => fetchPokemon(speciesName),
-      enabled: !!speciesName,
-      staleTime: 1000 * 60 * 60,
-      cacheTime: 1000 * 60 * 60 * 24,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+  const [state, setState] = useState<{
+    stages: PreviousStagePokemon[];
+    isLoading: boolean;
+    isError: boolean;
+  }>({
+    stages: previousSpecies.map((name) => ({
+      speciesName: name,
+      pokemon: undefined,
+      isLoading: true,
+      isError: false,
     })),
+    isLoading: previousSpecies.length > 0,
+    isError: false,
   });
 
-  const stages: PreviousStagePokemon[] = previousSpecies.map((name, index) => ({
-    speciesName: name,
-    pokemon: queries[index]?.data,
-    isLoading: queries[index]?.isLoading ?? false,
-    isError: queries[index]?.isError ?? false,
-  }));
+  useEffect(() => {
+    if (previousSpecies.length === 0) {
+      setState({ stages: [], isLoading: false, isError: false });
+      return;
+    }
 
-  const isLoading = queries.some((query) => query.isLoading);
-  const isError = queries.some((query) => query.isError);
+    let isMounted = true;
+    setState({
+      stages: previousSpecies.map((name) => ({
+        speciesName: name,
+        pokemon: undefined,
+        isLoading: true,
+        isError: false,
+      })),
+      isLoading: true,
+      isError: false,
+    });
 
-  return { stages, isLoading, isError };
+    Promise.all(
+      previousSpecies.map(async (speciesName) => {
+        try {
+          const pokemon = await fetchPokemonWithCache(speciesName);
+          return { speciesName, pokemon, error: null };
+        } catch (error) {
+          return {
+            speciesName,
+            pokemon: undefined,
+            error: error instanceof Error ? error : new Error(String(error)),
+          };
+        }
+      })
+    ).then((results) => {
+      if (!isMounted) return;
+      setState({
+        stages: results.map((result) => ({
+          speciesName: result.speciesName,
+          pokemon: result.pokemon,
+          isLoading: false,
+          isError: Boolean(result.error),
+        })),
+        isLoading: false,
+        isError: results.some((result) => result.error != null),
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [previousSpecies]);
+
+  return state;
 }

@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMove } from "@/features/moves/hooks/useMovesQueries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,42 +11,28 @@ import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 
+type MoveEffectEntry = {
+  language: { name: string };
+  effect?: string;
+  short_effect?: string;
+};
+
+type MoveFlavorTextEntry = MoveEffectEntry & {
+  version_group: { name: string };
+  flavor_text: string;
+};
+
+type LearnedPokemonEntry = {
+  name: string;
+  url: string;
+};
+
 interface MoveDetailClientProps {
-  initialMove: any;
-  moveId: string;
+  move: any;
 }
 
-export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps) {
+export function MoveDetailClient({ move }: MoveDetailClientProps) {
   const router = useRouter();
-  const {
-    data: move,
-    isLoading,
-    isError,
-  } = useMove(moveId, {
-    initialData: initialMove,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">기술 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !move) {
-    return (
-      <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-destructive">기술 정보를 불러오지 못했습니다.</p>
-        <Button variant="outline" onClick={() => router.back()}>
-          뒤로 가기
-        </Button>
-      </div>
-    );
-  }
 
   const { pokemonSpeciesNamesData, versionGroupsData } = useDexCsvData();
   const { getLocalizedMoveName } = useLocalizedMoveName();
@@ -83,7 +68,7 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
     return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
   };
 
-  const getEffectText = (entries: typeof move.effect_entries) => {
+  const getEffectText = (entries: MoveEffectEntry[]) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
     return {
@@ -95,7 +80,9 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
   const { effect, short_effect } = getEffectText(move.effect_entries);
 
   const KOREAN_UNUSABLE_TEXT = "사용할 수 없는 기술입니다.";
-  const sortedFlavorTextEntries = move.flavor_text_entries
+  const flavorTextEntries = move.flavor_text_entries as MoveFlavorTextEntry[];
+
+  const sortedFlavorTextEntries = flavorTextEntries
     .filter((entry) => entry.language.name === "ko")
     .slice()
     .sort(
@@ -184,7 +171,7 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {move.learned_by_pokemon.map((entry) => {
+                {(move.learned_by_pokemon as LearnedPokemonEntry[]).map((entry) => {
                   const displayName = getPokemonDisplayName(entry);
                   const portrait = getArtworkUrl(entry);
                   const match = entry.url.match(/\/pokemon\/(\d+)\//);

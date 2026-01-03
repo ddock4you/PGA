@@ -1,38 +1,43 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchPokemon, fetchPokemonSpecies } from "@/features/pokemon/api/pokemonApi";
+import {
+  fetchPokemon,
+  fetchPokemonSpecies,
+  fetchEvolutionChain,
+  fetchPokemonEncounters,
+} from "@/features/pokemon/api/pokemonApi";
 import { PokemonDetailClient } from "./PokemonDetailClient";
+import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
+import { loadDexCsvData } from "@/lib/dexCsvData";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
     const resolvedParams = await params;
-    const [pokemon, species] = await Promise.all([
-      fetchPokemon(resolvedParams.id),
-      fetchPokemonSpecies(resolvedParams.id),
-    ]);
+    const { id } = resolvedParams;
+    const [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
 
-    // 한국어 이름 찾기
     const koreanName =
       species.names.find((name: any) => name.language.name === "ko")?.name || pokemon.name;
-
-    // 한국어 도감 설명 찾기
     const koreanFlavorText = species.flavor_text_entries.find(
       (entry) => entry.language.name === "ko"
     )?.flavor_text;
 
-    // 구조화된 데이터 생성
+    const artworkUrl =
+      pokemon.sprites.other?.["official-artwork"]?.front_default || pokemon.sprites.front_default;
+
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "Article",
       headline: `${koreanName} - 포켓몬 도감`,
       description: koreanFlavorText || `${koreanName} 포켓몬의 상세 정보`,
-      image:
-        pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default,
+      image: artworkUrl,
       author: {
         "@type": "Organization",
         name: "포켓몬 게임 어시스턴트",
@@ -62,9 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: koreanFlavorText || `${koreanName} 포켓몬의 상세 정보`,
         images: [
           {
-            url:
-              pokemon.sprites.other["official-artwork"].front_default ||
-              pokemon.sprites.front_default,
+            url: artworkUrl,
             width: 400,
             height: 400,
             alt: koreanName,
@@ -76,16 +79,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: "summary_large_image",
         title: `${koreanName} - 포켓몬 도감`,
         description: koreanFlavorText || `${koreanName} 포켓몬의 상세 정보`,
-        images: [
-          pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default,
-        ],
+        images: [artworkUrl],
       },
       other: {
         "article:section": "포켓몬",
         "article:tag": pokemon.types.map((t: any) => t.type.name).join(", "),
         "article:published_time": species.generation?.name || "unknown",
+        "structured-data": JSON.stringify(jsonLd),
       },
-      structuredData: jsonLd,
     };
   } catch (error) {
     return {
@@ -97,20 +98,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 서버 사이드 데이터 prefetch
 export default async function PokemonDetailPage({ params }: PageProps) {
+  const { id } = await params;
+
   try {
-    // 서버 사이드에서 데이터 미리 가져오기
-    const resolvedParams = await params;
-    const [pokemon, species] = await Promise.all([
-      fetchPokemon(resolvedParams.id),
-      fetchPokemonSpecies(resolvedParams.id),
-    ]);
+    const [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
+    const evolutionChain = species.evolution_chain?.url
+      ? await fetchEvolutionChain(species.evolution_chain.url)
+      : undefined;
+    const encounters = await fetchPokemonEncounters(id);
+    const csvData = await loadDexCsvData();
 
     return (
-      <PokemonDetailClient
-        initialPokemon={pokemon}
-        initialSpecies={species}
-        pokemonId={resolvedParams.id}
-      />
+      <DexCsvDataProvider data={csvData}>
+        <PokemonDetailClient
+          pokemon={pokemon}
+          species={species}
+          evolutionChain={evolutionChain}
+          encounters={encounters}
+        />
+      </DexCsvDataProvider>
     );
   } catch (error) {
     notFound();
