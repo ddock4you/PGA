@@ -55,7 +55,7 @@ function EvolutionNode({
     <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-start">
       {/* 포켓몬 카드 */}
       <Link
-        to={`/dex/${id}`}
+        href={`/dex/${id}`}
         className="flex flex-col items-center gap-2 rounded-lg border p-3 transition hover:bg-muted/50 min-w-[100px]"
       >
         <div className="h-16 w-16">
@@ -74,7 +74,7 @@ function EvolutionNode({
             >
               <div className="flex flex-col items-center gap-1 px-2">
                 <ArrowRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
-                <div className="h-4 w-[1px] bg-muted-foreground sm:hidden block my-1"></div>
+                <div className="h-4 w-px bg-muted-foreground sm:hidden block my-1"></div>
 
                 {/* 진화 조건 표시 */}
                 <div className="flex flex-col gap-1">

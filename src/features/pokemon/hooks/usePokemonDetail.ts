@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../api/pokemonApi";
 import {
   fetchPokemon,
   fetchPokemonSpecies,
@@ -6,12 +7,21 @@ import {
   fetchPokemonEncounters,
 } from "../api/pokemonApi";
 
-export function usePokemonDetail(idOrName: string | number) {
+interface PokemonDetailInitialData {
+  pokemon?: PokeApiPokemon;
+  species?: PokeApiPokemonSpecies;
+}
+
+export function usePokemonDetail(
+  idOrName: string | number | null,
+  initialData?: PokemonDetailInitialData
+) {
   // 1. Pokemon 기본 정보
-  const pokemonQuery = useQuery({
+  const pokemonQuery = useQuery<PokeApiPokemon>({
     queryKey: ["pokemon", idOrName],
     queryFn: () => fetchPokemon(idOrName),
     enabled: !!idOrName,
+    initialData: initialData?.pokemon,
   });
 
   // Pokemon 데이터에서 species_id 추출
@@ -24,6 +34,8 @@ export function usePokemonDetail(idOrName: string | number) {
     queryKey: ["pokemon-species", speciesId],
     queryFn: () => fetchPokemonSpecies(speciesId!),
     enabled: !!speciesId,
+    initialData:
+      speciesId && initialData?.species?.id === speciesId ? initialData.species : undefined,
   });
 
   // 3. Evolution Chain 정보 (Species에 있는 URL 사용)

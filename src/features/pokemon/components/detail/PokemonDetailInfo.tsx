@@ -105,7 +105,7 @@ export function PokemonDetailInfo({
             return (
               <div key={a.ability.name} className="flex items-center justify-between">
                 <Link
-                  to={`/abilities/${a.ability.name}`}
+                  href={`/abilities/${a.ability.name}`}
                   className="capitalize text-primary hover:underline"
                 >
                   {koreanAbilityName}
@@ -346,7 +346,7 @@ export function PokemonDetailInfo({
                   {previousStages.map((stage, index) => (
                     <Link
                       key={stage.speciesName}
-                      to={`/dex/${stage.speciesName}?scrollTo=obtaining-methods`}
+                      href={`/dex/${stage.speciesName}?scrollTo=obtaining-methods`}
                       className="text-primary hover:underline capitalize"
                     >
                       {getKoreanPokemonName(stage.speciesName)}

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchItem } from "@/lib/pokeapi";
+import { fetchItem } from "@/features/items/api/itemsApi";
 import { ItemDetailClient } from "./ItemDetailClient";
 
 interface PageProps {
@@ -10,7 +10,8 @@ interface PageProps {
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const item = await fetchItem(params.id);
+    const resolvedParams = await params;
+    const item = await fetchItem(resolvedParams.id);
 
     // 한국어 이름 찾기 (임시로 영문 사용 - 추후 한국어 매핑 적용)
     const koreanName = item.name;
@@ -70,9 +71,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ItemDetailPage({ params }: PageProps) {
   try {
     // 서버 사이드에서 데이터 미리 가져오기
-    const item = await fetchItem(params.id);
+    const resolvedParams = await params;
+    const item = await fetchItem(resolvedParams.id);
 
-    return <ItemDetailClient initialItem={item} itemId={params.id} />;
+    return <ItemDetailClient initialItem={item} itemId={resolvedParams.id} />;
   } catch (error) {
     notFound();
   }

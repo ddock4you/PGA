@@ -7,7 +7,7 @@ export interface CacheMeta {
   maxAge?: number;
 }
 
-export function getCacheMeta(queryKey: any[]): CacheMeta {
+export function getCacheMeta(queryKey: readonly unknown[]): CacheMeta {
   const [namespace, ...rest] = queryKey;
 
   switch (namespace) {
@@ -30,6 +30,12 @@ export function getCacheMeta(queryKey: any[]): CacheMeta {
     case "search":
     case "unified-search":
       return { cacheStrategy: "both", persist: true, revalidate: 1800 };
+    case "pokemon-encounters":
+      return {
+        cacheStrategy: "client",
+        persist: true,
+        maxAge: 3600 * 24 * 30,
+      };
     case "dynamic":
     case "encounters":
       return { cacheStrategy: "client", persist: true, maxAge: 3600 * 24 * 30 };

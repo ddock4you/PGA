@@ -126,23 +126,44 @@ export async function fetchPokemonSpeciesListByGeneration(
 }
 
 export async function fetchPokemon(idOrName: number | string): Promise<PokeApiPokemon> {
-  return fetchFromPokeApi<PokeApiPokemon>(`/pokemon/${idOrName}`);
+  return fetchFromPokeApi<PokeApiPokemon>(`/pokemon/${idOrName}`, {
+    next: {
+      revalidate: 3600,
+      tags: [`pokemon-${idOrName}`],
+    },
+  });
 }
 
 export async function fetchPokemonSpecies(
   idOrName: number | string
 ): Promise<PokeApiPokemonSpecies> {
-  return fetchFromPokeApi<PokeApiPokemonSpecies>(`/pokemon-species/${idOrName}`);
+  return fetchFromPokeApi<PokeApiPokemonSpecies>(`/pokemon-species/${idOrName}`, {
+    next: {
+      revalidate: 3600,
+      tags: [`pokemon-species-${idOrName}`],
+    },
+  });
 }
 
 export async function fetchEvolutionChain(url: string): Promise<PokeApiEvolutionChain> {
-  return fetchFromPokeApi<PokeApiEvolutionChain>(url, { absoluteUrl: url });
+  return fetchFromPokeApi<PokeApiEvolutionChain>(url, {
+    absoluteUrl: url,
+    next: {
+      revalidate: 3600,
+      tags: [`evolution-chain-${url}`],
+    },
+  });
 }
 
 export async function fetchPokemonEncounters(
   idOrName: number | string
 ): Promise<PokeApiEncounter[]> {
-  return fetchFromPokeApi<PokeApiEncounter[]>(`/pokemon/${idOrName}/encounters`);
+  return fetchFromPokeApi<PokeApiEncounter[]>(`/pokemon/${idOrName}/encounters`, {
+    next: {
+      revalidate: 3600 * 24,
+      tags: [`pokemon-encounters-${idOrName}`],
+    },
+  });
 }
 
 /**
@@ -155,10 +176,12 @@ export async function getKoreanPokemonName(pokemonIdOrName: number | string): Pr
     const speciesUrl = pokemon.species.url;
 
     // species 정보에서 한국어 이름을 찾음
-    const species = await fetchFromPokeApi<PokeApiPokemonSpecies>(speciesUrl, { absoluteUrl: speciesUrl });
+    const species = await fetchFromPokeApi<PokeApiPokemonSpecies>(speciesUrl, {
+      absoluteUrl: speciesUrl,
+    });
 
     // 한국어 이름 찾기 (language id 3 = Korean)
-    const koreanNameEntry = species.names.find(name => name.language.name === 'ko');
+    const koreanNameEntry = species.names.find((name) => name.language.name === "ko");
     if (koreanNameEntry) {
       return koreanNameEntry.name;
     }

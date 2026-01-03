@@ -1,11 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import { buildUnifiedSearchIndex } from "../api/unifiedSearchIndexApi";
+import { clientQueryClient } from "@/lib/query-clients";
 import type { UnifiedSearchIndex } from "../types/unifiedSearchTypes";
+import { buildUnifiedSearchIndex } from "../api/unifiedSearchIndexApi";
 
 export function useUnifiedSearchIndex() {
   return useQuery<UnifiedSearchIndex>({
     queryKey: ["unifiedSearchIndex"],
-    queryFn: buildUnifiedSearchIndex,
+    queryFn: () =>
+      buildUnifiedSearchIndex({
+        progress: (chunk) => {
+          clientQueryClient.setQueryData(["unifiedSearchIndex"], (previous) => {
+            const base: UnifiedSearchIndex = previous ?? {
+              pokemon: [],
+              moves: [],
+              abilities: [],
+              items: [],
+            };
+
+            return {
+              pokemon: chunk.pokemon ?? base.pokemon,
+              moves: chunk.moves ?? base.moves,
+              abilities: chunk.abilities ?? base.abilities,
+              items: chunk.items ?? base.items,
+            };
+          });
+        },
+      }),
     meta: {
       persist: true,
     },

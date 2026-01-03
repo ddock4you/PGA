@@ -56,8 +56,16 @@ function dexFilterReducer(
   }
 }
 
-// localStorage에서 데이터 로드
+const DEFAULT_STATE = {
+  filters: { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" },
+  searchQuery: "",
+};
+
 function loadFromStorage(): { filters: DexFilters; searchQuery: string } {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") {
+    return DEFAULT_STATE;
+  }
+
   try {
     const filtersData = localStorage.getItem(DEX_FILTERS_STORAGE_KEY);
     const searchData = localStorage.getItem(DEX_SEARCH_STORAGE_KEY);
@@ -65,7 +73,6 @@ function loadFromStorage(): { filters: DexFilters; searchQuery: string } {
     const savedFilters = filtersData ? JSON.parse(filtersData) : null;
     const savedSearch = searchData || "";
 
-    // 저장된 데이터가 있으면 사용, 없으면 기본값 사용 (9세대)
     const filters: DexFilters = savedFilters
       ? {
           ...DEFAULT_DEX_FILTERS,
@@ -76,12 +83,15 @@ function loadFromStorage(): { filters: DexFilters; searchQuery: string } {
     return { filters, searchQuery: savedSearch };
   } catch (error) {
     console.warn("Failed to load dex filters from storage:", error);
-    return { filters: { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" }, searchQuery: "" };
+    return DEFAULT_STATE;
   }
 }
 
-// localStorage에 데이터 저장
 function saveToStorage(filters: DexFilters, searchQuery: string) {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") {
+    return;
+  }
+
   try {
     localStorage.setItem(DEX_FILTERS_STORAGE_KEY, JSON.stringify(filters));
     localStorage.setItem(DEX_SEARCH_STORAGE_KEY, searchQuery);
@@ -96,16 +106,23 @@ interface DexFilterProviderProps {
 }
 
 export function DexFilterProvider({ children }: DexFilterProviderProps) {
-  const [state, dispatch] = useReducer(dexFilterReducer, loadFromStorage());
+  const [state, dispatch] = useReducer(dexFilterReducer, DEFAULT_STATE);
 
-  // 컴포넌트 마운트 시 localStorage에서 데이터 로드
   useEffect(() => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return;
+    }
+
     const storedData = loadFromStorage();
     dispatch({ type: "LOAD_FROM_STORAGE", payload: storedData });
   }, []);
 
   // 상태 변경 시 localStorage에 저장
   useEffect(() => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return;
+    }
+
     saveToStorage(state.filters, state.searchQuery);
   }, [state.filters, state.searchQuery]);
 

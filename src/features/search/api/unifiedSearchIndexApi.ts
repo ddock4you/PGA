@@ -20,45 +20,53 @@ import type {
 import type { UnifiedSearchIndex, UnifiedSearchEntry } from "../types/unifiedSearchTypes";
 import { groupNamesById, getLocalizedNamesForId } from "../utils/nameMappingUtils";
 
-// 통합 검색 인덱스 생성 함수
-export async function buildUnifiedSearchIndex(): Promise<UnifiedSearchIndex> {
-  // 모든 CSV 데이터를 병렬로 로드
-  const [
-    pokemonData,
-    pokemonNames,
-    movesData,
-    moveNames,
-    abilitiesData,
-    abilityNames,
-    itemsData,
-    itemNames,
-  ] = await Promise.all([
-    loadPokemonCsv(),
-    loadPokemonSpeciesNamesCsv(),
-    loadMovesCsv(),
-    loadMoveNamesCsv(),
-    loadAbilitiesCsv(),
-    loadAbilityNamesCsv(),
-    loadItemsCsv(),
-    loadItemNamesCsv(),
-  ]);
+export interface UnifiedSearchIndexBuildOptions {
+  progress?: (chunk: Partial<UnifiedSearchIndex>) => void;
+}
 
-  // 포켓몬 이름 그룹화 (species_id 기준)
+// 통합 검색 인덱스 생성 함수 (chunked preload 지원)
+export async function buildUnifiedSearchIndex(
+  options?: UnifiedSearchIndexBuildOptions
+): Promise<UnifiedSearchIndex> {
+  const index: UnifiedSearchIndex = {
+    pokemon: [],
+    moves: [],
+    abilities: [],
+    items: [],
+  };
+
+  const pokemonData = await loadPokemonCsv();
+  const pokemonNames = await loadPokemonSpeciesNamesCsv();
   const pokemonNameGroups = groupNamesById(
     pokemonData,
     pokemonNames.map((name) => ({
       ...name,
-      id: name.pokemon_species_id, // species_id를 id로 매핑
+      id: name.pokemon_species_id,
     }))
   );
+  const pokemonEntries = createPokemonEntries(pokemonData, pokemonNameGroups);
+  index.pokemon = pokemonEntries;
+  options?.progress?.({ pokemon: pokemonEntries });
 
-  // 각 카테고리별로 UnifiedSearchEntry 생성
-  const pokemon = createPokemonEntries(pokemonData, pokemonNameGroups);
+  const movesData = await loadMovesCsv();
+  const moveNames = await loadMoveNamesCsv();
   const moves = createMoveEntries(movesData, moveNames);
-  const abilities = createAbilityEntries(abilitiesData, abilityNames);
-  const items = createItemEntries(itemsData, itemNames);
+  index.moves = moves;
+  options?.progress?.({ moves });
 
-  return { pokemon, moves, abilities, items };
+  const abilitiesData = await loadAbilitiesCsv();
+  const abilityNames = await loadAbilityNamesCsv();
+  const abilities = createAbilityEntries(abilitiesData, abilityNames);
+  index.abilities = abilities;
+  options?.progress?.({ abilities });
+
+  const itemsData = await loadItemsCsv();
+  const itemNames = await loadItemNamesCsv();
+  const items = createItemEntries(itemsData, itemNames);
+  index.items = items;
+  options?.progress?.({ items });
+
+  return index;
 }
 
 // 포켓몬 엔트리 생성

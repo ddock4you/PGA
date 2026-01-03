@@ -3,6 +3,10 @@ const POKEAPI_BASE_URL = "https://pokeapi.co/api/v2";
 interface FetchOptions extends RequestInit {
   /** 절대 URL을 그대로 호출하고 싶을 때 사용 (선택 사항) */
   absoluteUrl?: string;
+  next?: {
+    revalidate?: number | boolean;
+    tags?: string[];
+  };
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -21,7 +25,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * @param path - `/type/1`, `type/1` 처럼 베이스 URL 이후 경로 또는 절대 URL
  */
 export async function fetchFromPokeApi<T>(path: string, options?: FetchOptions): Promise<T> {
-  const { absoluteUrl, headers, ...rest } = options ?? {};
+  const { absoluteUrl, headers, next, ...rest } = options ?? {};
 
   const url =
     absoluteUrl ??
@@ -34,6 +38,7 @@ export async function fetchFromPokeApi<T>(path: string, options?: FetchOptions):
       Accept: "application/json",
       ...(headers ?? {}),
     },
+    next,
     ...rest,
   });
 

@@ -21,7 +21,11 @@ interface PokemonDetailClientProps {
   pokemonId: string;
 }
 
-export function PokemonDetailClient({ initialPokemon, initialSpecies, pokemonId }: PokemonDetailClientProps) {
+export function PokemonDetailClient({
+  initialPokemon,
+  initialSpecies,
+  pokemonId,
+}: PokemonDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
@@ -30,10 +34,8 @@ export function PokemonDetailClient({ initialPokemon, initialSpecies, pokemonId 
   const { pokemon, species, evolutionChain, encounters, isLoading, isError } = usePokemonDetail(
     pokemonId,
     {
-      initialData: {
-        pokemon: initialPokemon,
-        species: initialSpecies,
-      },
+      pokemon: initialPokemon,
+      species: initialSpecies,
     }
   );
 
@@ -109,6 +111,3 @@ export function PokemonDetailClient({ initialPokemon, initialSpecies, pokemonId 
     </div>
   );
 }
-
-
-
