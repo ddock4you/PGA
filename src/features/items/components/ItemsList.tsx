@@ -105,6 +105,9 @@ export function ItemsList() {
         </p>
       ) : (
         <>
+          <p className="text-sm text-muted-foreground">
+            {filteredItems.length}개의 도구를 볼 수 있습니다.
+          </p>
           <div className="rounded-md border card-item">
             <Table>
               <TableHeader>

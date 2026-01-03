@@ -221,6 +221,12 @@ export function DexPokemonTab() {
         </p>
       )}
 
+      {!isLoading && !isError && (
+        <p className="text-sm text-muted-foreground">
+          {pokemonSummaries.length}마리의 포켓몬을 볼 수 있습니다.
+        </p>
+      )}
+
       {!isLoading && !isError && pokemonSummaries.length === 0 && (
         <p className="pt-2 text-xs text-muted-foreground">조건에 해당하는 포켓몬이 없습니다.</p>
       )}

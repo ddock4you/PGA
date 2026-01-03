@@ -101,6 +101,9 @@ export function AbilitiesList() {
         </p>
       ) : (
         <>
+          <p className="text-sm text-muted-foreground">
+            {filteredAbilities.length}개의 특성을 볼 수 있습니다.
+          </p>
           <div className="rounded-md border card-ability">
             <Table>
               <TableHeader>

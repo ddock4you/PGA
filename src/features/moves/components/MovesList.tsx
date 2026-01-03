@@ -111,6 +111,9 @@ export function MovesList() {
         </p>
       ) : (
         <>
+          <p className="text-sm text-muted-foreground">
+            {filteredMoves.length}개의 기술을 볼 수 있습니다.
+          </p>
           <div className="rounded-md border card-move">
             <Table>
               <TableHeader>
