@@ -1,11 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMove } from "@/features/moves/hooks/useMovesQueries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
+import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
+import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 
 interface MoveDetailClientProps {
   initialMove: any;
@@ -14,7 +19,11 @@ interface MoveDetailClientProps {
 
 export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps) {
   const router = useRouter();
-  const { data: move, isLoading, isError } = useMove(moveId, {
+  const {
+    data: move,
+    isLoading,
+    isError,
+  } = useMove(moveId, {
     initialData: initialMove,
   });
 
@@ -40,6 +49,40 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
     );
   }
 
+  const { pokemonSpeciesNamesData, versionGroupsData } = useDexCsvData();
+  const { getLocalizedMoveName } = useLocalizedMoveName();
+  const { getArtworkUrl } = usePokemonArtwork();
+
+  const versionGroupRankMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    versionGroupsData.forEach((group) => {
+      map[group.identifier] = group.id;
+    });
+    return map;
+  }, [versionGroupsData]);
+
+  const koreanSpeciesNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    pokemonSpeciesNamesData.forEach((entry) => {
+      if (entry.local_language_id === 3) {
+        map.set(entry.pokemon_species_id, entry.name);
+      }
+    });
+    return map;
+  }, [pokemonSpeciesNamesData]);
+
+  const getPokemonDisplayName = (pokemon: { name: string; url: string }) => {
+    const match = pokemon.url.match(/\/pokemon\/(\d+)\//);
+    if (!match) {
+      return pokemon.name;
+    }
+    const speciesId = Number(match[1]);
+    if (Number.isNaN(speciesId)) {
+      return pokemon.name;
+    }
+    return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
+  };
+
   const getEffectText = (entries: typeof move.effect_entries) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
@@ -50,6 +93,22 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
   };
 
   const { effect, short_effect } = getEffectText(move.effect_entries);
+
+  const KOREAN_UNUSABLE_TEXT = "사용할 수 없는 기술입니다.";
+  const sortedFlavorTextEntries = move.flavor_text_entries
+    .filter((entry) => entry.language.name === "ko")
+    .slice()
+    .sort(
+      (a, b) =>
+        (versionGroupRankMap[b.version_group.name] ?? -1) -
+        (versionGroupRankMap[a.version_group.name] ?? -1)
+    );
+  const flavorTextEntry =
+    sortedFlavorTextEntries.find((entry) => !entry.flavor_text.includes(KOREAN_UNUSABLE_TEXT)) ??
+    sortedFlavorTextEntries[0];
+  const flavorText = flavorTextEntry?.flavor_text;
+
+  const localizedMoveName = getLocalizedMoveName(move.name);
 
   return (
     <div className="space-y-4">
@@ -62,7 +121,7 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
 
       <header>
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{move.name}</h1>
+          <h1 className="text-2xl font-bold">{localizedMoveName}</h1>
           <Badge>{move.type.name}</Badge>
           <Badge variant="outline">{move.damage_class.name}</Badge>
         </div>
@@ -107,6 +166,56 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">도감 설명</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm whitespace-pre-wrap">{flavorText ?? effect}</p>
+          </CardContent>
+        </Card>
+
+        {move.learned_by_pokemon && move.learned_by_pokemon.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                배울 수 있는 포켓몬 ({move.learned_by_pokemon.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {move.learned_by_pokemon.map((entry) => {
+                  const displayName = getPokemonDisplayName(entry);
+                  const portrait = getArtworkUrl(entry);
+                  const match = entry.url.match(/\/pokemon\/(\d+)\//);
+                  const targetId = match ? match[1] : null;
+                  return (
+                    <Badge
+                      key={entry.name}
+                      variant="secondary"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (targetId) {
+                          router.push(`/dex/${targetId}`);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {portrait && (
+                          <span className="h-8 w-8 overflow-hidden rounded-full bg-muted/50">
+                            <Image src={portrait} alt={displayName} width={32} height={32} />
+                          </span>
+                        )}
+                        <span>{displayName}</span>
+                      </div>
+                    </Badge>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {move.meta && (
           <Card>
             <CardHeader>
@@ -140,6 +249,3 @@ export function MoveDetailClient({ initialMove, moveId }: MoveDetailClientProps)
     </div>
   );
 }
-
-
-

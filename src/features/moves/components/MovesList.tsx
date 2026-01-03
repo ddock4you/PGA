@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { transformMovesForDex } from "@/utils/dataTransforms";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import type { DexMoveSummary } from "@/utils/dataTransforms";
@@ -35,7 +36,14 @@ export function MovesList() {
   const effectiveGenerationId = state.selectedGenerationId ?? "1";
 
   // 1. CSV 데이터 로딩
-  const { movesData, machinesData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
+  const {
+    movesData,
+    moveNamesData,
+    machinesData,
+    isLoading: isCsvLoading,
+    isError: isCsvError,
+  } = useDexCsvData();
+  const { getLocalizedMoveName } = useLocalizedMoveName({ movesData, moveNamesData });
 
   // 2. 기술 데이터 변환 및 필터링
   const allMoves = useMemo(() => {
@@ -43,11 +51,24 @@ export function MovesList() {
     return transformMovesForDex(movesData, machinesData, effectiveGenerationId);
   }, [movesData, machinesData, effectiveGenerationId]);
 
+  const localizedMoves = useMemo(() => {
+    if (!allMoves.length) return [];
+    return allMoves.map((move) => ({
+      ...move,
+      displayName: getLocalizedMoveName(move.id),
+    }));
+  }, [allMoves, getLocalizedMoveName]);
+
   const filteredMoves = useMemo(() => {
-    if (!allMoves) return [];
-    if (!searchQuery.trim()) return allMoves;
-    return allMoves.filter((m) => m.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  }, [allMoves, searchQuery]);
+    if (!localizedMoves.length) return [];
+    if (!searchQuery.trim()) return localizedMoves;
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    return localizedMoves.filter((move) => {
+      const englishMatch = move.name.toLowerCase().includes(normalizedQuery);
+      const koreanMatch = move.displayName?.toLowerCase().includes(normalizedQuery);
+      return englishMatch || koreanMatch;
+    });
+  }, [localizedMoves, searchQuery]);
 
   // 3. 페이지네이션 계산
   const totalPages = Math.ceil(filteredMoves.length / ITEMS_PER_PAGE);
@@ -113,24 +134,28 @@ export function MovesList() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedMoves.map((move: DexMoveSummary) => (
-                    <TableRow
-                      key={move.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleRowClick(move.id)}
-                    >
-                      <TableCell className="font-medium">{move.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="capitalize">
-                          {move.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="capitalize">{move.damageClass}</TableCell>
-                      <TableCell className="text-right">{move.power ?? "-"}</TableCell>
-                      <TableCell className="text-right">{move.accuracy ?? "-"}</TableCell>
-                      <TableCell className="text-right">{move.pp}</TableCell>
-                    </TableRow>
-                  ))
+                  paginatedMoves.map((move: DexMoveSummary) => {
+                    const displayName = move.displayName ?? move.name;
+
+                    return (
+                      <TableRow
+                        key={move.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleRowClick(move.id)}
+                      >
+                        <TableCell className="font-medium">{displayName}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="capitalize">
+                            {move.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="capitalize">{move.damageClass}</TableCell>
+                        <TableCell className="text-right">{move.power ?? "-"}</TableCell>
+                        <TableCell className="text-right">{move.accuracy ?? "-"}</TableCell>
+                        <TableCell className="text-right">{move.pp}</TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>

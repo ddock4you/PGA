@@ -7,6 +7,7 @@ import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import { usePreviousStagePokemons } from "../../hooks/usePreviousStagePokemons";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { useLocalizedAbilityName } from "@/hooks/useLocalizedAbilityName";
 import { getEggGroupKorean, getGrowthRateKorean, getStatNameKorean } from "@/utils/dataTransforms";
 import type {
   PokeApiPokemon,
@@ -32,7 +33,11 @@ export function PokemonDetailInfo({
 }: PokemonDetailInfoProps) {
   const { state } = usePreferences();
   const selectedGameId = state.selectedGameId;
-  const { abilityNamesData, itemsData, pokemonSpeciesNamesData } = useDexCsvData();
+  const { abilitiesData, abilityNamesData, itemsData, pokemonSpeciesNamesData } = useDexCsvData();
+  const { getLocalizedAbilityName } = useLocalizedAbilityName({
+    abilitiesData,
+    abilityNamesData,
+  });
 
   // 진화 이전 단계 포켓몬 정보
   const { stages: previousStages } = usePreviousStagePokemons(evolutionChain, species.name);
@@ -93,14 +98,12 @@ export function PokemonDetailInfo({
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           {pokemon.abilities.map((a) => {
-            // 특성 ID 추출 및 한글 이름 찾기
             const abilityIdMatch = a.ability.url.match(/\/ability\/(\d+)\//);
-            const abilityId = abilityIdMatch ? parseInt(abilityIdMatch[1], 10) : null;
-            const koreanAbilityName = abilityId
-              ? abilityNamesData.find(
-                  (name) => name.ability_id === abilityId && name.local_language_id === 3
-                )?.name || a.ability.name.replace("-", " ")
-              : a.ability.name.replace("-", " ");
+            const abilityId = abilityIdMatch ? parseInt(abilityIdMatch[1], 10) : undefined;
+            const koreanAbilityName = getLocalizedAbilityName({
+              id: abilityId,
+              identifier: a.ability.name,
+            });
 
             return (
               <div key={a.ability.name} className="flex items-center justify-between">

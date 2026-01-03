@@ -26,10 +26,14 @@ export function useMovesDetails(names: string[]) {
 }
 
 // 단일 기술 상세
-export function useMove(idOrName: string | number) {
+export function useMove(
+  idOrName: string | number,
+  options?: { initialData?: Awaited<ReturnType<typeof fetchMove>> }
+) {
   return useQuery({
     queryKey: ["move", idOrName],
     queryFn: () => fetchMove(idOrName),
     enabled: !!idOrName,
+    initialData: options?.initialData,
   });
 }

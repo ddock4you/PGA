@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
+import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { getDamageClassKorean } from "@/utils/dataTransforms";
 import type { MoveRow } from "../types/moveTypes";
 
@@ -43,36 +44,8 @@ interface PreviousStageMovesTableProps {
 const formatStat = (value?: number | null) => (value === null || value === undefined ? "-" : value);
 
 export const PreviousStageMovesTable = ({ rows, isLoading }: PreviousStageMovesTableProps) => {
-  const { movesData, moveNamesData, pokemonSpeciesNamesData, pokemonData } = useDexCsvData();
-
-  // 기술 ID로 한글 이름 찾기 함수
-  const getKoreanMoveName = (moveName: string) => {
-    // moveName이 ID인 경우 (숫자)
-    if (/^\d+$/.test(moveName)) {
-      const moveId = parseInt(moveName, 10);
-      // 먼저 한글 이름 찾기
-      const koreanName = moveNamesData.find(
-        (name) => name.move_id === moveId && name.local_language_id === 3
-      )?.name;
-      if (koreanName) return koreanName;
-
-      // 한글 이름이 없으면 영문 identifier 사용
-      const moveData = movesData.find((m) => m.id === moveId);
-      return moveData?.identifier.replace(/-/g, " ") || moveName;
-    }
-    // moveName이 영문 이름인 경우
-    // 먼저 해당 영문 이름으로 move_id 찾기
-    const moveData = movesData.find((m) => m.identifier === moveName);
-    if (moveData) {
-      // 한글 이름 찾기
-      const koreanName = moveNamesData.find(
-        (name) => name.move_id === moveData.id && name.local_language_id === 3
-      )?.name;
-      if (koreanName) return koreanName;
-    }
-    // 한글 이름이 없으면 영문 이름 그대로 사용 (하이픈을 공백으로)
-    return moveName.replace(/-/g, " ");
-  };
+  const { pokemonSpeciesNamesData, pokemonData } = useDexCsvData();
+  const { getLocalizedMoveName } = useLocalizedMoveName();
 
   // 포켓몬 이름 한글화 헬퍼 함수
   const getKoreanPokemonName = (speciesName: string) => {
@@ -158,7 +131,7 @@ export const PreviousStageMovesTable = ({ rows, isLoading }: PreviousStageMovesT
                         href={`/moves/${move.name}`}
                         className="capitalize text-primary hover:underline"
                       >
-                        {getKoreanMoveName(move.name)}
+                        {getLocalizedMoveName(move.name)}
                       </Link>
                     </TableCell>
                     {renderCommonCells(move)}

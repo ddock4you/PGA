@@ -335,6 +335,7 @@ export interface DexMoveSummary {
   accuracy: number | null;
   pp: number;
   machines: CsvMachine[];
+  displayName?: string;
 }
 
 export function transformMovesForDex(

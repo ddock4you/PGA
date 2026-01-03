@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { loadPokemonSpeciesNamesCsv, loadVersionGroupsCsv } from "@/data/csvLoader";
 import type { CsvPokemonSpeciesName, CsvVersionGroup } from "@/types/csvTypes";
 import { useAbility } from "@/features/abilities/hooks/useAbilitiesQueries";
-import { getLocalizedAbilityName } from "@/features/abilities/utils/localization";
+import { useLocalizedAbilityName } from "@/hooks/useLocalizedAbilityName";
+import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +72,8 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
     return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
   };
 
+  const { getArtworkUrl } = usePokemonArtwork();
+
   // 로딩/에러 상태 핸들링
   if (isLoading) {
     return (
@@ -103,6 +107,7 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
     };
   };
 
+  const { getLocalizedAbilityName } = useLocalizedAbilityName();
   const { effect } = getEffectText(ability.effect_entries);
   const abilityDisplayName = getLocalizedAbilityName(ability);
   // 한국어 flavor_text_entries 중 가장 최신 버전그룹 선택
@@ -158,20 +163,30 @@ export function AbilityDetailClient({ abilityId }: AbilityDetailClientProps) {
             <div className="flex flex-wrap gap-2">
               {ability.pokemon.map((p) => {
                 const displayName = getPokemonDisplayName(p.pokemon);
+                const portrait = getArtworkUrl(p.pokemon);
+                const match = p.pokemon.url.match(/\/pokemon\/(\d+)\//);
+                const targetId = match ? match[1] : null;
                 return (
                   <Badge
                     key={p.pokemon.name}
                     variant="secondary"
                     className="cursor-pointer"
                     onClick={() => {
-                      // 포켓몬 ID 추출 시도
-                      const match = p.pokemon.url.match(/\/pokemon\/(\d+)\//);
-                      if (match) {
-                        router.push(`/dex/${match[1]}`);
+                      if (targetId) {
+                        router.push(`/dex/${targetId}`);
                       }
                     }}
                   >
-                    {displayName} {p.is_hidden && "(숨겨진 특성)"}
+                    <div className="flex items-center gap-2">
+                      {portrait && (
+                        <span className="h-8 w-8 overflow-hidden rounded-full bg-muted/50">
+                          <Image src={portrait} alt={displayName} width={32} height={32} />
+                        </span>
+                      )}
+                      <span>
+                        {displayName} {p.is_hidden && "(숨겨진 특성)"}
+                      </span>
+                    </div>
                   </Badge>
                 );
               })}

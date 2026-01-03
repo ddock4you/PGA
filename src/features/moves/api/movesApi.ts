@@ -35,6 +35,7 @@ export interface PokeApiMove {
     flinch_chance: number;
     stat_chance: number;
   } | null;
+  learned_by_pokemon: PokeApiNamedResource[];
 }
 
 export async function fetchMove(idOrName: number | string): Promise<PokeApiMove> {
