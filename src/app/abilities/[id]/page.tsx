@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchAbility } from "@/features/abilities/api/abilitiesApi";
+import { getLocalizedAbilityName } from "@/features/abilities/utils/localization";
 import { AbilityDetailClient } from "./AbilityDetailClient";
 
 interface PageProps {
@@ -14,14 +15,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const ability = await fetchAbility(resolvedParams.id);
 
     // 한국어 이름 찾기 (임시로 영문 사용 - 추후 한국어 매핑 적용)
-    const koreanName = ability.name;
+    const koreanName = getLocalizedAbilityName(ability);
 
     const description =
       ability.effect_entries?.find((e: any) => e.language.name === "ko")?.short_effect ||
       ability.effect_entries?.find((e: any) => e.language.name === "en")?.short_effect ||
       `${koreanName} 특성의 상세 정보`;
 
-    return {
+    const metadataWithStructuredData: Metadata & {
+      structuredData: Record<string, unknown>;
+    } = {
       title: `${koreanName} - 특성 정보`,
       description: description,
       openGraph: {
@@ -58,6 +61,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         },
       },
     };
+
+    return metadataWithStructuredData;
   } catch (error) {
     return {
       title: "특성 정보",

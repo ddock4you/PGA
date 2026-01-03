@@ -66,8 +66,20 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
     id: "3",
     name: "3세대",
     versions: [
-      { id: "ruby", name: "루비", color: "bg-red-600", generationId: "3" },
-      { id: "sapphire", name: "사파이어", color: "bg-blue-600", generationId: "3" },
+      {
+        id: "ruby",
+        name: "루비",
+        color: "bg-red-600",
+        generationId: "3",
+        versionGroup: "ruby-sapphire",
+      },
+      {
+        id: "sapphire",
+        name: "사파이어",
+        color: "bg-blue-600",
+        generationId: "3",
+        versionGroup: "ruby-sapphire",
+      },
       {
         id: "emerald",
         name: "에메랄드",

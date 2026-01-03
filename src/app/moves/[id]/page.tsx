@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchMove } from "@/lib/pokeapi";
+import { fetchMove } from "@/features/moves/api/movesApi";
 import { MoveDetailClient } from "./MoveDetailClient";
 
 interface PageProps {
@@ -10,7 +10,8 @@ interface PageProps {
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const move = await fetchMove(params.id);
+    const resolvedParams = await params;
+    const move = await fetchMove(resolvedParams.id);
 
     // 한국어 이름 찾기 (임시로 영문 사용 - 추후 한국어 매핑 적용)
     const koreanName = move.name;
@@ -32,7 +33,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
       other: {
         "article:section": "기술",
-        "article:tag": move.type.name,
         "article:tag": move.damage_class.name,
       },
       structuredData: {
@@ -73,9 +73,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function MoveDetailPage({ params }: PageProps) {
   try {
     // 서버 사이드에서 데이터 미리 가져오기
-    const move = await fetchMove(params.id);
+    const resolvedParams = await params;
+    const move = await fetchMove(resolvedParams.id);
 
-    return <MoveDetailClient initialMove={move} moveId={params.id} />;
+    return <MoveDetailClient initialMove={move} moveId={resolvedParams.id} />;
   } catch (error) {
     notFound();
   }
