@@ -181,6 +181,7 @@ export function useQuizGenerator() {
     state.options,
     isGenerating,
     state.askedPokemonIds,
+    actions,
   ]);
 }
 
@@ -280,22 +281,17 @@ function generateAttackLevel2(
 ): QuizQuestion {
   // 1. 포켓몬 필터링 (세대 등)
   let candidates = pokemons;
-  if (options.generationSelection) {
-    const { type, ...genOpt } = options.generationSelection;
-    if (type === "single") {
-      const targetGen = (genOpt as any).generation;
-      // 하위 세대 포함 여부 체크 필요하지만, 데이터 구조상 generationId만 있음.
-      // 간단히 targetGen과 같거나 (includeSubGenerations면) 작거나.
-      const includeSub = (genOpt as any).includeSubGenerations;
-      candidates = pokemons.filter((p) =>
-        includeSub ? p.generationId <= targetGen : p.generationId === targetGen
-      );
-    } else if (type === "range") {
-      const { minGeneration, maxGeneration } = genOpt as any;
-      candidates = pokemons.filter(
-        (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
-      );
-    }
+  const generationSelection = options.generationSelection;
+  if (generationSelection?.type === "single") {
+    const { generation: targetGen, includeSubGenerations } = generationSelection;
+    candidates = pokemons.filter((p) =>
+      includeSubGenerations ? p.generationId <= targetGen : p.generationId === targetGen
+    );
+  } else if (generationSelection?.type === "range") {
+    const { minGeneration, maxGeneration } = generationSelection;
+    candidates = pokemons.filter(
+      (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
+    );
   }
 
   if (candidates.length === 0) candidates = pokemons; // fallback
@@ -409,21 +405,17 @@ function generateAttackLevel3(
   // 로직은 Lv2와 유사하지만 정답 조건이 0.25배 이상 & 가장 높은 배율
   // 1. 포켓몬 필터링 및 선택
   let candidates = pokemons;
-  if (options.generationSelection) {
-    // (Lv2와 동일한 필터링 로직)
-    const { type, ...genOpt } = options.generationSelection;
-    if (type === "single") {
-      const targetGen = (genOpt as any).generation;
-      const includeSub = (genOpt as any).includeSubGenerations;
-      candidates = pokemons.filter((p) =>
-        includeSub ? p.generationId <= targetGen : p.generationId === targetGen
-      );
-    } else if (type === "range") {
-      const { minGeneration, maxGeneration } = genOpt as any;
-      candidates = pokemons.filter(
-        (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
-      );
-    }
+  const generationSelection = options.generationSelection;
+  if (generationSelection?.type === "single") {
+    const { generation: targetGen, includeSubGenerations } = generationSelection;
+    candidates = pokemons.filter((p) =>
+      includeSubGenerations ? p.generationId <= targetGen : p.generationId === targetGen
+    );
+  } else if (generationSelection?.type === "range") {
+    const { minGeneration, maxGeneration } = generationSelection;
+    candidates = pokemons.filter(
+      (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
+    );
   }
   if (candidates.length === 0) candidates = pokemons;
 
@@ -533,20 +525,17 @@ function generateTypeQuiz(
 ): QuizQuestion {
   // 1. 세대 필터링
   let candidates = pokemons;
-  if (options.generationSelection) {
-    const { type, ...genOpt } = options.generationSelection;
-    if (type === "single") {
-      const targetGen = (genOpt as any).generation;
-      const includeSub = (genOpt as any).includeSubGenerations;
-      candidates = pokemons.filter((p) =>
-        includeSub ? p.generationId <= targetGen : p.generationId === targetGen
-      );
-    } else if (type === "range") {
-      const { minGeneration, maxGeneration } = genOpt as any;
-      candidates = pokemons.filter(
-        (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
-      );
-    }
+  const generationSelection = options.generationSelection;
+  if (generationSelection?.type === "single") {
+    const { generation: targetGen, includeSubGenerations } = generationSelection;
+    candidates = pokemons.filter((p) =>
+      includeSubGenerations ? p.generationId <= targetGen : p.generationId === targetGen
+    );
+  } else if (generationSelection?.type === "range") {
+    const { minGeneration, maxGeneration } = generationSelection;
+    candidates = pokemons.filter(
+      (p) => p.generationId >= minGeneration && p.generationId <= maxGeneration
+    );
   }
   if (candidates.length === 0) candidates = pokemons;
 

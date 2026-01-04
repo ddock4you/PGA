@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS } from "@/utils/dataTransforms";
 import type { MoveChoice } from "../store/types";
 
 interface QuizChoice {
@@ -47,7 +46,7 @@ export function QuizAnswerButtons({
     return "outline";
   };
 
-  const shouldShowType = (choice: QuizChoice) => {
+  const shouldShowType = () => {
     // 1. 기본적으로 보여주는 모드(Lv1, Lv2)면 true
     if (showTypeBadge) return true;
     // 2. 결과 화면이고, 결과 시 보여주기(Lv3)가 켜져있고, 선택된 상태(정답 공개)면 true
@@ -66,7 +65,7 @@ export function QuizAnswerButtons({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {choices.map((choice) => {
-        const showType = shouldShowType(choice);
+        const showType = shouldShowType();
         const isAnswerRevealed = selectedChoice !== null;
 
         return (

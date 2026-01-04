@@ -34,8 +34,10 @@ export function useListRestoration({
     if (!saved) {
       return;
     }
-    setTargetPageCount(Math.max(1, saved.pageCount));
-    setTargetScroll(saved.scrollY ?? 0);
+    setTimeout(() => {
+      setTargetPageCount(Math.max(1, saved.pageCount));
+      setTargetScroll(saved.scrollY ?? 0);
+    }, 0);
     clearListState(pathname);
     hasRestoredRef.current = false;
   }, [pathname, navigationType]);
@@ -47,7 +49,9 @@ export function useListRestoration({
         fetchNextPage();
       }
       if (!hasNextPage) {
-        setTargetPageCount(null);
+        setTimeout(() => {
+          setTargetPageCount(null);
+        }, 0);
       }
       return;
     }
@@ -59,7 +63,9 @@ export function useListRestoration({
           window.scrollTo({ top: targetScroll, behavior: "auto" });
         });
       }
-      setTargetPageCount(null);
+      setTimeout(() => {
+        setTargetPageCount(null);
+      }, 0);
     }
   }, [currentPage, fetchNextPage, hasNextPage, isFetchingNextPage, targetPageCount, targetScroll]);
 }

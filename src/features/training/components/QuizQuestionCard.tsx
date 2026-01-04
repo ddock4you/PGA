@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TYPE_COLORS, getKoreanTypeName } from "@/utils/dataTransforms";
@@ -31,10 +32,13 @@ export function QuizQuestionCard({
           {question.pokemonData && (
             <div className="flex items-center justify-center gap-4 p-4 bg-muted rounded-lg">
               {question.pokemonData.sprite ? (
-                <img
+                <Image
                   src={question.pokemonData.sprite}
                   alt={question.pokemonData.name}
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-contain"
+                  unoptimized
                 />
               ) : (
                 <div className="w-20 h-20 bg-muted-foreground/10 rounded-lg flex items-center justify-center">

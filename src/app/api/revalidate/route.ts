@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     await Promise.all(operations);
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 }

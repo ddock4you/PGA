@@ -82,21 +82,25 @@ export function usePreviousStagePokemons(
 
   useEffect(() => {
     if (previousSpecies.length === 0) {
-      setState({ stages: [], isLoading: false, isError: false });
+      setTimeout(() => {
+        setState({ stages: [], isLoading: false, isError: false });
+      }, 0);
       return;
     }
 
     let isMounted = true;
-    setState({
-      stages: previousSpecies.map((name) => ({
-        speciesName: name,
-        pokemon: undefined,
+    setTimeout(() => {
+      setState({
+        stages: previousSpecies.map((name) => ({
+          speciesName: name,
+          pokemon: undefined,
+          isLoading: true,
+          isError: false,
+        })),
         isLoading: true,
         isError: false,
-      })),
-      isLoading: true,
-      isError: false,
-    });
+      });
+    }, 0);
 
     Promise.all(
       previousSpecies.map(async (speciesName) => {

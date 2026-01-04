@@ -1,29 +1,29 @@
 import { fetchFromPokeApi } from "@/lib/pokeapi";
-import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
+import type { Ability, NamedAPIResource } from "@/types/pokeapi";
 
-export interface PokeApiAbility {
+export interface PokeApiAbility extends Ability {
   id: number;
   name: string;
   is_main_series: boolean;
-  generation: PokeApiNamedResource;
+  generation: NamedAPIResource;
   names: {
     name: string;
-    language: PokeApiNamedResource;
+    language: NamedAPIResource;
   }[];
   effect_entries: {
     effect: string;
     short_effect: string;
-    language: PokeApiNamedResource;
+    language: NamedAPIResource;
   }[];
   flavor_text_entries: {
     flavor_text: string;
-    language: PokeApiNamedResource;
-    version_group: PokeApiNamedResource;
+    language: NamedAPIResource;
+    version_group: NamedAPIResource;
   }[];
   pokemon: {
     is_hidden: boolean;
     slot: number;
-    pokemon: PokeApiNamedResource;
+    pokemon: NamedAPIResource;
   }[];
 }
 

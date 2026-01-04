@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAllTypesQuery } from "@/features/types/hooks/useAllTypesQuery";
-import { buildTypeMap, computeAttackMultiplier, type TypeMap } from "@/features/types/utils/typeEffectiveness";
+import {
+  buildTypeMap,
+  computeAttackMultiplier,
+  type TypeMap,
+} from "@/features/types/utils/typeEffectiveness";
 
 type MultiplierChoice = "0" | "0.5" | "1" | "2";
 
@@ -82,8 +86,13 @@ export function useTypeQuiz(options?: UseTypeQuizOptions): UseTypeQuizResult {
 
   useEffect(() => {
     if (!isLoading && !isError && !question) {
-      generateQuestion();
+      const timer = setTimeout(() => {
+        generateQuestion();
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
+    return undefined;
   }, [generateQuestion, isError, isLoading, question]);
 
   const submitChoice = (choice: MultiplierChoice) => {
@@ -126,5 +135,3 @@ export function useTypeQuiz(options?: UseTypeQuizOptions): UseTypeQuizResult {
     nextQuestion,
   };
 }
-
-

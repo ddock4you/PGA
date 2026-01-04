@@ -8,7 +8,7 @@ export interface CacheMeta {
 }
 
 export function getCacheMeta(queryKey: readonly unknown[]): CacheMeta {
-  const [namespace, ...rest] = queryKey;
+  const namespace = queryKey[0];
 
   switch (namespace) {
     case "static":

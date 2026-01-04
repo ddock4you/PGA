@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   Table,
   TableBody,
@@ -177,14 +178,16 @@ export function ItemsList() {
                     >
                       <TableCell>
                         <div className="size-8 flex items-center justify-center">
-                          <img
+                          <Image
                             src={getItemSpriteUrl(item.name)}
                             alt={item.name}
+                            width={48}
+                            height={48}
                             className="max-h-full max-w-full"
-                            onError={(e) => {
-                              // 이미지 로드 실패 시 숨김
-                              (e.target as HTMLImageElement).style.display = "none";
+                            onError={({ currentTarget }) => {
+                              currentTarget.style.visibility = "hidden";
                             }}
+                            unoptimized
                           />
                         </div>
                       </TableCell>

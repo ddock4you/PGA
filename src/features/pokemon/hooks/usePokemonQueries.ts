@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchPokemonSpeciesListByGeneration,
   type PokeApiPokemonSpecies,
@@ -41,19 +41,25 @@ export function usePokemonSpeciesByGeneration(generationId: number | string | nu
 
   useEffect(() => {
     if (!generationId) {
-      setState({ data: [], isLoading: false, isError: false });
+      setTimeout(() => {
+        setState({ data: [], isLoading: false, isError: false });
+      }, 0);
       return;
     }
 
     const key = String(generationId);
 
     if (pokemonSpeciesCache.has(key)) {
-      setState({ data: pokemonSpeciesCache.get(key)!, isLoading: false, isError: false });
+      setTimeout(() => {
+        setState({ data: pokemonSpeciesCache.get(key)!, isLoading: false, isError: false });
+      }, 0);
       return;
     }
 
     let isMounted = true;
-    setState((prev) => ({ ...prev, isLoading: true, isError: false }));
+    setTimeout(() => {
+      setState((prev) => ({ ...prev, isLoading: true, isError: false }));
+    }, 0);
 
     loadSpeciesList(key)
       .then((data) => {

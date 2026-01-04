@@ -10,25 +10,13 @@ import { ArrowLeft } from "lucide-react";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
+import type { PokeApiMove } from "@/features/moves/api/movesApi";
+import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
 
-type MoveEffectEntry = {
-  language: { name: string };
-  effect?: string;
-  short_effect?: string;
-};
-
-type MoveFlavorTextEntry = MoveEffectEntry & {
-  version_group: { name: string };
-  flavor_text: string;
-};
-
-type LearnedPokemonEntry = {
-  name: string;
-  url: string;
-};
+type LearnedPokemonEntry = PokeApiNamedResource;
 
 interface MoveDetailClientProps {
-  move: any;
+  move: PokeApiMove;
 }
 
 export function MoveDetailClient({ move }: MoveDetailClientProps) {
@@ -56,7 +44,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
     return map;
   }, [pokemonSpeciesNamesData]);
 
-  const getPokemonDisplayName = (pokemon: { name: string; url: string }) => {
+  const getPokemonDisplayName = (pokemon: LearnedPokemonEntry) => {
     const match = pokemon.url.match(/\/pokemon\/(\d+)\//);
     if (!match) {
       return pokemon.name;
@@ -68,7 +56,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
     return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
   };
 
-  const getEffectText = (entries: MoveEffectEntry[]) => {
+  const getEffectText = (entries: PokeApiMove["effect_entries"]) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
     return {
@@ -80,7 +68,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
   const { effect, short_effect } = getEffectText(move.effect_entries);
 
   const KOREAN_UNUSABLE_TEXT = "사용할 수 없는 기술입니다.";
-  const flavorTextEntries = move.flavor_text_entries as MoveFlavorTextEntry[];
+  const flavorTextEntries = move.flavor_text_entries;
 
   const sortedFlavorTextEntries = flavorTextEntries
     .filter((entry) => entry.language.name === "ko")
@@ -171,7 +159,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {(move.learned_by_pokemon as LearnedPokemonEntry[]).map((entry) => {
+                {move.learned_by_pokemon.map((entry) => {
                   const displayName = getPokemonDisplayName(entry);
                   const portrait = getArtworkUrl(entry);
                   const match = entry.url.match(/\/pokemon\/(\d+)\//);

@@ -3,16 +3,10 @@ import {
   PolarGrid,
   Radar,
   RadarChart,
-  ReferenceLine,
   PolarRadiusAxis,
   Customized,
 } from "recharts";
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,

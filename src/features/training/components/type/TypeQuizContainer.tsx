@@ -1,4 +1,3 @@
-import { useQuizContext } from "../../store";
 import { TypeQuizLevel } from "./TypeQuizLevel";
 
 export function TypeQuizContainer() {

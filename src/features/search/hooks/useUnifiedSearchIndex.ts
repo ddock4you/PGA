@@ -32,14 +32,14 @@ export function useUnifiedSearchIndex() {
 
   useEffect(() => {
     if (cachedUnifiedSearchIndex) {
-      setData(cachedUnifiedSearchIndex);
-      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
 
-    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(true);
+    }, 0);
     loadUnifiedSearchIndex()
       .then((index) => {
         if (!isMounted) return;

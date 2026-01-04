@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";
@@ -80,7 +81,14 @@ export function PokemonDetailOverview({ pokemon, species, language }: PokemonDet
     <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
       <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-xl border bg-muted sm:w-40">
         {imageUrl ? (
-          <img src={imageUrl} alt={name} className="h-full w-full object-contain p-2" />
+          <Image
+            src={imageUrl}
+            alt={name}
+            width={160}
+            height={160}
+            className="h-full w-full object-contain p-2"
+            unoptimized
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
             No Image

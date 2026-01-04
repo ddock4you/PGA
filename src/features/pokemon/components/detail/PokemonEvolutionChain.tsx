@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { getEvolutionTriggerKorean, getTimeOfDayKorean } from "@/utils/dataTransforms";
 import type { PokeApiEvolutionChain, PokeApiEvolutionChainLink } from "../../api/pokemonApi";
+import type { CsvPokemonSpeciesName, CsvItem } from "@/types/csvTypes";
 
 interface PokemonEvolutionChainProps {
   chain: PokeApiEvolutionChain;
@@ -38,8 +40,8 @@ function EvolutionNode({
   items,
 }: {
   node: PokeApiEvolutionChainLink;
-  pokemonNames: any[];
-  items: any[];
+  pokemonNames: CsvPokemonSpeciesName[];
+  items: CsvItem[];
 }) {
   const idMatch = node.species.url.match(/\/pokemon-species\/(\d+)\//);
   const id = idMatch ? parseInt(idMatch[1], 10) : 0;
@@ -59,7 +61,13 @@ function EvolutionNode({
         className="flex flex-col items-center gap-2 rounded-lg border p-3 transition hover:bg-muted/50 min-w-[100px]"
       >
         <div className="h-16 w-16">
-          <img src={spriteUrl} alt={koreanName} className="h-full w-full object-contain" />
+          <Image
+            src={spriteUrl}
+            alt={koreanName}
+            width={64}
+            height={64}
+            className="h-full w-full object-contain"
+          />
         </div>
         <span className="text-xs font-medium capitalize">{koreanName}</span>
       </Link>
@@ -100,7 +108,7 @@ function EvolutionNode({
 
 function getEvolutionTriggerText(
   detail: PokeApiEvolutionChainLink["evolution_details"][0],
-  items: any[]
+  items: CsvItem[]
 ) {
   const parts = [];
 

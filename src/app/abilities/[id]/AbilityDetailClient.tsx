@@ -10,26 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
-
-type AbilityEffectEntry = {
-  language: { name: string };
-  effect?: string;
-  short_effect?: string;
-};
-
-type AbilityFlavorTextEntry = {
-  language: { name: string };
-  version_group: { name: string };
-  flavor_text: string;
-};
-
-type AbilityPokemonEntry = {
-  is_hidden: boolean;
-  pokemon: { name: string; url: string };
-};
+import type { Ability, AbilityEffectEntry } from "@/types/pokeapi";
 
 interface AbilityDetailClientProps {
-  ability: any;
+  ability: Ability;
 }
 
 export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
@@ -84,7 +68,7 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
   const { effect } = getEffectText(ability.effect_entries);
   const abilityDisplayName = getLocalizedAbilityName(ability);
   // 한국어 flavor_text_entries 중 가장 최신 버전그룹 선택
-  const flavorTextEntries = ability.flavor_text_entries as AbilityFlavorTextEntry[];
+  const flavorTextEntries = ability.flavor_text_entries;
 
   const flavorTextEntry =
     flavorTextEntries
@@ -136,7 +120,7 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {(ability.pokemon as AbilityPokemonEntry[]).map((p) => {
+              {ability.pokemon.map((p) => {
                 const displayName = getPokemonDisplayName(p.pokemon);
                 const portrait = getArtworkUrl(p.pokemon);
                 const match = p.pokemon.url.match(/\/pokemon\/(\d+)\//);

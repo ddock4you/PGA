@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useQuizContext } from "../../store";
 import { useQuizNavigation } from "../../hooks/useQuizNavigation";
 import { useQuizGenerator } from "../../hooks/useQuizGenerator";

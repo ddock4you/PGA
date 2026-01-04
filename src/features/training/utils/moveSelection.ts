@@ -110,7 +110,7 @@ export function selectBestMove(
     // 폴백: x1.5 이상으로 시도
     const fallbackTypes: Array<{ typeId: number; englishType: string; multiplier: number }> = [];
 
-    Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr, koreanName]) => {
+    Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr]) => {
       const typeId = Number(typeIdStr);
       const englishType = idToEnglishType[typeId];
 
@@ -136,7 +136,7 @@ export function selectBestMove(
       const finalFallbackTypes: Array<{ typeId: number; englishType: string; multiplier: number }> =
         [];
 
-      Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr, koreanName]) => {
+      Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr]) => {
         const typeId = Number(typeIdStr);
         const englishType = idToEnglishType[typeId];
 
@@ -280,7 +280,7 @@ export function generateMoveChoicesLv2(
     [];
   const lowMultiplierTypes: Array<{ typeId: number; englishType: string; multiplier: number }> = [];
 
-  Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr, koreanName]) => {
+  Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr]) => {
     const typeId = Number(typeIdStr);
     const englishType = Object.keys(TYPE_ID_TO_KOREAN_NAME).find(
       (key) => TYPE_ID_TO_KOREAN_NAME[Number(key)] === koreanName

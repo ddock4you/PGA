@@ -34,10 +34,6 @@ export function TypeQuizLevel() {
 
           // 2개 선택되면 자동 제출
           if (newSelected.length === 2) {
-            const correctTypes = state.question?.pokemonData?.types || [];
-            const isCorrect =
-              correctTypes.length === newSelected.length &&
-              correctTypes.every((type) => newSelected.includes(type));
             actions.submitAnswer(newSelected.join(","));
           }
         }
@@ -45,8 +41,6 @@ export function TypeQuizLevel() {
     } else {
       // 단일 타입: 클릭하면 바로 제출
       setSelectedTypes([typeId]);
-      const correctTypes = state.question?.pokemonData?.types || [];
-      const isCorrect = correctTypes.includes(typeId);
       actions.submitAnswer(typeId);
     }
   };

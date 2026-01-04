@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchItem } from "@/features/items/api/itemsApi";
 import { ItemDetailClient } from "./ItemDetailClient";
+import type { Item } from "@/types/pokeapi";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -9,16 +10,16 @@ interface PageProps {
 
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
   try {
-    const { id } = await params;
     const item = await fetchItem(id);
 
     // 한국어 이름 찾기 (임시로 영문 사용 - 추후 한국어 매핑 적용)
     const koreanName = item.name;
 
     const description =
-      item.effect_entries?.find((e: any) => e.language.name === "ko")?.short_effect ||
-      item.effect_entries?.find((e: any) => e.language.name === "en")?.short_effect ||
+      item.effect_entries?.find((entry) => entry.language.name === "ko")?.short_effect ||
+      item.effect_entries?.find((entry) => entry.language.name === "en")?.short_effect ||
       `${koreanName} 도구의 상세 정보`;
 
     const structuredData = {
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         "structured-data": JSON.stringify(structuredData),
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: "도구 정보",
       description: "도구의 상세 정보를 확인하세요.",
@@ -71,12 +72,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 서버 사이드 데이터 prefetch
 export default async function ItemDetailPage({ params }: PageProps) {
-  try {
-    const { id } = await params;
-    const item = await fetchItem(id);
+  const { id } = await params;
 
-    return <ItemDetailClient item={item} />;
-  } catch (error) {
+  let item: Item;
+  try {
+    item = await fetchItem(id);
+  } catch {
     notFound();
   }
+
+  return <ItemDetailClient item={item} />;
 }

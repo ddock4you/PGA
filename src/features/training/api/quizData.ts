@@ -9,9 +9,7 @@ import {
   transformPokemonForDex,
   GENERATION_POKEMON_RANGES,
   TYPE_ID_TO_KOREAN_NAME,
-  getTypeName,
 } from "@/utils/dataTransforms";
-import type { CsvMove } from "@/types/csvTypes";
 
 export interface QuizPokemon {
   id: number;

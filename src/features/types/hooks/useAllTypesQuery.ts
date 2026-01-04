@@ -31,13 +31,13 @@ export function useAllTypesQuery() {
 
   useEffect(() => {
     if (cachedTypes) {
-      setData(cachedTypes);
-      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
-    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(true);
+    }, 0);
 
     loadAllTypes()
       .then((types) => {

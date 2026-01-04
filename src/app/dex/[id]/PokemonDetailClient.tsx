@@ -8,6 +8,12 @@ import { PokemonDetailHeader } from "@/features/pokemon/components/detail/Pokemo
 import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
 import { PokemonDetailTabs } from "@/features/pokemon/components/detail/PokemonDetailTabs";
 import { smoothScrollToElement, SCROLL_CONSTANTS } from "@/hooks/useSmoothScroll";
+import type {
+  PokeApiEncounter,
+  PokeApiEvolutionChain,
+  PokeApiPokemon,
+  PokeApiPokemonSpecies,
+} from "@/features/pokemon/api/pokemonApi";
 
 // 스크롤 관련 설정 (공통 hook에서 가져옴)
 // 필요시 SCROLL_CONSTANTS를 직접 수정하거나 다른 값 사용 가능
@@ -15,10 +21,10 @@ const SCROLL_DURATION = SCROLL_CONSTANTS.DEFAULT_DURATION;
 const SCROLL_DELAY = SCROLL_CONSTANTS.TAB_SWITCH_DELAY;
 
 interface PokemonDetailClientProps {
-  pokemon: any;
-  species: any;
-  evolutionChain?: any;
-  encounters?: any;
+  pokemon: PokeApiPokemon;
+  species: PokeApiPokemonSpecies;
+  evolutionChain?: PokeApiEvolutionChain;
+  encounters?: PokeApiEncounter[];
 }
 
 export function PokemonDetailClient({
@@ -29,18 +35,19 @@ export function PokemonDetailClient({
 }: PokemonDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState("overview");
+  const initialTab = searchParams.get("scrollTo") === "obtaining-methods" ? "info" : "overview";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const language = "ko";
   // URL 쿼리 파라미터에서 스크롤 타겟 확인 및 처리
   useEffect(() => {
     const scrollTo = searchParams.get("scrollTo");
 
     if (scrollTo === "obtaining-methods") {
-      setActiveTab("info");
-
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         smoothScrollToElement("obtaining-methods", SCROLL_DURATION);
       }, SCROLL_DELAY);
+
+      return () => clearTimeout(timer);
     }
   }, [searchParams]);
 

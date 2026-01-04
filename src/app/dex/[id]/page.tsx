@@ -9,6 +9,12 @@ import {
 import { PokemonDetailClient } from "./PokemonDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
 import { loadDexCsvData } from "@/lib/dexCsvData";
+import type {
+  PokeApiEncounter,
+  PokeApiEvolutionChain,
+  PokeApiPokemon,
+  PokeApiPokemonSpecies,
+} from "@/features/pokemon/api/pokemonApi";
 
 interface PageProps {
   params: Promise<{
@@ -18,13 +24,13 @@ interface PageProps {
 
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+
   try {
-    const resolvedParams = await params;
-    const { id } = resolvedParams;
     const [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
 
     const koreanName =
-      species.names.find((name: any) => name.language.name === "ko")?.name || pokemon.name;
+      species.names.find((name) => name.language.name === "ko")?.name || pokemon.name;
     const koreanFlavorText = species.flavor_text_entries.find(
       (entry) => entry.language.name === "ko"
     )?.flavor_text;
@@ -83,12 +89,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
       other: {
         "article:section": "포켓몬",
-        "article:tag": pokemon.types.map((t: any) => t.type.name).join(", "),
+        "article:tag": pokemon.types.map((t) => t.type.name).join(", "),
         "article:published_time": species.generation?.name || "unknown",
         "structured-data": JSON.stringify(jsonLd),
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: "포켓몬 정보 - 포켓몬 도감",
       description: "포켓몬 상세 정보를 확인하세요.",
@@ -100,25 +106,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PokemonDetailPage({ params }: PageProps) {
   const { id } = await params;
 
+  let pokemon: PokeApiPokemon;
+  let species: PokeApiPokemonSpecies;
+  let evolutionChain: PokeApiEvolutionChain | undefined;
+  let encounters: PokeApiEncounter[];
+
   try {
-    const [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
-    const evolutionChain = species.evolution_chain?.url
+    [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
+    evolutionChain = species.evolution_chain?.url
       ? await fetchEvolutionChain(species.evolution_chain.url)
       : undefined;
-    const encounters = await fetchPokemonEncounters(id);
-    const csvData = await loadDexCsvData();
-
-    return (
-      <DexCsvDataProvider data={csvData}>
-        <PokemonDetailClient
-          pokemon={pokemon}
-          species={species}
-          evolutionChain={evolutionChain}
-          encounters={encounters}
-        />
-      </DexCsvDataProvider>
-    );
-  } catch (error) {
+    encounters = await fetchPokemonEncounters(id);
+  } catch {
     notFound();
   }
+
+  const csvData = await loadDexCsvData();
+
+  return (
+    <DexCsvDataProvider data={csvData}>
+      <PokemonDetailClient
+        pokemon={pokemon}
+        species={species}
+        evolutionChain={evolutionChain}
+        encounters={encounters}
+      />
+    </DexCsvDataProvider>
+  );
 }

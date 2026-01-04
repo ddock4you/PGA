@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchAbility } from "@/features/abilities/api/abilitiesApi";
+import type { PokeApiAbility } from "@/features/abilities/api/abilitiesApi";
 import { getLocalizedAbilityName } from "@/features/abilities/utils/localization";
 import { AbilityDetailClient } from "./AbilityDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
@@ -12,14 +13,15 @@ interface PageProps {
 
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+
   try {
-    const { id } = await params;
     const ability = await fetchAbility(id);
 
     const koreanName = getLocalizedAbilityName(ability);
     const description =
-      ability.effect_entries?.find((e: any) => e.language.name === "ko")?.short_effect ||
-      ability.effect_entries?.find((e: any) => e.language.name === "en")?.short_effect ||
+      ability.effect_entries?.find((entry) => entry.language.name === "ko")?.short_effect ||
+      ability.effect_entries?.find((entry) => entry.language.name === "en")?.short_effect ||
       `${koreanName} 특성의 상세 정보`;
 
     const structuredData = {
@@ -61,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         "structured-data": JSON.stringify(structuredData),
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: "특성 정보",
       description: "특성의 상세 정보를 확인하세요.",
@@ -71,17 +73,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 서버 사이드 데이터 prefetch
 export default async function AbilityDetailPage({ params }: PageProps) {
-  try {
-    const { id } = await params;
-    const ability = await fetchAbility(id);
-    const csvData = await loadDexCsvData();
+  const { id } = await params;
 
-    return (
-      <DexCsvDataProvider data={csvData}>
-        <AbilityDetailClient ability={ability} />
-      </DexCsvDataProvider>
-    );
-  } catch (error) {
+  let ability: PokeApiAbility;
+  try {
+    ability = await fetchAbility(id);
+  } catch {
     notFound();
   }
+
+  const csvData = await loadDexCsvData();
+
+  return (
+    <DexCsvDataProvider data={csvData}>
+      <AbilityDetailClient ability={ability} />
+    </DexCsvDataProvider>
+  );
 }

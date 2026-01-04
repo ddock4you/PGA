@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { GameGenerationModal } from "./GameGenerationModal";
@@ -21,11 +21,13 @@ export function GameGenerationSelector({
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true);
+    const timer = window.setTimeout(() => {
+      setHasMounted(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  // 현재 선택된 게임/세대 표시 텍스트
-  const displayText = useMemo(() => {
+  const displayText = (() => {
     if (!hasMounted) {
       return "게임/세대 선택";
     }
@@ -34,7 +36,6 @@ export function GameGenerationSelector({
       return state.selectedGenerationId ? `${state.selectedGenerationId}세대` : "세대 선택";
     }
 
-    // 게임 이름 찾기
     if (state.selectedGameId) {
       for (const generation of GENERATION_GAME_MAPPING) {
         const game = generation.versions.find((v) => v.id === state.selectedGameId);
@@ -45,7 +46,7 @@ export function GameGenerationSelector({
     }
 
     return "게임/세대 선택";
-  }, [state.selectedGenerationId, state.selectedGameId, showGenerationOnly]);
+  })();
 
   const handleSelect = (generationId: string, version: GameVersion) => {
     onGenerationSelect?.(generationId, version);

@@ -1,19 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
+import type { Item, ItemEffectEntry } from "@/types/pokeapi";
 
 interface ItemDetailClientProps {
-  item: any;
+  item: Item;
 }
 
 export function ItemDetailClient({ item }: ItemDetailClientProps) {
   const router = useRouter();
 
-  const getEffectText = (entries: typeof item.effect_entries) => {
+  const getEffectText = (entries: ItemEffectEntry[]) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
     return {
@@ -36,7 +38,13 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
       <header className="flex items-start gap-4">
         <div className="size-16 flex items-center justify-center border rounded-md bg-muted">
           {item.sprites.default && (
-            <img src={item.sprites.default} alt={item.name} className="size-12 object-contain" />
+            <Image
+              src={item.sprites.default}
+              alt={item.name}
+              width={48}
+              height={48}
+              className="size-12 object-contain"
+            />
           )}
         </div>
         <div>

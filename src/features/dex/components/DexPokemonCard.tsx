@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TYPE_COLORS, getEnglishTypeName } from "@/utils/dataTransforms";
@@ -26,7 +27,14 @@ export function DexPokemonCard(props: DexPokemonCardProps) {
     >
       <CardContent className="flex items-center gap-3 py-3">
         <div className="flex size-12 items-center justify-center rounded-md bg-muted text-[10px] text-muted-foreground overflow-hidden">
-          <img src={spriteUrl} alt={name} className="h-full w-full object-contain" loading="lazy" />
+          <Image
+            src={spriteUrl}
+            alt={name}
+            width={60}
+            height={60}
+            className="h-full w-full object-contain"
+            priority={false}
+          />
         </div>
         <div className="flex-1 space-y-1">
           <p className="text-xs text-muted-foreground">{number}</p>
