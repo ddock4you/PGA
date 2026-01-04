@@ -1,9 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useQuizContext } from "../store";
 import { loadQuizData, type QuizPokemon, type QuizMove } from "../api/quizData";
 import type { QuizOptions, QuizQuestion, QuizChoiceData } from "../store/types";
 import {
-  computeDefenseEffectivenessDetail,
   buildTypeMap,
   type TypeMap,
   computeAttackMultiplier,
@@ -138,7 +137,8 @@ export function useQuizGenerator() {
               state.options,
               typeMap,
               quizData.pokemons,
-              quizData.moves
+              quizData.moves,
+              state.askedPokemonIds
             );
           } else if (state.level === 3) {
             // Lv3 추가 예정
@@ -146,17 +146,18 @@ export function useQuizGenerator() {
               state.options,
               typeMap,
               quizData.pokemons,
-              quizData.moves
+              quizData.moves,
+              state.askedPokemonIds
             );
           }
-        } else if (state.mode === "defense") {
-          // 방어 모드도 나중에 개편 필요하면 추가
-          // 현재는 Attack 모드 개편이 우선
         } else if (state.mode === "type") {
-          question = generateTypeQuiz(state.options, quizData.pokemons);
+          question = generateTypeQuiz(state.options, quizData.pokemons, state.askedPokemonIds);
         }
 
         if (question) {
+          if (question.pokemonData?.id) {
+            actions.addAskedPokemon(question.pokemonData.id);
+          }
           actions.setQuestion(question);
         } else {
           actions.setError("문제를 생성할 수 없습니다.");
@@ -179,6 +180,7 @@ export function useQuizGenerator() {
     state.level,
     state.options,
     isGenerating,
+    state.askedPokemonIds,
   ]);
 }
 
@@ -273,7 +275,8 @@ function generateAttackLevel2(
   options: QuizOptions,
   typeMap: TypeMap,
   pokemons: QuizPokemon[],
-  moves: QuizMove[]
+  moves: QuizMove[],
+  askedPokemonIds: number[]
 ): QuizQuestion {
   // 1. 포켓몬 필터링 (세대 등)
   let candidates = pokemons;
@@ -298,7 +301,9 @@ function generateAttackLevel2(
   if (candidates.length === 0) candidates = pokemons; // fallback
 
   // 2. 포켓몬 선택
-  const pokemon = candidates[Math.floor(Math.random() * candidates.length)];
+  const unused = candidates.filter((p) => !askedPokemonIds.includes(p.id));
+  const pool = unused.length > 0 ? unused : candidates;
+  const pokemon = pool[Math.floor(Math.random() * pool.length)];
   const defTypesEn = pokemon.types.map(toEnglishType);
 
   // 3. 정답 타입 후보 찾기 (2배 이상)
@@ -314,7 +319,7 @@ function generateAttackLevel2(
 
   if (effectiveTypes.length === 0) {
     // 약점이 없는 포켓몬(저리더프 등)은 재시도
-    return generateAttackLevel2(options, typeMap, pokemons, moves);
+    return generateAttackLevel2(options, typeMap, pokemons, moves, askedPokemonIds);
   }
 
   // 4. 정답 선택 (타입)
@@ -325,7 +330,7 @@ function generateAttackLevel2(
   const validMoves = moves.filter((m) => m.type === answerTypeKo);
   if (validMoves.length === 0) {
     // 해당 타입 기술이 데이터에 없으면 재시도
-    return generateAttackLevel2(options, typeMap, pokemons, moves);
+    return generateAttackLevel2(options, typeMap, pokemons, moves, askedPokemonIds);
   }
   const answerMove = validMoves[Math.floor(Math.random() * validMoves.length)];
 
@@ -398,7 +403,8 @@ function generateAttackLevel3(
   options: QuizOptions,
   typeMap: TypeMap,
   pokemons: QuizPokemon[],
-  moves: QuizMove[]
+  moves: QuizMove[],
+  askedPokemonIds: number[]
 ): QuizQuestion {
   // 로직은 Lv2와 유사하지만 정답 조건이 0.25배 이상 & 가장 높은 배율
   // 1. 포켓몬 필터링 및 선택
@@ -421,7 +427,9 @@ function generateAttackLevel3(
   }
   if (candidates.length === 0) candidates = pokemons;
 
-  const pokemon = candidates[Math.floor(Math.random() * candidates.length)];
+  const unused = candidates.filter((p) => !askedPokemonIds.includes(p.id));
+  const pool = unused.length > 0 ? unused : candidates;
+  const pokemon = pool[Math.floor(Math.random() * pool.length)];
   const defTypesEn = pokemon.types.map(toEnglishType);
 
   // 2. 모든 타입의 배율 계산
@@ -439,7 +447,7 @@ function generateAttackLevel3(
   if (maxMultiplier < 0.25) {
     // 최고 배율조차 0.25 미만(0배 등)이면 문제 성립 어려움 (효과가 없는데 정답이라니?)
     // 재시도
-    return generateAttackLevel3(options, typeMap, pokemons, moves);
+    return generateAttackLevel3(options, typeMap, pokemons, moves, askedPokemonIds);
   }
 
   const bestTypes = typeMultipliers.filter((t) => t.multiplier === maxMultiplier);
@@ -449,7 +457,7 @@ function generateAttackLevel3(
   // 4. 정답 기술 선택
   const validMoves = moves.filter((m) => m.type === answerTypeKo);
   if (validMoves.length === 0) {
-    return generateAttackLevel3(options, typeMap, pokemons, moves);
+    return generateAttackLevel3(options, typeMap, pokemons, moves, askedPokemonIds);
   }
   const answerMove = validMoves[Math.floor(Math.random() * validMoves.length)];
 
@@ -518,7 +526,11 @@ function generateAttackLevel3(
   };
 }
 
-function generateTypeQuiz(options: QuizOptions, pokemons: QuizPokemon[]): QuizQuestion {
+function generateTypeQuiz(
+  options: QuizOptions,
+  pokemons: QuizPokemon[],
+  askedPokemonIds: number[]
+): QuizQuestion {
   // 1. 세대 필터링
   let candidates = pokemons;
   if (options.generationSelection) {
@@ -538,8 +550,11 @@ function generateTypeQuiz(options: QuizOptions, pokemons: QuizPokemon[]): QuizQu
   }
   if (candidates.length === 0) candidates = pokemons;
 
+  const unused = candidates.filter((p) => !askedPokemonIds.includes(p.id));
+  const pool = unused.length > 0 ? unused : candidates;
+
   // 2. 랜덤 포켓몬 선택
-  const pokemon = candidates[Math.floor(Math.random() * candidates.length)];
+  const pokemon = pool[Math.floor(Math.random() * pool.length)];
 
   // 3. 문제 생성
   const isDualType = pokemon.types.length === 2;

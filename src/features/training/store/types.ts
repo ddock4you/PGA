@@ -1,4 +1,4 @@
-export type QuizMode = "attack" | "defense" | "type";
+export type QuizMode = "attack" | "type";
 export type QuizLevel = 1 | 2 | 3;
 export type QuizScreen = "start" | "playing" | "finished";
 
@@ -55,6 +55,7 @@ export interface QuizState {
   question: QuizQuestion | null;
   isLoading: boolean;
   error: string | null;
+  askedPokemonIds: number[];
 }
 
 export type QuizAction =
@@ -68,6 +69,7 @@ export type QuizAction =
   | { type: "SET_QUESTION"; payload: QuizQuestion | null }
   | { type: "SUBMIT_ANSWER"; payload: string }
   | { type: "NEXT_QUESTION" }
+  | { type: "ADD_ASKED_POKEMON"; payload: number }
   | { type: "RESET_QUIZ" };
 
 export interface QuizContextType {
@@ -83,6 +85,7 @@ export interface QuizContextType {
     setQuestion: (question: QuizQuestion | null) => void;
     submitAnswer: (choice: string) => void;
     nextQuestion: () => void;
+    addAskedPokemon: (pokemonId: number) => void;
     resetQuiz: () => void;
   };
 }

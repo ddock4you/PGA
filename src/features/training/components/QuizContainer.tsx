@@ -2,7 +2,6 @@ import { useQuizContext } from "../store";
 import { QuizStartScreen } from "./QuizStartScreen";
 import { QuizFinishedScreen } from "./QuizFinishedScreen";
 import { AttackQuizContainer } from "./attack/AttackQuizContainer";
-import { DefenseQuizContainer } from "./defense/DefenseQuizContainer";
 import { TypeQuizContainer } from "./type/TypeQuizContainer";
 
 export function QuizContainer() {
@@ -16,8 +15,6 @@ export function QuizContainer() {
     case "playing":
       if (state.mode === "attack") {
         return <AttackQuizContainer />;
-      } else if (state.mode === "defense") {
-        return <DefenseQuizContainer />;
       } else if (state.mode === "type") {
         return <TypeQuizContainer />;
       }

@@ -28,7 +28,16 @@ const initialState: QuizState = {
   question: null,
   isLoading: false,
   error: null,
+  askedPokemonIds: [],
 };
+
+const normalizeTypeAnswer = (answer: string) =>
+  answer
+    .split(",")
+    .map((type) => type.trim())
+    .filter(Boolean)
+    .sort()
+    .join(",");
 
 function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -73,6 +82,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
         question: null,
         isLoading: true,
         error: null,
+        askedPokemonIds: [],
       };
 
     case "SET_LOADING":
@@ -101,7 +111,11 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
     case "SUBMIT_ANSWER":
       if (!state.question) return state;
 
-      const isCorrect = action.payload === state.question.correctAnswer;
+      const isTypeMode = state.mode === "type";
+      const submittedAnswer = action.payload;
+      const isCorrect = isTypeMode
+        ? normalizeTypeAnswer(submittedAnswer) === normalizeTypeAnswer(state.question.correctAnswer)
+        : submittedAnswer === state.question.correctAnswer;
       return {
         ...state,
         selectedChoice: action.payload,
@@ -121,6 +135,15 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
         isCorrect: null,
         question: null,
         isLoading: !isFinished,
+      };
+
+    case "ADD_ASKED_POKEMON":
+      if (state.askedPokemonIds.includes(action.payload)) {
+        return state;
+      }
+      return {
+        ...state,
+        askedPokemonIds: [...state.askedPokemonIds, action.payload],
       };
 
     case "RESET_QUIZ":
@@ -176,6 +199,10 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
     nextQuestion: () => {
       dispatch({ type: "NEXT_QUESTION" });
+    },
+
+    addAskedPokemon: (pokemonId: number) => {
+      dispatch({ type: "ADD_ASKED_POKEMON", payload: pokemonId });
     },
 
     resetQuiz: () => {

@@ -18,11 +18,6 @@ function QuizModeSelector({ selectedMode, onModeChange }: QuizModeSelectorProps)
       description: "효과적인 공격 타입을 맞춰보세요",
     },
     {
-      key: "defense" as const,
-      label: "방어 상성 맞추기",
-      description: "효과적으로 막을 수 있는 타입을 맞춰보세요",
-    },
-    {
       key: "type" as const,
       label: "포켓몬 속성 맞추기",
       description: "포켓몬의 타입을 맞춰보세요",

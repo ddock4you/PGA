@@ -22,14 +22,12 @@ export function QuizFinishedScreen() {
 
   const getQuizTitle = () => {
     if (state.mode === "attack") return "공격 상성 맞추기";
-    if (state.mode === "defense") return "방어 상성 맞추기";
     if (state.mode === "type") return "포켓몬 속성 맞추기";
     return "퀴즈";
   };
 
   const getQuizBadgeText = () => {
     if (state.mode === "attack") return "공격 상성";
-    if (state.mode === "defense") return "방어 상성";
     if (state.mode === "type") return "포켓몬 속성";
     return "퀴즈";
   };

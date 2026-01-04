@@ -10,8 +10,6 @@ export { QuizAnswerButtons } from "./components/QuizAnswerButtons";
 
 // Quiz type components
 export { AttackQuizContainer } from "./components/attack/AttackQuizContainer";
-export { DefenseQuizContainer } from "./components/defense/DefenseQuizContainer";
-
 // Hook exports
 export { useQuizNavigation } from "./hooks/useQuizNavigation";
 export { useQuizOptions } from "./hooks/useQuizOptions";
