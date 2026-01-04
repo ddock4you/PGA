@@ -1,6 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,20 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { transformMovesForDex } from "@/utils/dataTransforms";
 import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { useLoadMore } from "@/hooks/useLoadMore";
+import { useListRestoration } from "@/hooks/useListRestoration";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
 import type { DexMoveSummary } from "@/utils/dataTransforms";
+import { saveListState } from "@/lib/listState";
 
 const ITEMS_PER_PAGE = 30;
 
@@ -30,7 +27,7 @@ export function MovesList() {
   const router = useRouter();
   const { state } = usePreferences();
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
 
   // 기본값은 1세대. Preferences 에 세대가 설정되어 있으면 그것을 우선 사용.
   const effectiveGenerationId = state.selectedGenerationId ?? "1";
@@ -70,24 +67,71 @@ export function MovesList() {
     });
   }, [localizedMoves, searchQuery]);
 
-  // 3. 페이지네이션 계산
-  const totalPages = Math.ceil(filteredMoves.length / ITEMS_PER_PAGE);
-  const paginatedMoves = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredMoves.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredMoves, currentPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  };
-
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // 검색 시 1페이지로 리셋
   };
 
+  const pathname = usePathname();
+  const chunkQueryKey = useMemo(
+    () => ["moves", effectiveGenerationId, searchQuery.trim()],
+    [effectiveGenerationId, searchQuery]
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handlePop = () => setNavigationType("pop");
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
+  useEffect(() => {
+    if (navigationType === "pop") {
+      const id = window.setTimeout(() => setNavigationType("push"), 0);
+      return () => window.clearTimeout(id);
+    }
+    return undefined;
+  }, [navigationType]);
+
+  const {
+    items,
+    totalPages,
+    totalCount,
+    currentPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isError: loadMoreError,
+  } = useLoadMore<DexMoveSummary>({
+    queryKey: chunkQueryKey,
+    enabled: !isCsvLoading && !isCsvError,
+    fetchPage: async (pageParam = 1) => {
+      const pageSize = ITEMS_PER_PAGE;
+      const count = filteredMoves.length;
+      const calculatedTotalPages = Math.max(1, Math.ceil(count / pageSize));
+      const start = (pageParam - 1) * pageSize;
+      return {
+        page: pageParam,
+        totalPages: calculatedTotalPages,
+        totalCount: count,
+        items: filteredMoves.slice(start, start + pageSize),
+      };
+    },
+  });
+
+  useListRestoration({
+    pathname,
+    currentPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    navigationType,
+  });
+
   const handleRowClick = (id: number) => {
+    if (typeof window !== "undefined") {
+      saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
+    }
+    setNavigationType("push");
     router.push(`/moves/${id}`);
   };
 
@@ -111,9 +155,7 @@ export function MovesList() {
         </p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            {filteredMoves.length}개의 기술을 볼 수 있습니다.
-          </p>
+          <p className="text-sm text-muted-foreground">{totalCount}개의 기술을 볼 수 있습니다.</p>
           <div className="rounded-md border card-move">
             <Table>
               <TableHeader>
@@ -127,7 +169,7 @@ export function MovesList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedMoves.length === 0 ? (
+                {items.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={6}
@@ -137,7 +179,7 @@ export function MovesList() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedMoves.map((move: DexMoveSummary) => {
+                  items.map((move: DexMoveSummary) => {
                     const displayName = move.displayName ?? move.name;
 
                     return (
@@ -165,35 +207,18 @@ export function MovesList() {
           </div>
 
           {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-
-                <PaginationItem>
-                  <div className="flex items-center px-4 text-sm">
-                    {currentPage} / {totalPages}
-                  </div>
-                </PaginationItem>
-
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <LoadMoreButton
+              currentPage={currentPage}
+              totalPages={totalPages}
+              hasNextPage={Boolean(hasNextPage)}
+              isLoading={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            />
+          )}
+          {loadMoreError && (
+            <p className="text-xs text-destructive">
+              추가 페이지를 불러오는 중 오류가 발생했습니다.
+            </p>
           )}
         </>
       )}

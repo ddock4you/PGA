@@ -1,6 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,24 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { transformItemsForDex } from "@/utils/dataTransforms";
+import { useLoadMore } from "@/hooks/useLoadMore";
+import { useListRestoration } from "@/hooks/useListRestoration";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
 import type { DexItemSummary } from "@/utils/dataTransforms";
+import { saveListState } from "@/lib/listState";
 
 const ITEMS_PER_PAGE = 30;
 
 export function ItemsList() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
 
   // 1. CSV 데이터 로딩
   const { itemsData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
@@ -44,23 +41,68 @@ export function ItemsList() {
   }, [allItems, searchQuery]);
 
   // 3. 페이지네이션 계산
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredItems.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredItems, currentPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  };
-
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1);
   };
 
+  const pathname = usePathname();
+  const chunkQueryKey = useMemo(() => ["items", searchQuery.trim()], [searchQuery]);
+
+  const {
+    items,
+    totalPages,
+    totalCount,
+    currentPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isError: loadMoreError,
+  } = useLoadMore<DexItemSummary>({
+    queryKey: chunkQueryKey,
+    enabled: !isCsvLoading && !isCsvError,
+    fetchPage: async (pageParam = 1) => {
+      const pageSize = ITEMS_PER_PAGE;
+      const count = filteredItems.length;
+      const totalPagesOfResults = Math.max(1, Math.ceil(count / pageSize));
+      const start = (pageParam - 1) * pageSize;
+      return {
+        page: pageParam,
+        totalPages: totalPagesOfResults,
+        totalCount: count,
+        items: filteredItems.slice(start, start + pageSize),
+      };
+    },
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handlePop = () => setNavigationType("pop");
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
+  useEffect(() => {
+    if (navigationType === "pop") {
+      const id = window.setTimeout(() => setNavigationType("push"), 0);
+      return () => window.clearTimeout(id);
+    }
+    return undefined;
+  }, [navigationType]);
+
+  useListRestoration({
+    pathname,
+    currentPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    navigationType,
+  });
+
   const handleRowClick = (id: number) => {
+    if (typeof window !== "undefined") {
+      saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
+    }
+    setNavigationType("push");
     router.push(`/items/${id}`);
   };
 
@@ -105,9 +147,7 @@ export function ItemsList() {
         </p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            {filteredItems.length}개의 도구를 볼 수 있습니다.
-          </p>
+          <p className="text-sm text-muted-foreground">{totalCount}개의 도구를 볼 수 있습니다.</p>
           <div className="rounded-md border card-item">
             <Table>
               <TableHeader>
@@ -119,7 +159,7 @@ export function ItemsList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedItems.length === 0 ? (
+                {items.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={4}
@@ -129,7 +169,7 @@ export function ItemsList() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedItems.map((item: DexItemSummary) => (
+                  items.map((item: DexItemSummary) => (
                     <TableRow
                       key={item.id}
                       className="cursor-pointer hover:bg-muted/50"
@@ -161,33 +201,18 @@ export function ItemsList() {
           </div>
 
           {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <div className="flex items-center px-4 text-sm">
-                    {currentPage} / {totalPages}
-                  </div>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <LoadMoreButton
+              currentPage={currentPage}
+              totalPages={totalPages}
+              hasNextPage={Boolean(hasNextPage)}
+              isLoading={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            />
+          )}
+          {loadMoreError && (
+            <p className="text-xs text-destructive">
+              추가 페이지를 불러오는 중 오류가 발생했습니다.
+            </p>
           )}
         </>
       )}
