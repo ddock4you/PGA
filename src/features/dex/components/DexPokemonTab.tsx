@@ -16,6 +16,8 @@ import { useListRestoration } from "@/hooks/useListRestoration";
 import type { DexFilters } from "../types/filterTypes";
 import { saveListState } from "@/lib/listState";
 
+type CsvPokemonRow = Parameters<typeof transformPokemonForDex>[0][number];
+
 export function DexPokemonTab() {
   const router = useRouter();
   const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
@@ -31,6 +33,40 @@ export function DexPokemonTab() {
     isError,
   } = useDexCsvData();
 
+  const pokemonTypesById = useMemo(() => {
+    const map = new Map<number, number[]>();
+    pokemonTypesData?.forEach((type) => {
+      const existing = map.get(type.pokemon_id);
+      if (existing) {
+        existing.push(type.type_id);
+      } else {
+        map.set(type.pokemon_id, [type.type_id]);
+      }
+    });
+    return map;
+  }, [pokemonTypesData]);
+
+  const pokemonAbilitiesById = useMemo(() => {
+    const map = new Map<number, number[]>();
+    pokemonAbilitiesData?.forEach((ability) => {
+      const existing = map.get(ability.pokemon_id);
+      if (existing) {
+        existing.push(ability.ability_id);
+      } else {
+        map.set(ability.pokemon_id, [ability.ability_id]);
+      }
+    });
+    return map;
+  }, [pokemonAbilitiesData]);
+
+  const pokemonById = useMemo(() => {
+    const map = new Map<number, CsvPokemonRow>();
+    pokemonData?.forEach((pokemon) => {
+      map.set(pokemon.id, pokemon);
+    });
+    return map;
+  }, [pokemonData]);
+
   const filteredPokemonSummaries = useMemo(
     () =>
       getFilteredPokemonSummaries({
@@ -38,6 +74,9 @@ export function DexPokemonTab() {
         pokemonTypesData,
         pokemonAbilitiesData,
         pokemonSpeciesNamesData,
+        pokemonTypesById,
+        pokemonAbilitiesById,
+        pokemonById,
         filters,
         searchQuery,
       }),
@@ -46,6 +85,9 @@ export function DexPokemonTab() {
       pokemonTypesData,
       pokemonAbilitiesData,
       pokemonSpeciesNamesData,
+      pokemonTypesById,
+      pokemonAbilitiesById,
+      pokemonById,
       filters,
       searchQuery,
     ]
@@ -216,6 +258,9 @@ function getFilteredPokemonSummaries({
   pokemonTypesData,
   pokemonAbilitiesData,
   pokemonSpeciesNamesData,
+  pokemonTypesById,
+  pokemonAbilitiesById,
+  pokemonById,
   filters,
   searchQuery,
 }: {
@@ -223,6 +268,9 @@ function getFilteredPokemonSummaries({
   pokemonTypesData?: Parameters<typeof transformPokemonForDex>[1];
   pokemonAbilitiesData?: Parameters<typeof transformPokemonForDex>[2];
   pokemonSpeciesNamesData?: Parameters<typeof transformPokemonForDex>[3];
+  pokemonTypesById: Map<number, number[]>;
+  pokemonAbilitiesById: Map<number, number[]>;
+  pokemonById: Map<number, CsvPokemonRow>;
   filters: DexFilters;
   searchQuery: string;
 }) {
@@ -259,16 +307,15 @@ function getFilteredPokemonSummaries({
 
   if (filters.selectedTypes.length > 0) {
     filteredPokemon = filteredPokemon.filter((p) => {
-      const pokemonTypes = pokemonTypesData.filter((pt) => pt.pokemon_id === p.id);
-      const pokemonTypeIds = pokemonTypes.map((pt) => pt.type_id);
+      const pokemonTypeIds = pokemonTypesById.get(p.id) ?? [];
       return filters.selectedTypes.some((typeId) => pokemonTypeIds.includes(typeId));
     });
   }
 
   if (filters.selectedAbilityId) {
     filteredPokemon = filteredPokemon.filter((p) => {
-      const pokemonAbilities = pokemonAbilitiesData.filter((pa) => pa.pokemon_id === p.id);
-      return pokemonAbilities.some((pa) => pa.ability_id === filters.selectedAbilityId);
+      const pokemonAbilityIds = pokemonAbilitiesById.get(p.id) ?? [];
+      return pokemonAbilityIds.includes(filters.selectedAbilityId);
     });
   }
 
@@ -282,7 +329,7 @@ function getFilteredPokemonSummaries({
     const query = searchQuery.trim().toLowerCase();
     summaries = summaries.filter((p) => {
       const koreanMatch = p.name.toLowerCase().includes(query);
-      const pokemon = pokemonData.find((pd) => pd.id === p.id);
+      const pokemon = pokemonById.get(p.id);
       const englishMatch = pokemon ? pokemon.identifier.toLowerCase().includes(query) : false;
       return koreanMatch || englishMatch;
     });
@@ -290,8 +337,8 @@ function getFilteredPokemonSummaries({
 
   if (!filters.sortByWeight && !filters.sortByHeight && !filters.sortByDexNumber) {
     summaries.sort((a, b) => {
-      const aPokemon = pokemonData.find((p) => p.id === a.id);
-      const bPokemon = pokemonData.find((p) => p.id === b.id);
+      const aPokemon = pokemonById.get(a.id);
+      const bPokemon = pokemonById.get(b.id);
 
       if (!aPokemon || !bPokemon) return 0;
 
@@ -307,8 +354,8 @@ function getFilteredPokemonSummaries({
 
   if (filters.sortByWeight) {
     summaries.sort((a, b) => {
-      const aPokemon = pokemonData.find((p) => p.id === a.id);
-      const bPokemon = pokemonData.find((p) => p.id === b.id);
+      const aPokemon = pokemonById.get(a.id);
+      const bPokemon = pokemonById.get(b.id);
       if (!aPokemon || !bPokemon) return 0;
 
       const comparison = aPokemon.weight - bPokemon.weight;
@@ -316,8 +363,8 @@ function getFilteredPokemonSummaries({
     });
   } else if (filters.sortByHeight) {
     summaries.sort((a, b) => {
-      const aPokemon = pokemonData.find((p) => p.id === a.id);
-      const bPokemon = pokemonData.find((p) => p.id === b.id);
+      const aPokemon = pokemonById.get(a.id);
+      const bPokemon = pokemonById.get(b.id);
       if (!aPokemon || !bPokemon) return 0;
 
       const comparison = aPokemon.height - bPokemon.height;

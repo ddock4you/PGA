@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 type Theme = "light" | "dark";
@@ -94,36 +94,58 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     }
   }, [state]);
 
+  const setTheme = useCallback((theme: Theme) => {
+    setState((prev) => ({
+      ...prev,
+      theme,
+    }));
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      theme: prev.theme === "dark" ? "light" : "dark",
+    }));
+  }, []);
+
+  const setSelectedGameId = useCallback((gameId: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      selectedGameId: gameId,
+    }));
+  }, []);
+
+  const setSelectedGenerationId = useCallback((generationId: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      selectedGenerationId: generationId,
+    }));
+  }, []);
+
+  const setSelectedVersionGroup = useCallback((group: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      selectedVersionGroup: group,
+    }));
+  }, []);
+
   const value = useMemo<PreferencesContextValue>(
     () => ({
       state,
-      setTheme: (theme) =>
-        setState((prev) => ({
-          ...prev,
-          theme,
-        })),
-      toggleTheme: () =>
-        setState((prev) => ({
-          ...prev,
-          theme: prev.theme === "dark" ? "light" : "dark",
-        })),
-      setSelectedGameId: (gameId) =>
-        setState((prev) => ({
-          ...prev,
-          selectedGameId: gameId,
-        })),
-      setSelectedGenerationId: (generationId) =>
-        setState((prev) => ({
-          ...prev,
-          selectedGenerationId: generationId,
-        })),
-      setSelectedVersionGroup: (group) =>
-        setState((prev) => ({
-          ...prev,
-          selectedVersionGroup: group,
-        })),
+      setTheme,
+      toggleTheme,
+      setSelectedGameId,
+      setSelectedGenerationId,
+      setSelectedVersionGroup,
     }),
-    [state]
+    [
+      state,
+      setTheme,
+      toggleTheme,
+      setSelectedGameId,
+      setSelectedGenerationId,
+      setSelectedVersionGroup,
+    ]
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

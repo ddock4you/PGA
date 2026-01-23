@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useMemo, useReducer } from "react";
 import type { ReactNode } from "react";
 import type {
   QuizContextType,
@@ -160,7 +160,8 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
 export function QuizProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(quizReducer, initialState);
 
-  const actions = {
+  const actions = useMemo(
+    () => ({
     setMode: (mode: QuizMode) => {
       dispatch({ type: "SET_MODE", payload: mode });
     },
@@ -205,10 +206,12 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "ADD_ASKED_POKEMON", payload: pokemonId });
     },
 
-    resetQuiz: () => {
-      dispatch({ type: "RESET_QUIZ" });
-    },
-  };
+      resetQuiz: () => {
+        dispatch({ type: "RESET_QUIZ" });
+      },
+    }),
+    [dispatch]
+  );
 
   const contextValue: QuizContextType = {
     state,

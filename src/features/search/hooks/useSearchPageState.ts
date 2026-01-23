@@ -9,7 +9,10 @@ import {
 import { usePreferences } from "@/features/preferences/PreferencesContext";
 import { useUnifiedSearchIndex } from "@/features/search/hooks/useUnifiedSearchIndex";
 import { filterUnifiedEntriesByQuery } from "@/features/search/utils/searchLogic";
-import type { UnifiedSearchIndex } from "@/features/search/types/unifiedSearchTypes";
+import type {
+  UnifiedSearchEntry,
+  UnifiedSearchIndex,
+} from "@/features/search/types/unifiedSearchTypes";
 import { buildSearchQueryString, parseSearchQueryString } from "@/lib/utils";
 
 export type TabType = "all" | "pokemon" | "moves" | "abilities" | "items";
@@ -62,12 +65,33 @@ export function useSearchPageState() {
 
     const allResults = filterUnifiedEntriesByQuery(unifiedSearchIndex, parsed.q);
 
-    return {
-      pokemon: allResults.filter((entry) => entry.category === "pokemon"),
-      moves: allResults.filter((entry) => entry.category === "move"),
-      abilities: allResults.filter((entry) => entry.category === "ability"),
-      items: allResults.filter((entry) => entry.category === "item"),
+    const categorized = {
+      pokemon: [] as UnifiedSearchEntry[],
+      moves: [] as UnifiedSearchEntry[],
+      abilities: [] as UnifiedSearchEntry[],
+      items: [] as UnifiedSearchEntry[],
     };
+
+    for (const entry of allResults) {
+      switch (entry.category) {
+        case "pokemon":
+          categorized.pokemon.push(entry);
+          break;
+        case "move":
+          categorized.moves.push(entry);
+          break;
+        case "ability":
+          categorized.abilities.push(entry);
+          break;
+        case "item":
+          categorized.items.push(entry);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return categorized;
   }, [parsed.q, unifiedSearchIndex]);
 
   const handleSearchSubmit = (nextQuery: string) => {

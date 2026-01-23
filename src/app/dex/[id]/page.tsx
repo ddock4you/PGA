@@ -15,6 +15,7 @@ import type {
   PokeApiPokemon,
   PokeApiPokemonSpecies,
 } from "@/features/pokemon/api/pokemonApi";
+import { cache } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -22,12 +23,33 @@ interface PageProps {
   }>;
 }
 
+const loadPokemonDetail = cache(async (id: string) => {
+  const pokemonPromise = fetchPokemon(id);
+  const speciesPromise = fetchPokemonSpecies(id);
+  const encountersPromise = fetchPokemonEncounters(id);
+
+  const evolutionChainPromise = speciesPromise.then((species) =>
+    species.evolution_chain?.url
+      ? fetchEvolutionChain(species.evolution_chain.url)
+      : Promise.resolve(undefined)
+  );
+
+  const [pokemon, species, encounters, evolutionChain] = await Promise.all([
+    pokemonPromise,
+    speciesPromise,
+    encountersPromise,
+    evolutionChainPromise,
+  ]);
+
+  return { pokemon, species, evolutionChain, encounters };
+});
+
 // SEO 메타데이터 생성 (서버 사이드)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
 
   try {
-    const [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
+    const { pokemon, species } = await loadPokemonDetail(id);
 
     const koreanName =
       species.names.find((name) => name.language.name === "ko")?.name || pokemon.name;
@@ -112,11 +134,11 @@ export default async function PokemonDetailPage({ params }: PageProps) {
   let encounters: PokeApiEncounter[];
 
   try {
-    [pokemon, species] = await Promise.all([fetchPokemon(id), fetchPokemonSpecies(id)]);
-    evolutionChain = species.evolution_chain?.url
-      ? await fetchEvolutionChain(species.evolution_chain.url)
-      : undefined;
-    encounters = await fetchPokemonEncounters(id);
+    const detail = await loadPokemonDetail(id);
+    pokemon = detail.pokemon;
+    species = detail.species;
+    evolutionChain = detail.evolutionChain;
+    encounters = detail.encounters;
   } catch {
     notFound();
   }

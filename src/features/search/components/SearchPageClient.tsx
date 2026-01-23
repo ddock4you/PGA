@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -68,10 +68,6 @@ function SearchSummaryHeader({
   onSubmit: (nextQuery: string) => void;
 }) {
   const [localQuery, setLocalQuery] = useState(query);
-
-  useEffect(() => {
-    setLocalQuery(query);
-  }, [query]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -345,7 +341,12 @@ export function SearchPageClient() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
       <section className="space-y-6">
-        <SearchSummaryHeader query={parsed.q} generationId="통합" onSubmit={handleSearchSubmit} />
+        <SearchSummaryHeader
+          key={parsed.q ?? "search"}
+          query={parsed.q}
+          generationId="통합"
+          onSubmit={handleSearchSubmit}
+        />
 
         <nav className="overflow-x-auto pb-2">
           <div className="flex gap-2 text-xs min-w-max px-1">
