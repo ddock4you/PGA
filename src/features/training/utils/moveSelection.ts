@@ -1,7 +1,7 @@
 import type { MoveChoice } from "../store/types";
 import type { CsvMove } from "@/types/csvTypes";
 import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
-import type { TypeMap } from "@/features/types/utils/typeEffectiveness";
+import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 
 /**
  * 특정 배율의 기술 중 하나를 랜덤으로 선택하여 정답으로 설정

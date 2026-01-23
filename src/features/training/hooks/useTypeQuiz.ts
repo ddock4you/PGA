@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAllTypesQuery } from "@/features/types/hooks/useAllTypesQuery";
+import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
 import {
   buildTypeMap,
   computeAttackMultiplier,
   type TypeMap,
-} from "@/features/types/utils/typeEffectiveness";
+} from "@/features/pokemonTypes/utils/typeEffectiveness";
 
 type MultiplierChoice = "0" | "0.5" | "1" | "2";
 

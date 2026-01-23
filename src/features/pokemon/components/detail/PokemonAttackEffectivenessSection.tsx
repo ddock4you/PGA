@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAllTypesQuery } from "@/features/types/hooks/useAllTypesQuery";
+import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
 import {
   buildTypeMap,
   computeOffenseEffectiveness,
-} from "@/features/types/utils/typeEffectiveness";
+} from "@/features/pokemonTypes/utils/typeEffectiveness";
 import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
 
 // 타입 이름(영문)으로부터 한글 이름을 찾는 매핑

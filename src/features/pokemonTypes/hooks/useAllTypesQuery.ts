@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAllTypes, type PokeApiType } from "@/features/types/api/typeApi";
+import { fetchAllTypes, type PokeApiType } from "@/features/pokemonTypes/api/typeApi";
 
 let cachedTypes: PokeApiType[] | null = null;
 let typesPromise: Promise<PokeApiType[]> | null = null;

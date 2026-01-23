@@ -1,22 +1,18 @@
 import { fetchFromPokeApi } from "@/lib/pokeapi";
-
-export interface PokeApiNamedResource {
-  name: string;
-  url: string;
-}
+import type { NamedAPIResource } from "@/types/pokeapi";
 
 export interface PokeApiGeneration {
   id: number;
   name: string;
-  pokemon_species: PokeApiNamedResource[];
-  moves: PokeApiNamedResource[];
-  abilities: PokeApiNamedResource[];
-  types: PokeApiNamedResource[];
-  version_groups: PokeApiNamedResource[];
+  pokemon_species: NamedAPIResource[];
+  moves: NamedAPIResource[];
+  abilities: NamedAPIResource[];
+  types: NamedAPIResource[];
+  version_groups: NamedAPIResource[];
 }
 
 interface PokeApiGenerationListResponse {
-  results: PokeApiNamedResource[];
+  results: NamedAPIResource[];
 }
 
 export async function fetchGenerationList(): Promise<PokeApiNamedResource[]> {

@@ -1,26 +1,22 @@
 import { fetchFromPokeApi } from "@/lib/pokeapi";
+import type { NamedAPIResource } from "@/types/pokeapi";
 
 // PokéAPI type 리소스의 최소 타입 정의 (실제 스키마의 일부만 사용)
-export interface PokeApiNamedResource {
-  name: string;
-  url: string;
-}
-
 export interface PokeApiType {
   id: number;
   name: string;
   damage_relations: {
-    double_damage_to: PokeApiNamedResource[];
-    half_damage_to: PokeApiNamedResource[];
-    no_damage_to: PokeApiNamedResource[];
-    double_damage_from: PokeApiNamedResource[];
-    half_damage_from: PokeApiNamedResource[];
-    no_damage_from: PokeApiNamedResource[];
+    double_damage_to: NamedAPIResource[];
+    half_damage_to: NamedAPIResource[];
+    no_damage_to: NamedAPIResource[];
+    double_damage_from: NamedAPIResource[];
+    half_damage_from: NamedAPIResource[];
+    no_damage_from: NamedAPIResource[];
   };
 }
 
 interface PokeApiTypeListResponse {
-  results: PokeApiNamedResource[];
+  results: NamedAPIResource[];
 }
 
 /**

@@ -5,7 +5,7 @@ import {
   computeDefenseEffectiveness,
   type TypeMap,
 } from "./typeEffectiveness";
-import type { PokeApiType } from "@/features/types/api/typeApi";
+import type { PokeApiType } from "@/features/pokemonTypes/api/typeApi";
 
 function createType(
   name: string,

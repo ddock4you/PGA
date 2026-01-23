@@ -6,7 +6,7 @@ import {
   buildTypeMap,
   type TypeMap,
   computeAttackMultiplier,
-} from "@/features/types/utils/typeEffectiveness";
+} from "@/features/pokemonTypes/utils/typeEffectiveness";
 import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
 
 // 임시: 한글 타입명 목록 (계산기 로직에 필요)
@@ -87,7 +87,7 @@ function toKoreanType(englishType: string): string {
 // `useAllTypesQuery`는 이미 `src/features/types/hooks/useAllTypesQuery.ts`에 있고 persist 됨.
 // 따라서 이건 그대로 써도 됨. "퀴즈 시작할 때 마다 API 요청"만 안 하면 됨.
 
-import { useAllTypesQuery } from "@/features/types/hooks/useAllTypesQuery";
+import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
 
 export function useQuizGenerator() {
   const { state, actions } = useQuizContext();

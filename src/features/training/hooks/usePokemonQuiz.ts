@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchPokemon, type PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
 import { usePokemonSpeciesByGeneration } from "@/features/pokemon/hooks/usePokemonQueries";
-import { useAllTypesQuery } from "@/features/types/hooks/useAllTypesQuery";
+import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
 import {
   buildTypeMap,
   computeAttackMultiplier,
   type TypeMap,
-} from "@/features/types/utils/typeEffectiveness";
+} from "@/features/pokemonTypes/utils/typeEffectiveness";
 
 export type PokemonQuizMultiplier = "0" | "0.5" | "1" | "2";
 

@@ -3,7 +3,7 @@ import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
 import type { MoveChoice } from "../store/types";
 import type { CsvMove } from "@/types/csvTypes";
-import type { TypeMap } from "@/features/types/utils/typeEffectiveness";
+import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 
 /**
  * 퀴즈에서 사용할 기술 데이터를 로드하고 매핑하는 훅

@@ -1,4 +1,4 @@
-import type { PokeApiType } from "@/features/types/api/typeApi";
+import type { PokeApiType } from "@/features/pokemonTypes/api/typeApi";
 
 export type TypeName = string;
 
