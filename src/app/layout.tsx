@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientLayout } from "@/components/ClientLayout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PreferencesProvider } from "@/features/preferences/PreferencesContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,9 +24,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <body className={inter.className}>
         <PreferencesProvider>
-          <div className="min-h-screen bg-background text-foreground">
-            <ClientLayout>{children}</ClientLayout>
-          </div>
+          <ErrorBoundary>
+            <div className="min-h-screen bg-background text-foreground">
+              <ClientLayout>{children}</ClientLayout>
+            </div>
+          </ErrorBoundary>
         </PreferencesProvider>
       </body>
     </html>

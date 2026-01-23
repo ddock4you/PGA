@@ -6,7 +6,6 @@
 
 - **Next.js 16 App Router**: Route segment, metadata API, ISR/캐시 태그를 활용한 SEO 최적화 및 서버/클라이언트 분리
 - **React 19 + Tailwind 4**: shadcn/ui 기반 디자인 시스템과 다크 모드 지원
-- **@tanstack/react-query v5 + persist**: `src/lib/query-clients.ts`/`cache-strategy.ts` 기준으로 PokéAPI, 검색 인덱스를 IndexedDB에 영속화
 - **CSV 데이터 로더**: `src/data/*.csv` + `csv-loader`로 통합 검색 및 퀴즈 데이터를 비동기로 채움
 - **Vitest**: 핵심 유틸/검색/캐시 전략에 대한 테스트 (`pnpm test`)
 
@@ -33,11 +32,9 @@ pnpm test             # vitest
 
 - PokéAPI 관련 동작은 `src/lib/pokeapi.md`, `src/lib/cache-strategy.md`, `src/lib/cache-optimization.md`에서 확인하세요.
 - 컴포넌트/상태 설계는 `.cursor/rules/CHECKLIST.mdc`, `COMPONENT_ARCHITECTURE.mdc`, `STATE_MANAGEMENT.mdc`에서 정리되어 있습니다.
-- CSV/검색/퀴즈 관련 문서는 `src/features/*/docs` 및 `src/lib` 하위에 있습니다.
 
 ## 환경 변수
 
 - `.env.local`/`.env.production`에서 `NEXT_PUBLIC_API_URL` 등을 정의합니다.
 - `scripts/revalidate.ts`를 사용할 때 `NEXT_REVALIDATE_TOKEN` 값을 설정해야 합니다.
 
-자세한 마이그레이션 계획과 테스트 체크리스트는 `.cursor/rules/CHECKLIST.mdc` 및 `docs/phase4-test-plan.md`를 참고하세요.

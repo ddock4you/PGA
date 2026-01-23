@@ -1,94 +1,117 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { usePreferences } from "@/features/preferences/PreferencesContext";
-import { useUnifiedSearchIndex } from "@/features/search/hooks/useUnifiedSearchIndex";
-import { filterUnifiedEntriesByQuery } from "@/features/search/utils/searchLogic";
-import type { UnifiedSearchEntry } from "@/features/search/types/unifiedSearchTypes";
-import {
-  GENERATION_VERSION_GROUP_MAP,
-  getVersionGroupByGameId,
-} from "@/features/generation/constants/generationData";
-import { buildSearchQueryString, parseSearchQueryString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import type { UnifiedSearchEntry } from "@/features/search/types/unifiedSearchTypes";
+import { escapeRegExp } from "@/features/search/utils/escapeRegExp";
+import { useSearchPageState, type TabType } from "@/features/search/hooks/useSearchPageState";
 
-type TabType = "all" | "pokemon" | "moves" | "abilities" | "items";
+const TAB_LABELS: Record<TabType, string> = {
+  all: "전체",
+  pokemon: "포켓몬",
+  moves: "기술",
+  abilities: "특성",
+  items: "도구",
+};
 
-export function SearchPageClient() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { state, setSelectedGenerationId, setSelectedGameId, setSelectedVersionGroup } =
-    usePreferences();
-  const { selectedGenerationId, selectedGameId, selectedVersionGroup } = state;
+const CARD_BG_CLASSES: Record<string, string> = {
+  포켓몬: "card-pokemon",
+  기술: "card-move",
+  특성: "card-ability",
+  도구: "card-item",
+};
 
-  const [activeTab, setActiveTab] = useState<TabType>("all");
+function TabButton({
+  tab,
+  count,
+  activeTab,
+  disabled,
+  onClick,
+}: {
+  tab: TabType;
+  count: number;
+  activeTab: TabType;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-full px-3 py-2 font-medium transition-colors whitespace-nowrap touch-manipulation ${
+        activeTab === tab
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : disabled
+          ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
+          : "bg-muted text-muted-foreground hover:bg-muted/80 active:bg-muted/90"
+      }`}
+    >
+      {TAB_LABELS[tab]}
+      <span className="ml-1 text-[10px] opacity-75">({count})</span>
+    </button>
+  );
+}
 
-  const parsed = useMemo(() => {
-    const search = searchParams.toString();
-    return parseSearchQueryString(search ? `?${search}` : "");
-  }, [searchParams]);
+function SearchSummaryHeader({
+  query,
+  generationId,
+  onSubmit,
+}: {
+  query: string;
+  generationId: string | null;
+  onSubmit: (nextQuery: string) => void;
+}) {
+  const [localQuery, setLocalQuery] = useState(query);
 
   useEffect(() => {
-    if (parsed.generationId && parsed.generationId !== selectedGenerationId) {
-      setSelectedGenerationId(parsed.generationId);
-      if (!parsed.gameId) {
-        setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[parsed.generationId] ?? null);
-      }
-    }
+    setLocalQuery(query);
+  }, [query]);
 
-    if (parsed.gameId && parsed.gameId !== selectedGameId) {
-      setSelectedGameId(parsed.gameId);
-      const versionGroup =
-        getVersionGroupByGameId(parsed.gameId) ??
-        (parsed.generationId
-          ? GENERATION_VERSION_GROUP_MAP[parsed.generationId]
-          : selectedVersionGroup);
-      setSelectedVersionGroup(versionGroup ?? null);
-    }
-  }, [
-    parsed,
-    selectedGenerationId,
-    selectedGameId,
-    selectedVersionGroup,
-    setSelectedGenerationId,
-    setSelectedGameId,
-    setSelectedVersionGroup,
-  ]);
-
-  const { data: unifiedSearchIndex, isLoading, isError } = useUnifiedSearchIndex();
-
-  const results = useMemo(() => {
-    if (!unifiedSearchIndex || !parsed.q)
-      return { pokemon: [], moves: [], abilities: [], items: [] };
-
-    const allResults = filterUnifiedEntriesByQuery(unifiedSearchIndex, parsed.q);
-
-    return {
-      pokemon: allResults.filter((entry) => entry.category === "pokemon"),
-      moves: allResults.filter((entry) => entry.category === "move"),
-      abilities: allResults.filter((entry) => entry.category === "ability"),
-      items: allResults.filter((entry) => entry.category === "item"),
-    };
-  }, [parsed.q, unifiedSearchIndex]);
-
-  const handleSearchSubmit = (nextQuery: string) => {
-    const trimmed = nextQuery.trim();
-    if (!trimmed) return;
-    const searchQuery = buildSearchQueryString({
-      q: trimmed,
-      generationId: "unified",
-      gameId: null,
-    });
-    router.push(`/search?${searchQuery}`);
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSubmit(localQuery);
   };
 
-  const SearchResultsSkeleton = () => (
+  return (
+    <header className="space-y-2 border-b pb-3">
+      <div className="flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">검색 결과</h2>
+          <p>포켓몬, 기술, 특성, 도구를 통합 검색합니다.</p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="mt-3 flex flex-col gap-3 text-xs sm:flex-row sm:items-center"
+      >
+        <div className="flex-1">
+          <label className="mb-1 block font-medium text-muted-foreground">검색어</label>
+          <Input
+            placeholder="검색어를 입력하세요"
+            value={localQuery}
+            onChange={(event) => setLocalQuery(event.target.value)}
+          />
+        </div>
+        <div className="flex-1">
+          <label className="mb-1 block font-medium text-muted-foreground">필터 정보</label>
+          <div className="flex h-9 items-center gap-2 text-sm">
+            <Badge variant="outline">세대: {generationId ?? "-"}</Badge>
+          </div>
+        </div>
+      </form>
+    </header>
+  );
+}
+
+function SearchResultsSkeleton() {
+  return (
     <div className="space-y-6">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i}>
@@ -107,18 +130,10 @@ export function SearchPageClient() {
       ))}
     </div>
   );
+}
 
-  const NoResults = ({ query }: { query: string }) => (
-    <div className="text-center py-12">
-      <div className="text-4xl mb-4">🔍</div>
-      <h3 className="text-lg font-medium text-muted-foreground mb-2">
-        &ldquo;{query}&rdquo;에 대한 검색 결과가 없습니다
-      </h3>
-      <p className="text-sm text-muted-foreground">다른 검색어나 철자를 확인해보세요</p>
-    </div>
-  );
-
-  const SearchPrompt = () => (
+function SearchPrompt() {
+  return (
     <div className="text-center py-12">
       <div className="text-4xl mb-4">⚡</div>
       <h3 className="text-lg font-medium text-muted-foreground mb-2">
@@ -127,152 +142,111 @@ export function SearchPageClient() {
       <p className="text-sm text-muted-foreground">한국어, 영어, 일본어로 검색할 수 있습니다</p>
     </div>
   );
+}
 
-  const HighlightText = ({ entry, query }: { entry: UnifiedSearchEntry; query: string }) => {
-    if (!query) return <>{entry.name}</>;
+function NoResults({ query }: { query: string }) {
+  return (
+    <div className="text-center py-12">
+      <div className="text-4xl mb-4">🔍</div>
+      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+        &ldquo;{query}&rdquo;에 대한 검색 결과가 없습니다
+      </h3>
+      <p className="text-sm text-muted-foreground">다른 검색어나 철자를 확인해보세요</p>
+    </div>
+  );
+}
 
-    const displayText = entry.name;
-    const parts = displayText.split(new RegExp(`(${query})`, "gi"));
+function HighlightText({ entry, query }: { entry: UnifiedSearchEntry; query: string }) {
+  if (!query) return <>{entry.name}</>;
 
-    return (
-      <>
-        {parts.map((part: string, i: number) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <span
-              key={i}
-              className="bg-yellow-200 font-medium text-foreground dark:bg-yellow-900/50"
-            >
-              {part}
-            </span>
-          ) : (
-            part
-          )
+  const safeQuery = escapeRegExp(query);
+  const parts = entry.name.split(new RegExp(`(${safeQuery})`, "gi"));
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <span key={i} className="bg-yellow-200 font-medium text-foreground dark:bg-yellow-900/50">
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
+function SearchResultSection({
+  title,
+  entries,
+  query,
+  linkPrefix,
+  limit,
+  onMoreClick,
+}: {
+  title: string;
+  entries: UnifiedSearchEntry[];
+  query: string;
+  linkPrefix: string;
+  limit?: number;
+  onMoreClick?: () => void;
+}) {
+  if (entries.length === 0) return null;
+
+  const displayEntries = limit ? entries.slice(0, limit) : entries;
+  const cardClassName = CARD_BG_CLASSES[title] ?? "";
+
+  return (
+    <section className="space-y-2">
+      <div className="flex items-baseline justify-between">
+        <h3 className="text-sm font-semibold">
+          {title} <span className="text-xs text-muted-foreground">({entries.length})</span>
+        </h3>
+        {limit && entries.length > limit && (
+          <button
+            type="button"
+            onClick={onMoreClick}
+            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+          >
+            더 보기
+          </button>
         )}
-      </>
-    );
-  };
-
-  const SearchSummaryHeader = ({
-    query,
-    generationId,
-    onSubmit,
-  }: {
-    query: string;
-    generationId: string | null;
-    onSubmit: (nextQuery: string) => void;
-  }) => {
-    const [localQuery, setLocalQuery] = useState(query);
-
-    useEffect(() => {
-      setLocalQuery(query);
-    }, [query]);
-
-    const handleSubmit = (event: React.FormEvent) => {
-      event.preventDefault();
-      onSubmit(localQuery);
-    };
-
-    return (
-      <header className="space-y-2 border-b pb-3">
-        <div className="flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">검색 결과</h2>
-            <p>포켓몬, 기술, 특성, 도구를 통합 검색합니다.</p>
-          </div>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mt-3 flex flex-col gap-3 text-xs sm:flex-row sm:items-center"
-        >
-          <div className="flex-1">
-            <label className="mb-1 block font-medium text-muted-foreground">검색어</label>
-            <Input
-              placeholder="검색어를 입력하세요"
-              value={localQuery}
-              onChange={(event) => setLocalQuery(event.target.value)}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block font-medium text-muted-foreground">필터 정보</label>
-            <div className="flex h-9 items-center gap-2 text-sm">
-              <Badge variant="outline">세대: {generationId ?? "-"}</Badge>
-            </div>
-          </div>
-        </form>
-      </header>
-    );
-  };
-
-  const SearchResultSection = ({
-    title,
-    entries,
-    query,
-    linkPrefix,
-    limit,
-    onMoreClick,
-  }: {
-    title: string;
-    entries: UnifiedSearchEntry[];
-    query: string;
-    linkPrefix: string;
-    limit?: number;
-    onMoreClick?: () => void;
-  }) => {
-    const count = entries.length;
-    const displayEntries = limit ? entries.slice(0, limit) : entries;
-
-    if (count === 0) return null;
-
-    const getCardClassName = (title: string) => {
-      if (title.includes("포켓몬")) return "card-pokemon";
-      if (title.includes("기술")) return "card-move";
-      if (title.includes("특성")) return "card-ability";
-      if (title.includes("도구")) return "card-item";
-      return "";
-    };
-
-    const cardClassName = getCardClassName(title);
-
-    return (
-      <section className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <h3 className="text-sm font-semibold">
-            {title} <span className="text-xs text-muted-foreground">({count})</span>
-          </h3>
-          {limit && count > limit && (
-            <button
-              type="button"
-              onClick={onMoreClick}
-              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+      </div>
+      <Card className={cardClassName}>
+        <CardContent className="space-y-1 py-3">
+          {displayEntries.map((entry) => (
+            <Link
+              key={`${title}-${entry.id}-${entry.name}`}
+              href={`${linkPrefix}/${entry.id}`}
+              className="block rounded-md p-3 text-sm transition-colors hover:bg-muted active:bg-muted/80 touch-manipulation border border-transparent hover:border-border/50"
             >
-              더 보기
-            </button>
-          )}
-        </div>
-        <Card className={cardClassName}>
-          <CardContent className="space-y-1 py-3">
-            {displayEntries.map((entry) => (
-              <Link
-                key={`${title}-${entry.id}-${entry.name}`}
-                href={`${linkPrefix}/${entry.id}`}
-                className="block rounded-md p-3 text-sm transition-colors hover:bg-muted active:bg-muted/80 touch-manipulation border border-transparent hover:border-border/50"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex-1 min-w-0">
-                    <HighlightText entry={entry} query={query} />
-                  </div>
-                  <span className="ml-2 text-xs text-muted-foreground shrink-0">No.{entry.id}</span>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1 min-w-0">
+                  <HighlightText entry={entry} query={query} />
                 </div>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      </section>
-    );
-  };
+                <span className="ml-2 text-xs text-muted-foreground shrink-0">No.{entry.id}</span>
+              </div>
+            </Link>
+          ))}
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
 
-  const renderContent = () => {
+export function SearchPageClient() {
+  const {
+    parsed,
+    activeTab,
+    setActiveTab,
+    results,
+    handleSearchSubmit,
+    isLoading,
+    isError,
+  } = useSearchPageState();
+
+  const renderResults = () => {
     if (isLoading) return <SearchResultsSkeleton />;
     if (isError) {
       return (
@@ -284,6 +258,7 @@ export function SearchPageClient() {
         </Alert>
       );
     }
+
     if (!parsed.q) return <SearchPrompt />;
 
     const hasAnyResults = Object.values(results).some((arr) => arr.length > 0);
@@ -328,34 +303,28 @@ export function SearchPageClient() {
       );
     }
 
-    let entries: UnifiedSearchEntry[] = [];
-    let linkPrefix = "";
-    if (activeTab === "pokemon") {
-      entries = results.pokemon;
-      linkPrefix = "/dex";
-    } else if (activeTab === "moves") {
-      entries = results.moves;
-      linkPrefix = "/moves";
-    } else if (activeTab === "abilities") {
-      entries = results.abilities;
-      linkPrefix = "/abilities";
-    } else if (activeTab === "items") {
-      entries = results.items;
-      linkPrefix = "/items";
-    }
+    const tabEntries: Record<TabType, { entries: UnifiedSearchEntry[]; prefix: string }> = {
+      all: { entries: [], prefix: "" },
+      pokemon: { entries: results.pokemon, prefix: "/dex" },
+      moves: { entries: results.moves, prefix: "/moves" },
+      abilities: { entries: results.abilities, prefix: "/abilities" },
+      items: { entries: results.items, prefix: "/items" },
+    };
+
+    const { entries, prefix } = tabEntries[activeTab];
 
     return (
       <div className="space-y-4">
         <SearchResultSection
-          title={getTabLabel(activeTab)}
+          title={TAB_LABELS[activeTab]}
           entries={entries}
           query={parsed.q}
-          linkPrefix={linkPrefix}
+          linkPrefix={prefix}
         />
         {entries.length === 0 && (
           <div className="text-center py-8">
             <p className="text-sm text-muted-foreground">
-              &ldquo;{getTabLabel(activeTab)}&rdquo; 카테고리에서 검색된 결과가 없습니다
+              &ldquo;{TAB_LABELS[activeTab]}&rdquo; 카테고리에서 검색된 결과가 없습니다
             </p>
           </div>
         )}
@@ -363,20 +332,15 @@ export function SearchPageClient() {
     );
   };
 
-  const getTabLabel = (tab: TabType) => {
-    switch (tab) {
-      case "all":
-        return "전체";
-      case "pokemon":
-        return "포켓몬";
-      case "moves":
-        return "기술";
-      case "abilities":
-        return "특성";
-      case "items":
-        return "도구";
-    }
+  const counts = {
+    pokemon: results.pokemon.length,
+    moves: results.moves.length,
+    abilities: results.abilities.length,
+    items: results.items.length,
   };
+
+  const totalCount =
+    counts.pokemon + counts.moves + counts.abilities + counts.items;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
@@ -385,37 +349,20 @@ export function SearchPageClient() {
 
         <nav className="overflow-x-auto pb-2">
           <div className="flex gap-2 text-xs min-w-max px-1">
-            {(["all", "pokemon", "moves", "abilities", "items"] as const).map((tab) => {
-              const count =
-                tab === "all"
-                  ? Object.values(results).reduce((acc, cur) => acc + cur.length, 0)
-                  : results[tab as keyof typeof results]?.length || 0;
-
-              const isDisabled = tab !== "all" && count === 0;
-
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => setActiveTab(tab)}
-                  className={`rounded-full px-3 py-2 font-medium transition-colors whitespace-nowrap touch-manipulation ${
-                    activeTab === tab
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : isDisabled
-                      ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 active:bg-muted/90"
-                  }`}
-                >
-                  {getTabLabel(tab)}
-                  <span className="ml-1 text-[10px] opacity-75">({count})</span>
-                </button>
-              );
-            })}
+            {(Object.keys(TAB_LABELS) as TabType[]).map((tab) => (
+              <TabButton
+                key={tab}
+                tab={tab}
+                count={tab === "all" ? totalCount : counts[tab]}
+                activeTab={activeTab}
+                disabled={tab !== "all" && counts[tab] === 0}
+                onClick={() => setActiveTab(tab)}
+              />
+            ))}
           </div>
         </nav>
 
-        {renderContent()}
+        {renderResults()}
       </section>
     </main>
   );
