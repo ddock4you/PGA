@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GameGenerationModal } from "@/features/generation/components/GameGenerationModal";
-import type { GameVersion } from "@/features/generation/types/generationTypes";
-
-interface DexGenerationSelectorProps {
-  generationId: string;
-  selectedGameVersion?: GameVersion;
-  onGenerationChange: (generationId: string, gameVersion?: GameVersion) => void;
-}
+import type { DexGenerationSelectorProps } from "../types/ui";
 
 export function DexGenerationSelector({
   generationId,

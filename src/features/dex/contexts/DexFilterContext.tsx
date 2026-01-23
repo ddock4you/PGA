@@ -1,17 +1,11 @@
 "use client";
 import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
-import type { ReactNode } from "react";
 import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
-
-// Context 타입 정의
-interface DexFilterContextType {
-  filters: DexFilters;
-  searchQuery: string;
-  updateFilters: (filters: DexFilters | Partial<DexFilters>) => void;
-  updateSearchQuery: (query: string) => void;
-  updatePagination: (page: number) => void;
-  resetFilters: () => void;
-}
+import type {
+  DexFilterAction,
+  DexFilterContextType,
+  DexFilterProviderProps,
+} from "../types/ui";
 
 // Context 생성
 const DexFilterContext = createContext<DexFilterContextType | undefined>(undefined);
@@ -19,14 +13,6 @@ const DexFilterContext = createContext<DexFilterContextType | undefined>(undefin
 // localStorage 키
 const DEX_FILTERS_STORAGE_KEY = "dex-filters";
 const DEX_SEARCH_STORAGE_KEY = "dex-search-query";
-
-// Action 타입
-type DexFilterAction =
-  | { type: "UPDATE_FILTERS"; payload: Partial<DexFilters> }
-  | { type: "UPDATE_SEARCH"; payload: string }
-  | { type: "UPDATE_PAGINATION"; payload: number }
-  | { type: "RESET_FILTERS" }
-  | { type: "LOAD_FROM_STORAGE"; payload: { filters: DexFilters; searchQuery: string } };
 
 // Reducer 함수
 function dexFilterReducer(
@@ -101,10 +87,6 @@ function saveToStorage(filters: DexFilters, searchQuery: string) {
 }
 
 // Provider 컴포넌트
-interface DexFilterProviderProps {
-  children: ReactNode;
-}
-
 export function DexFilterProvider({ children }: DexFilterProviderProps) {
   const [state, dispatch] = useReducer(dexFilterReducer, DEFAULT_STATE);
 

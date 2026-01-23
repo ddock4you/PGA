@@ -5,32 +5,12 @@ import {
   computeAttackMultiplier,
   type TypeMap,
 } from "@/features/pokemonTypes/utils/typeEffectiveness";
-
-type MultiplierChoice = "0" | "0.5" | "1" | "2";
-
-interface TypeQuizQuestion {
-  attackType: string;
-  defenderType: string;
-  multiplier: MultiplierChoice;
-  index: number;
-  total: number;
-}
-
-interface UseTypeQuizOptions {
-  totalQuestions?: number;
-}
-
-interface UseTypeQuizResult {
-  typesLoading: boolean;
-  typesError: boolean;
-  question: TypeQuizQuestion | null;
-  choices: MultiplierChoice[];
-  selectedChoice: MultiplierChoice | null;
-  isCorrect: boolean | null;
-  score: number;
-  submitChoice: (choice: MultiplierChoice) => void;
-  nextQuestion: () => void;
-}
+import type {
+  MultiplierChoice,
+  TypeQuizQuestion,
+  UseTypeQuizOptions,
+  UseTypeQuizResult,
+} from "../types/quiz";
 
 function toChoiceFromMultiplier(multiplier: number): MultiplierChoice {
   if (multiplier === 0) return "0";

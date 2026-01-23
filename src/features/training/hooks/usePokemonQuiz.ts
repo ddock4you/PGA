@@ -7,45 +7,11 @@ import {
   computeAttackMultiplier,
   type TypeMap,
 } from "@/features/pokemonTypes/utils/typeEffectiveness";
-
-export type PokemonQuizMultiplier = "0" | "0.5" | "1" | "2";
-
-export interface PokemonQuizQuestion {
-  pokemon: {
-    id: number;
-    name: string;
-    sprite: string | null;
-    types: string[];
-  };
-  defenderTypes: string[];
-  correctAttackType: string;
-  correctMultiplier: number;
-  choices: string[];
-  index: number;
-  total: number;
-}
-
-interface UsePokemonQuizOptions {
-  generationId: number | string | null;
-  totalQuestions?: number;
-  allowDualType?: boolean;
-  choicesPerQuestion?: number;
-}
-
-export interface UsePokemonQuizResult {
-  question: PokemonQuizQuestion | null;
-  selectedChoice: string | null;
-  isCorrect: boolean | null;
-  score: number;
-  isPreparing: boolean;
-  preparationError: string | null;
-  typesLoading: boolean;
-  typesError: boolean;
-  speciesLoading: boolean;
-  speciesError: boolean;
-  submitChoice: (choice: string) => void;
-  nextQuestion: () => void;
-}
+import type {
+  PokemonQuizQuestion,
+  UsePokemonQuizOptions,
+  UsePokemonQuizResult,
+} from "../types/quiz";
 
 function shuffleArray<T>(array: T[]): T[] {
   const cloned = [...array];
