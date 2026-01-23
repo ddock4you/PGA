@@ -1,10 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuizContext } from "../../store";
-import { useQuizNavigation } from "../../hooks/useQuizNavigation";
-import { useQuizGenerator } from "../../hooks/useQuizGenerator";
-import { QuizQuestionCard } from "../QuizQuestionCard";
-import { QuizAnswerButtons } from "../QuizAnswerButtons";
+import { useQuizContext } from "@/features/training/contexts";
+import { useQuizNavigation } from "@/features/training/hooks/useQuizNavigation";
+import { useQuizGenerator } from "@/features/training/hooks/useQuizGenerator";
+import { QuizQuestionCard } from "@/features/training/components/QuizQuestionCard";
+import { QuizAnswerButtons } from "@/features/training/components/QuizAnswerButtons";
 
 export function AttackQuizLevel3() {
   const { state, actions } = useQuizContext();

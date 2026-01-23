@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+
 import Image from "next/image";
 import {
   Table,
@@ -11,105 +10,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { transformItemsForDex } from "@/utils/dataTransforms";
-import { useLoadMore } from "@/hooks/useLoadMore";
-import { useListRestoration } from "@/hooks/useListRestoration";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import type { DexItemSummary } from "@/utils/dataTransforms";
-import { saveListState } from "@/lib/listState";
-
-const ITEMS_PER_PAGE = 30;
+import { useItemsList } from "@/features/items/hooks/useItemsList";
 
 export function ItemsList() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
-
-  // 1. CSV 데이터 로딩
-  const { itemsData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
-
-  // 2. 도구 데이터 변환 및 필터링
-  const allItems = useMemo(() => {
-    if (!itemsData) return [];
-    return transformItemsForDex(itemsData);
-  }, [itemsData]);
-
-  const filteredItems = useMemo(() => {
-    if (!allItems) return [];
-    if (!searchQuery.trim()) return allItems;
-    return allItems.filter((i) => i.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  }, [allItems, searchQuery]);
-
-  // 3. 페이지네이션 계산
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const pathname = usePathname();
-  const chunkQueryKey = useMemo(() => ["items", searchQuery.trim()], [searchQuery]);
-
   const {
+    searchQuery,
+    handleSearchChange,
+    isCsvLoading,
+    isCsvError,
+    totalCount,
     items,
     totalPages,
-    totalCount,
     currentPage,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    isError: loadMoreError,
-  } = useLoadMore<DexItemSummary>({
-    queryKey: chunkQueryKey,
-    enabled: !isCsvLoading && !isCsvError,
-    fetchPage: async (pageParam = 1) => {
-      const pageSize = ITEMS_PER_PAGE;
-      const count = filteredItems.length;
-      const totalPagesOfResults = Math.max(1, Math.ceil(count / pageSize));
-      const start = (pageParam - 1) * pageSize;
-      return {
-        page: pageParam,
-        totalPages: totalPagesOfResults,
-        totalCount: count,
-        items: filteredItems.slice(start, start + pageSize),
-      };
-    },
-  });
+    loadMoreError,
+    handleRowClick,
+  } = useItemsList();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handlePop = () => setNavigationType("pop");
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
-
-  useEffect(() => {
-    if (navigationType === "pop") {
-      const id = window.setTimeout(() => setNavigationType("push"), 0);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [navigationType]);
-
-  useListRestoration({
-    pathname,
-    currentPage,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    navigationType,
-  });
-
-  const handleRowClick = (id: number) => {
-    if (typeof window !== "undefined") {
-      saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
-    }
-    setNavigationType("push");
-    router.push(`/items/${id}`);
-  };
-
-  // 도구 효과 텍스트 (CSV에 없으므로 기본 설명)
   const getItemEffectText = (item: DexItemSummary) => {
-    // 간단한 카테고리 기반 설명
     const descriptions: Record<string, string> = {
       "standard-balls": "포켓몬을 잡는 데 사용",
       healing: "HP 회복",
@@ -118,15 +40,12 @@ export function ItemsList() {
       vitamins: "능력치 상승",
       evolution: "진화 관련",
       "held-items": "지니게 하는 도구",
-      // 기타 카테고리는 기본 설명
     };
     return descriptions[item.category] || `${item.category} 카테고리의 도구`;
   };
 
-  // 도구 이미지 URL 생성 (PokéAPI 스프라이트)
-  const getItemSpriteUrl = (itemName: string) => {
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
-  };
+  const getItemSpriteUrl = (itemName: string) =>
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
 
   return (
     <div className="space-y-4">

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 
 /**
  * 퀴즈 옵션 관리를 위한 공용 훅

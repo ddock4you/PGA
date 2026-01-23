@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 import { loadQuizData, type QuizPokemon, type QuizMove } from "../api/quizData";
-import type { QuizOptions, QuizQuestion, QuizChoiceData } from "../store/types";
+import type { QuizOptions, QuizQuestion, QuizChoiceData } from "../contexts/types";
 import {
   buildTypeMap,
   type TypeMap,

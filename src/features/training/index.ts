@@ -1,5 +1,5 @@
-// Store exports
-export { QuizProvider, useQuizContext } from "./store";
+// Context exports
+export { QuizProvider, useQuizContext } from "./contexts";
 
 // Component exports
 export { QuizContainer } from "./components/QuizContainer";
@@ -23,4 +23,4 @@ export type {
   QuizQuestion,
   QuizState,
   QuizContextType,
-} from "./store";
+} from "./contexts";

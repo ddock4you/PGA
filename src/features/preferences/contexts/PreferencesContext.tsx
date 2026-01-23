@@ -68,7 +68,6 @@ interface PreferencesProviderProps {
 export function PreferencesProvider({ children }: PreferencesProviderProps) {
   const [state, setState] = useState<PreferencesState>(() => loadInitialState());
 
-  // 테마 상태 → documentElement.classList("dark") 및 color-scheme 반영
   useEffect(() => {
     if (typeof document === "undefined") return;
 
@@ -83,14 +82,13 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     root.style.colorScheme = state.theme;
   }, [state.theme]);
 
-  // Preferences 전체를 localStorage 에 저장
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     try {
       window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // 저장 실패는 조용히 무시
+      // Ignore storage failure
     }
   }, [state]);
 

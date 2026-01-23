@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { usePreferences } from "@/features/preferences/contexts";
 
 const NAV_LINKS = [
   { href: "/dex", label: "포켓몬" },

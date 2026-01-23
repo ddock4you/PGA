@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 
 /**
  * 퀴즈 화면 전환을 관리하는 공용 훅

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { usePreferences } from "@/features/preferences/contexts";
 import { useUnifiedSearchIndex } from "@/features/search/hooks/useUnifiedSearchIndex";
 import { filterUnifiedEntriesByQuery } from "@/features/search/utils/searchLogic";
 import type { UnifiedSearchEntry } from "@/features/search/types/unifiedSearchTypes";

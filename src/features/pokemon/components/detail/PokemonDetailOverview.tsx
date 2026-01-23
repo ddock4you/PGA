@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { usePreferences } from "@/features/preferences/PreferencesContext";
+import { usePreferences } from "@/features/preferences/contexts";
 import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";
 

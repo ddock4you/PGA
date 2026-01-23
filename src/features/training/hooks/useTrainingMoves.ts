@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
-import type { MoveChoice } from "../store/types";
+import type { MoveChoice } from "../contexts/types";
 import type { CsvMove } from "@/types/csvTypes";
 import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 

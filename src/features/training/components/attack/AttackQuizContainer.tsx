@@ -1,4 +1,4 @@
-import { useQuizContext } from "../../store";
+import { useQuizContext } from "../../contexts";
 import { AttackQuizLevel1 } from "./AttackQuizLevel1";
 import { AttackQuizLevel2 } from "./AttackQuizLevel2";
 import { AttackQuizLevel3 } from "./AttackQuizLevel3";

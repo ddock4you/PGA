@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useQuizContext } from "../../store";
-import { useQuizNavigation } from "../../hooks/useQuizNavigation";
-import { useQuizGenerator } from "../../hooks/useQuizGenerator";
-import { QuizQuestionCard } from "../QuizQuestionCard";
+import { useQuizContext } from "@/features/training/contexts";
+import { useQuizNavigation } from "@/features/training/hooks/useQuizNavigation";
+import { useQuizGenerator } from "@/features/training/hooks/useQuizGenerator";
+import { QuizQuestionCard } from "@/features/training/components/QuizQuestionCard";
 
 export function TypeQuizLevel() {
   const { state, actions } = useQuizContext();

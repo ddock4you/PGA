@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TYPE_COLORS, getKoreanTypeName } from "@/utils/dataTransforms";
-import type { QuizQuestion } from "../store/types";
+import type { QuizQuestion } from "../contexts/types";
 
 interface QuizQuestionCardProps {
   question: QuizQuestion;

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 import { useQuizNavigation } from "../hooks/useQuizNavigation";
 
 export function QuizFinishedScreen() {

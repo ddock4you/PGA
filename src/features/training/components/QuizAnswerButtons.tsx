@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { MoveChoice } from "../store/types";
+import type { MoveChoice } from "../contexts/types";
 
 interface QuizChoice {
   id: string;

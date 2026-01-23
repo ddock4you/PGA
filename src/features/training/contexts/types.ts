@@ -4,7 +4,7 @@ export type QuizScreen = "start" | "playing" | "finished";
 
 export interface QuizOptions {
   totalQuestions: number;
-  allowDualType?: boolean; // Lv1에서만 사용
+  allowDualType?: boolean;
   generationSelection?:
     | {
         type: "single";
@@ -15,14 +15,14 @@ export interface QuizOptions {
         type: "range";
         minGeneration: number;
         maxGeneration: number;
-      }; // Lv2에서만 사용
+      };
 }
 
 export interface QuizChoiceData {
   id: string;
   label: string;
-  type?: string; // 기술 타입 등 (배지 표시용)
-  multiplier?: number; // 배율 정보
+  type?: string;
+  multiplier?: number;
 }
 
 export interface QuizQuestion {
@@ -41,13 +41,10 @@ export interface QuizQuestion {
 }
 
 export interface QuizState {
-  // UI 상태
   mode: QuizMode;
   level: QuizLevel | null;
   screen: QuizScreen;
   options: QuizOptions;
-
-  // 퀴즈 진행 상태
   currentQuestion: number;
   score: number;
   selectedChoice: string | null;

@@ -1,4 +1,4 @@
-import type { MoveChoice } from "../store/types";
+import type { MoveChoice } from "../contexts/types";
 import type { CsvMove } from "@/types/csvTypes";
 import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
 import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 import { useQuizNavigation } from "../hooks/useQuizNavigation";
 import { useQuizOptions } from "../hooks/useQuizOptions";
 

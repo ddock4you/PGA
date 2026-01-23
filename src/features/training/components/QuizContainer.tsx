@@ -1,4 +1,4 @@
-import { useQuizContext } from "../store";
+import { useQuizContext } from "../contexts";
 import { QuizStartScreen } from "./QuizStartScreen";
 import { QuizFinishedScreen } from "./QuizFinishedScreen";
 import { AttackQuizContainer } from "./attack/AttackQuizContainer";

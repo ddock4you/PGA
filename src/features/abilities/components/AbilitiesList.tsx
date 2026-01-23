@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+
 import {
   Table,
   TableBody,
@@ -10,118 +9,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { transformAbilitiesForDex } from "@/utils/dataTransforms";
-import { useLoadMore } from "@/hooks/useLoadMore";
-import { useListRestoration } from "@/hooks/useListRestoration";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import type { DexAbilitySummary } from "@/utils/dataTransforms";
-import { saveListState } from "@/lib/listState";
-
-const ITEMS_PER_PAGE = 30;
+import { useAbilitiesList } from "@/features/abilities/hooks/useAbilitiesList";
 
 export function AbilitiesList() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
-
-  // 1. CSV 데이터 로딩
   const {
-    abilitiesData,
-    abilityNamesData,
-    isLoading: isCsvLoading,
-    isError: isCsvError,
-  } = useDexCsvData();
-
-  // 2. 특성 데이터 변환 및 필터링
-  const allAbilities = useMemo(() => {
-    if (!abilitiesData || !abilityNamesData) return [];
-    return transformAbilitiesForDex(abilitiesData, abilityNamesData, 3, 9); // 한국어 우선, 영어 보조
-  }, [abilitiesData, abilityNamesData]);
-
-  const filteredAbilities = useMemo(() => {
-    if (!allAbilities) return [];
-    if (!searchQuery.trim()) return allAbilities;
-
-    const query = searchQuery.trim().toLowerCase();
-    return allAbilities.filter((ability) => {
-      const nameMatch = ability.name.toLowerCase().includes(query);
-      const identifierMatch = ability.identifier.toLowerCase().includes(query);
-
-      return nameMatch || identifierMatch;
-    });
-  }, [allAbilities, searchQuery]);
-
-  // 3. 페이지네이션 계산
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const pathname = usePathname();
-  const chunkQueryKey = useMemo(() => ["abilities", searchQuery.trim()], [searchQuery]);
-
-  const {
+    searchQuery,
+    handleSearchChange,
+    isCsvLoading,
+    isCsvError,
+    totalCount,
     items,
     totalPages,
-    totalCount,
     currentPage,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    isError: loadMoreError,
-  } = useLoadMore<DexAbilitySummary>({
-    queryKey: chunkQueryKey,
-    enabled: !isCsvLoading && !isCsvError,
-    fetchPage: async (pageParam = 1) => {
-      const pageSize = ITEMS_PER_PAGE;
-      const count = filteredAbilities.length;
-      const totalPagesOfResults = Math.max(1, Math.ceil(count / pageSize));
-      const start = (pageParam - 1) * pageSize;
-      return {
-        page: pageParam,
-        totalPages: totalPagesOfResults,
-        totalCount: count,
-        items: filteredAbilities.slice(start, start + pageSize),
-      };
-    },
-  });
+    loadMoreError,
+    handleRowClick,
+  } = useAbilitiesList();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handlePop = () => setNavigationType("pop");
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
-
-  useEffect(() => {
-    if (navigationType === "pop") {
-      const id = window.setTimeout(() => setNavigationType("push"), 0);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [navigationType]);
-
-  useListRestoration({
-    pathname,
-    currentPage,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    navigationType,
-  });
-
-  const handleRowClick = (id: number) => {
-    if (typeof window !== "undefined") {
-      saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
-    }
-    setNavigationType("push");
-    router.push(`/abilities/${id}`);
-  };
-
-  // 특성 효과 텍스트 (간단한 설명 표시)
-  const getAbilityDescription = (ability: DexAbilitySummary) => {
-    return ability.description;
-  };
+  const getAbilityDescription = (ability: DexAbilitySummary) => ability.description;
 
   return (
     <div className="space-y-4">

@@ -45,7 +45,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return {
         ...state,
         mode: action.payload,
-        level: null, // 모드 변경 시 레벨 초기화
+        level: null,
         screen: "start",
       };
 
@@ -149,7 +149,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
     case "RESET_QUIZ":
       return {
         ...initialState,
-        mode: state.mode, // 모드만 유지
+        mode: state.mode,
       };
 
     default:
@@ -162,49 +162,49 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
   const actions = useMemo(
     () => ({
-    setMode: (mode: QuizMode) => {
-      dispatch({ type: "SET_MODE", payload: mode });
-    },
+      setMode: (mode: QuizMode) => {
+        dispatch({ type: "SET_MODE", payload: mode });
+      },
 
-    setLevel: (level: QuizLevel) => {
-      dispatch({ type: "SET_LEVEL", payload: level });
-    },
+      setLevel: (level: QuizLevel) => {
+        dispatch({ type: "SET_LEVEL", payload: level });
+      },
 
-    setScreen: (screen: QuizScreen) => {
-      dispatch({ type: "SET_SCREEN", payload: screen });
-    },
+      setScreen: (screen: QuizScreen) => {
+        dispatch({ type: "SET_SCREEN", payload: screen });
+      },
 
-    updateOptions: (options: Partial<QuizOptions>) => {
-      dispatch({ type: "UPDATE_OPTIONS", payload: options });
-    },
+      updateOptions: (options: Partial<QuizOptions>) => {
+        dispatch({ type: "UPDATE_OPTIONS", payload: options });
+      },
 
-    startQuiz: () => {
-      dispatch({ type: "START_QUIZ" });
-    },
+      startQuiz: () => {
+        dispatch({ type: "START_QUIZ" });
+      },
 
-    setLoading: (loading: boolean) => {
-      dispatch({ type: "SET_LOADING", payload: loading });
-    },
+      setLoading: (loading: boolean) => {
+        dispatch({ type: "SET_LOADING", payload: loading });
+      },
 
-    setError: (error: string | null) => {
-      dispatch({ type: "SET_ERROR", payload: error });
-    },
+      setError: (error: string | null) => {
+        dispatch({ type: "SET_ERROR", payload: error });
+      },
 
-    setQuestion: (question: QuizQuestion | null) => {
-      dispatch({ type: "SET_QUESTION", payload: question });
-    },
+      setQuestion: (question: QuizQuestion | null) => {
+        dispatch({ type: "SET_QUESTION", payload: question });
+      },
 
-    submitAnswer: (choice: string) => {
-      dispatch({ type: "SUBMIT_ANSWER", payload: choice });
-    },
+      submitAnswer: (choice: string) => {
+        dispatch({ type: "SUBMIT_ANSWER", payload: choice });
+      },
 
-    nextQuestion: () => {
-      dispatch({ type: "NEXT_QUESTION" });
-    },
+      nextQuestion: () => {
+        dispatch({ type: "NEXT_QUESTION" });
+      },
 
-    addAskedPokemon: (pokemonId: number) => {
-      dispatch({ type: "ADD_ASKED_POKEMON", payload: pokemonId });
-    },
+      addAskedPokemon: (pokemonId: number) => {
+        dispatch({ type: "ADD_ASKED_POKEMON", payload: pokemonId });
+      },
 
       resetQuiz: () => {
         dispatch({ type: "RESET_QUIZ" });
