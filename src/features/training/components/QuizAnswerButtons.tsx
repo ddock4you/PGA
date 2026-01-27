@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { MoveChoice } from "../contexts/types";
 
 interface QuizChoice {
   id: string;
@@ -12,7 +11,7 @@ interface QuizChoice {
 }
 
 interface QuizAnswerButtonsProps {
-  choices: QuizChoice[] | MoveChoice[];
+  choices: QuizChoice[];
   selectedChoice: string | null;
   isCorrect: boolean | null;
   onChoiceSelect: (choiceId: string) => void;

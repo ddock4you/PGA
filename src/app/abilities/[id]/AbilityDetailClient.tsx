@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
-import type { Ability, AbilityEffectEntry } from "@/types/pokeapi";
+import type { Ability, AbilityEffectEntry, AbilityFlavorTextEntry } from "@/types/pokeapi";
 
 interface AbilityDetailClientProps {
   ability: Ability;

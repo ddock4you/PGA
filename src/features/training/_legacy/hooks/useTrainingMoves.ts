@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
-import type { MoveChoice } from "../contexts/types";
+import type { LegacyMoveChoice } from "../types/moveChoice";
 import type { CsvMove } from "@/types/csvTypes";
 import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 
@@ -54,7 +54,7 @@ export function createMoveChoicesForType(
   defenderTypes: string[],
   typeMap: TypeMap,
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice[] {
+): LegacyMoveChoice[] {
   const typeMoves = moves.filter((move) => move.type_id === typeId);
 
   return typeMoves
@@ -79,5 +79,5 @@ export function createMoveChoicesForType(
         power: move.power || 0,
       };
     })
-    .filter(Boolean) as MoveChoice[];
+    .filter(Boolean) as LegacyMoveChoice[];
 }

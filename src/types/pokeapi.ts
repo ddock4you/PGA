@@ -141,7 +141,7 @@ export interface Item {
   fling_effect?: ItemFlingEffect | null;
   category?: NamedAPIResource;
   cost: number;
-  held_by_pokemon: ItemHoldPokemon[];
+  held_by_pokemon?: ItemHoldPokemon[];
 }
 
 export interface MoveEffectEntry {

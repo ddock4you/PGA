@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     if (Array.isArray(body.tags) && body.tags.length > 0) {
       operations.push(
-        Promise.all(body.tags.map((tag) => revalidateTag(tag))).then(() => undefined)
+        Promise.all(body.tags.map((tag) => revalidateTag(tag, "default"))).then(() => undefined)
       );
     }
 

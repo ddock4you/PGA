@@ -1,4 +1,4 @@
-import type { MoveChoice } from "../contexts/types";
+import type { LegacyMoveChoice } from "../types/moveChoice";
 import type { CsvMove } from "@/types/csvTypes";
 import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
 import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
@@ -12,7 +12,7 @@ export function selectMoveByMultiplier(
   targetMultiplier: number, // 2, 1, 또는 0.5
   moves: (CsvMove & { koreanName: string })[],
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice | null {
+): LegacyMoveChoice | null {
   // 모든 타입에 대해 배율 계산
   const typeMultipliers: Array<{ typeId: number; englishType: string; multiplier: number }> = [];
 
@@ -67,7 +67,7 @@ export function selectBestMove(
   typeMap: TypeMap,
   moves: (CsvMove & { koreanName: string })[],
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice | null {
+): LegacyMoveChoice | null {
   console.log(`selectBestMove called for defender types: ${defenderTypes}`);
 
   // x2 이상의 배율을 가진 타입들을 찾음
@@ -239,7 +239,7 @@ export function selectMoveByTargetMultiplier(
   targetMultiplier: 1 | 0.5,
   moves: (CsvMove & { koreanName: string })[],
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice | null {
+): LegacyMoveChoice | null {
   let result = selectMoveByMultiplier(
     defenderTypes,
     typeMap,
@@ -266,13 +266,13 @@ export function selectMoveByTargetMultiplier(
  * Lv.2용 보기 생성: x2 이상의 기술을 우선적으로 포함
  */
 export function generateMoveChoicesLv2(
-  correctMove: MoveChoice,
+  correctMove: LegacyMoveChoice,
   allMoves: (CsvMove & { koreanName: string })[],
   defenderTypes: string[],
   typeMap: TypeMap,
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice[] {
-  const choices: MoveChoice[] = [correctMove];
+): LegacyMoveChoice[] {
+  const choices: LegacyMoveChoice[] = [correctMove];
   const usedTypeIds = new Set([correctMove.typeId]);
 
   // x2 이상과 x2 미만 타입들을 분리
@@ -280,7 +280,7 @@ export function generateMoveChoicesLv2(
     [];
   const lowMultiplierTypes: Array<{ typeId: number; englishType: string; multiplier: number }> = [];
 
-  Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr]) => {
+  Object.entries(TYPE_ID_TO_KOREAN_NAME).forEach(([typeIdStr, koreanName]) => {
     const typeId = Number(typeIdStr);
     const englishType = Object.keys(TYPE_ID_TO_KOREAN_NAME).find(
       (key) => TYPE_ID_TO_KOREAN_NAME[Number(key)] === koreanName
@@ -366,7 +366,7 @@ export function generateMoveChoicesLv3(
   defenderTypes: string[],
   typeMap: TypeMap,
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): { choices: MoveChoice[]; correctAnswer: string } {
+): { choices: LegacyMoveChoice[]; correctAnswer: string } {
   // 1. 모든 타입의 배율을 계산하고 정렬
   const allTypeMultipliers: Array<{
     typeId: number;
@@ -412,7 +412,7 @@ export function generateMoveChoicesLv3(
   const correctMoveId = correctMoveData.id.toString();
 
   // 6. 보기 생성: 각 타입에서 하나씩 기술을 선택 (최대 4개)
-  const choices: MoveChoice[] = [];
+  const choices: LegacyMoveChoice[] = [];
   const usedTypeIds = new Set<number>();
 
   for (const typeInfo of sortedTypes) {
@@ -476,13 +476,13 @@ export function generateMoveChoicesLv3(
  * 보기 생성: 정답 기술을 포함하여 4개의 서로 다른 타입 기술 선택 (구버전)
  */
 export function generateMoveChoices(
-  correctMove: MoveChoice,
+  correctMove: LegacyMoveChoice,
   allMoves: (CsvMove & { koreanName: string })[],
   defenderTypes: string[],
   typeMap: TypeMap,
   computeAttackMultiplier: (attackType: string, defenderTypes: string[], typeMap: TypeMap) => number
-): MoveChoice[] {
-  const choices: MoveChoice[] = [correctMove];
+): LegacyMoveChoice[] {
+  const choices: LegacyMoveChoice[] = [correctMove];
   const usedTypeIds = new Set([correctMove.typeId]);
 
   // 다른 타입들의 기술을 선택하여 보기 채우기

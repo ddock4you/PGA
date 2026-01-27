@@ -7,11 +7,7 @@ import {
   computeAttackMultiplier,
   type TypeMap,
 } from "@/features/pokemonTypes/utils/typeEffectiveness";
-import type {
-  PokemonQuizQuestion,
-  UsePokemonQuizOptions,
-  UsePokemonQuizResult,
-} from "../types/quiz";
+import type { PokemonQuizQuestion, UsePokemonQuizOptions, UsePokemonQuizResult } from "../types/quiz";
 
 function shuffleArray<T>(array: T[]): T[] {
   const cloned = [...array];

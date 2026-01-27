@@ -22,8 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-docs
-.cursor
+
 .next
 .env
 .agents
+.opencode
+.cursor
+docs
+opencode.json

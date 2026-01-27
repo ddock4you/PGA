@@ -50,7 +50,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">{item.name}</h1>
-            <Badge>{item.category.name}</Badge>
+            <Badge>{item.category?.name ?? "-"}</Badge>
           </div>
           <p className="text-muted-foreground text-sm mt-1">{short_effect}</p>
           <p className="text-sm font-medium mt-1">가격: {item.cost}원</p>

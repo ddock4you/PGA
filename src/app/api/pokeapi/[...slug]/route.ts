@@ -1,21 +1,20 @@
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { fetchFromPokeApi } from "@/lib/pokeapi";
 
-interface RouteParams {
-  params: {
-    slug?: string[];
-  };
-}
-
-export async function GET(_request: Request, { params }: RouteParams) {
-  const slugParts = params?.slug ?? [];
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await context.params;
+  const slugParts = slug ?? [];
 
   if (slugParts.length === 0) {
     return NextResponse.json({ error: "PokéAPI 경로를 지정해야 합니다." }, { status: 400 });
   }
 
   const path = slugParts.join("/");
-  const queryString = new URL(_request.url).search;
+  const queryString = new URL(request.url).search;
   const targetPath = queryString ? `${path}${queryString}` : path;
 
   try {
