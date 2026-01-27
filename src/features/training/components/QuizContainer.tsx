@@ -1,8 +1,8 @@
 import { useQuizContext } from "../contexts";
 import { QuizStartScreen } from "./QuizStartScreen";
 import { QuizFinishedScreen } from "./QuizFinishedScreen";
-import { AttackQuizContainer } from "./attack/AttackQuizContainer";
-import { TypeQuizContainer } from "./type/TypeQuizContainer";
+import { AttackQuizContainer } from "./attackTypeQuiz/AttackQuizContainer";
+import { TypeQuizContainer } from "./pokemonTypeQuiz/TypeQuizContainer";
 
 export function QuizContainer() {
   const { state } = useQuizContext();

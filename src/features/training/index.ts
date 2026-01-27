@@ -9,7 +9,7 @@ export { QuizQuestionCard } from "./components/QuizQuestionCard";
 export { QuizAnswerButtons } from "./components/QuizAnswerButtons";
 
 // Quiz type components
-export { AttackQuizContainer } from "./components/attack/AttackQuizContainer";
+export { AttackQuizContainer } from "./components/attackTypeQuiz/AttackQuizContainer";
 // Hook exports
 export { useQuizNavigation } from "./hooks/useQuizNavigation";
 export { useQuizOptions } from "./hooks/useQuizOptions";

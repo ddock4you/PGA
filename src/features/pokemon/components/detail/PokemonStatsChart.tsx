@@ -95,8 +95,12 @@ export function PokemonStatsChart({ stats }: PokemonStatsChartProps) {
               <PolarGrid gridType="polygon" />
               {/* 100 기준선 강조를 위한 커스텀 드로잉 */}
               <Customized
-                component={(props: any) => {
-                  const { cx, cy, polarRadius } = props ?? {};
+                component={(props: unknown) => {
+                  const p =
+                    typeof props === "object" && props !== null
+                      ? (props as Partial<{ cx: number; cy: number; polarRadius: number }>)
+                      : undefined;
+                  const { cx, cy, polarRadius } = p ?? {};
                   // polarRadius는 차트의 반지름. 도메인(0~150)과 매핑 필요.
                   // Recharts 내부 스케일을 정확히 알기 어려우므로 대략적인 비율 계산
                   // domain max가 150(변환값 기준)이라고 가정하면 100은 2/3 지점.
