@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import Search from "lucide-react/dist/esm/icons/search";
 import { buildSearchQueryString } from "@/lib/utils";
 
 /**
@@ -24,7 +24,7 @@ export function SearchLandingForm() {
 
     const searchParams = buildSearchQueryString({
       q: trimmed,
-      generationId: "unified",
+      generationId: null,
       gameId: null,
     });
     router.push(`/search?${searchParams}`);

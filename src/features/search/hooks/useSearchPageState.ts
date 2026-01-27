@@ -25,7 +25,7 @@ export function useSearchPageState() {
       if (!trimmed) return;
       const searchQuery = buildQueryString({
         q: trimmed,
-        generationId: "unified",
+        generationId: null,
         gameId: null,
       });
       router.push(`/search?${searchQuery}`);

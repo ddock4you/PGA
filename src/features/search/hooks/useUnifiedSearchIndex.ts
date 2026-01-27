@@ -36,10 +36,6 @@ export function useUnifiedSearchIndex() {
     }
 
     let isMounted = true;
-
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 0);
     loadUnifiedSearchIndex()
       .then((index) => {
         if (!isMounted) return;

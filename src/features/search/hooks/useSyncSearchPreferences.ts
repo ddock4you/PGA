@@ -13,11 +13,13 @@ export function useSyncSearchPreferences(parsed: ParsedSearchQueryParams) {
     usePreferences();
   const { selectedGenerationId, selectedGameId, selectedVersionGroup } = state;
 
+  const safeGenerationId = parsed.generationId === "unified" ? null : parsed.generationId;
+
   useEffect(() => {
-    if (parsed.generationId && parsed.generationId !== selectedGenerationId) {
-      setSelectedGenerationId(parsed.generationId);
+    if (safeGenerationId && safeGenerationId !== selectedGenerationId) {
+      setSelectedGenerationId(safeGenerationId);
       if (!parsed.gameId) {
-        setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[parsed.generationId] ?? null);
+        setSelectedVersionGroup(GENERATION_VERSION_GROUP_MAP[safeGenerationId] ?? null);
       }
     }
 
@@ -25,13 +27,14 @@ export function useSyncSearchPreferences(parsed: ParsedSearchQueryParams) {
       setSelectedGameId(parsed.gameId);
       const versionGroup =
         getVersionGroupByGameId(parsed.gameId) ??
-        (parsed.generationId
-          ? GENERATION_VERSION_GROUP_MAP[parsed.generationId]
+        (safeGenerationId
+          ? GENERATION_VERSION_GROUP_MAP[safeGenerationId]
           : selectedVersionGroup);
       setSelectedVersionGroup(versionGroup ?? null);
     }
   }, [
     parsed,
+    safeGenerationId,
     selectedGenerationId,
     selectedGameId,
     selectedVersionGroup,

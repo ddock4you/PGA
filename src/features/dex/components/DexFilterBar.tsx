@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
 import { DexGenerationSelector } from "./DexGenerationSelector";
 import { DexTypeFilter } from "./DexTypeFilter";
 import { DexSortOptions } from "./DexSortOptions";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { Button } from "@/components/ui/button";
 import { PokemonDetailHeader } from "@/features/pokemon/components/detail/PokemonDetailHeader";
 import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
