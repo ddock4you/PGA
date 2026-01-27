@@ -15,6 +15,7 @@ import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import type { DexFilters } from "../types/filterTypes";
 import { saveListState } from "@/lib/listState";
+import type { CsvPokemonSpeciesName, CsvPokemonType } from "@/types/csvTypes";
 
 type CsvPokemonRow = Parameters<typeof transformPokemonForDex>[0][number];
 
@@ -72,7 +73,6 @@ export function DexPokemonTab() {
       getFilteredPokemonSummaries({
         pokemonData,
         pokemonTypesData,
-        pokemonAbilitiesData,
         pokemonSpeciesNamesData,
         pokemonTypesById,
         pokemonAbilitiesById,
@@ -83,7 +83,6 @@ export function DexPokemonTab() {
     [
       pokemonData,
       pokemonTypesData,
-      pokemonAbilitiesData,
       pokemonSpeciesNamesData,
       pokemonTypesById,
       pokemonAbilitiesById,
@@ -256,7 +255,6 @@ export function DexPokemonTab() {
 function getFilteredPokemonSummaries({
   pokemonData,
   pokemonTypesData,
-  pokemonAbilitiesData,
   pokemonSpeciesNamesData,
   pokemonTypesById,
   pokemonAbilitiesById,
@@ -264,17 +262,16 @@ function getFilteredPokemonSummaries({
   filters,
   searchQuery,
 }: {
-  pokemonData?: Parameters<typeof transformPokemonForDex>[0];
-  pokemonTypesData?: Parameters<typeof transformPokemonForDex>[1];
-  pokemonAbilitiesData?: Parameters<typeof transformPokemonForDex>[2];
-  pokemonSpeciesNamesData?: Parameters<typeof transformPokemonForDex>[3];
+  pokemonData?: CsvPokemonRow[];
+  pokemonTypesData?: CsvPokemonType[];
+  pokemonSpeciesNamesData?: CsvPokemonSpeciesName[];
   pokemonTypesById: Map<number, number[]>;
   pokemonAbilitiesById: Map<number, number[]>;
   pokemonById: Map<number, CsvPokemonRow>;
   filters: DexFilters;
   searchQuery: string;
 }) {
-  if (!pokemonData || !pokemonTypesData) return [];
+  if (!pokemonData || !pokemonTypesData || !pokemonSpeciesNamesData) return [];
 
   let filteredPokemon = pokemonData;
   let minId = 1;
@@ -296,8 +293,9 @@ function getFilteredPokemonSummaries({
   filteredPokemon = filteredPokemon.filter((p) => p.id >= minId && p.id <= maxId);
 
   if (filters.selectedGameVersion) {
+    const selectedGameVersionId = filters.selectedGameVersion.id;
     filteredPokemon = filteredPokemon.filter((p) =>
-      shouldShowVariantPokemon(p.identifier, filters.selectedGameVersion.id)
+      shouldShowVariantPokemon(p.identifier, selectedGameVersionId)
     );
   }
 
@@ -313,9 +311,10 @@ function getFilteredPokemonSummaries({
   }
 
   if (filters.selectedAbilityId) {
+    const selectedAbilityId = filters.selectedAbilityId;
     filteredPokemon = filteredPokemon.filter((p) => {
       const pokemonAbilityIds = pokemonAbilitiesById.get(p.id) ?? [];
-      return pokemonAbilityIds.includes(filters.selectedAbilityId);
+      return pokemonAbilityIds.includes(selectedAbilityId);
     });
   }
 

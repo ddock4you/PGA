@@ -7,7 +7,7 @@ import { RotateCcw } from "lucide-react";
 import { DexGenerationSelector } from "./DexGenerationSelector";
 import { DexTypeFilter } from "./DexTypeFilter";
 import { DexSortOptions } from "./DexSortOptions";
-import { DEFAULT_DEX_FILTERS } from "../types/filterTypes";
+import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
 import type { DexFilterBarProps } from "../types/ui";
 
 export function DexFilterBar({

@@ -9,6 +9,7 @@ import { SearchPrompt } from "@/features/search/components/SearchPrompt";
 import { SearchResultSection } from "@/features/search/components/SearchResultSection";
 import { SearchTabButton } from "@/features/search/components/SearchTabButton";
 import { SearchNoResults } from "@/features/search/components/SearchNoResults";
+import type { UnifiedSearchEntry } from "@/features/search/types/unifiedSearchTypes";
 
 import { TAB_LABELS } from "@/features/search/constants/searchPageConstants";
 export function SearchPageClient() {

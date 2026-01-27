@@ -17,7 +17,7 @@ export function useSearchPageState() {
 
   const { data: unifiedSearchIndex, isLoading, isError } = useUnifiedSearchIndex();
 
-  const results = useUnifiedSearchResults(unifiedSearchIndex, parsed.q);
+  const results = useUnifiedSearchResults(unifiedSearchIndex ?? undefined, parsed.q);
 
   const handleSearchSubmit = useCallback(
     (nextQuery: string) => {

@@ -31,7 +31,7 @@ export function extractLocalizedNames(
 
 // 단일 이름 항목에서 다국어 이름을 추출하는 함수 (ID 기반 그룹화용)
 export function groupNamesById<T extends { id: number }>(
-  items: T[],
+  _items: T[],
   names: Array<{ id: number; local_language_id: number; name: string }>
 ): Map<number, Array<{ local_language_id: number; name: string }>> {
   const nameGroups = new Map<number, Array<{ local_language_id: number; name: string }>>();

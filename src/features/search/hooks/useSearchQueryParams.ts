@@ -6,7 +6,6 @@ import {
   buildSearchQueryString,
   parseSearchQueryString,
   type SearchQueryParamsInput,
-  type ParsedSearchQueryParams,
 } from "@/lib/utils";
 
 export function useSearchQueryParams() {

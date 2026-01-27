@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { QueryKey } from "@tanstack/react-query";
+import type { InfiniteData, QueryKey } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 export interface LoadMorePage<TItem> {
@@ -25,12 +25,18 @@ export function useLoadMore<TItem>(options: UseLoadMoreOptions<TItem>) {
   const defaultGetNextPageParam = (lastPage: LoadMorePage<TItem>) =>
     lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    LoadMorePage<TItem>,
+    Error,
+    InfiniteData<LoadMorePage<TItem>>,
+    QueryKey,
+    number
+  >({
     queryKey,
+    initialPageParam,
     queryFn: ({ pageParam = initialPageParam }) => fetchPage(pageParam),
     getNextPageParam: getNextPageParam ?? defaultGetNextPageParam,
     enabled,
-    keepPreviousData: true,
   });
 
   const items = useMemo(() => query.data?.pages.flatMap((page) => page.items) ?? [], [query.data]);

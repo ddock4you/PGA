@@ -1,7 +1,8 @@
 export const parseIdFromUrl = (url?: string): number | undefined => {
   if (!url) return undefined;
   const parts = url.split("/").filter(Boolean);
-  const id = Number(parts.at(-1));
+  const last = parts[parts.length - 1];
+  const id = Number(last);
   return Number.isFinite(id) ? id : undefined;
 };
 

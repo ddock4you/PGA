@@ -83,6 +83,8 @@ export interface PokeApiEvolutionChainLink {
   evolves_to: PokeApiEvolutionChainLink[];
   evolution_details: {
     min_level?: number | null;
+    min_happiness?: number | null;
+    time_of_day?: string | null;
     item?: PokeApiNamedResource | null;
     trigger: PokeApiNamedResource;
     // ... add other evolution details as needed
