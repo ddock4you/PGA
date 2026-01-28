@@ -2,26 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-
-type Theme = "light" | "dark";
-
-interface PreferencesState {
-  theme: Theme;
-  selectedGameId: string | null;
-  selectedGenerationId: string | null;
-  selectedVersionGroup: string | null;
-}
-
-interface PreferencesContextValue {
-  state: PreferencesState;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-  setSelectedGameId: (gameId: string | null) => void;
-  setSelectedGenerationId: (generationId: string | null) => void;
-  setSelectedVersionGroup: (group: string | null) => void;
-}
-
-const PREFERENCES_STORAGE_KEY = "pga.preferences.v1";
+import { PREFERENCES_STORAGE_KEY } from "./constants";
+import { applyThemeToDocument } from "./theme";
+import type { PreferencesContextValue, PreferencesState, Theme } from "./types";
 
 const defaultState: PreferencesState = {
   theme: "light",
@@ -41,13 +24,9 @@ function loadInitialState(): PreferencesState {
     const raw = window.localStorage.getItem(PREFERENCES_STORAGE_KEY);
 
     if (!raw) {
-      const prefersDark =
-        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-      return {
-        ...defaultState,
-        theme: prefersDark ? "dark" : "light",
-      };
+      // White(=light) is always the default theme.
+      // Note: if a user previously selected dark, it will be loaded from storage.
+      return defaultState;
     }
 
     const parsed = JSON.parse(raw) as Partial<PreferencesState>;
@@ -69,17 +48,7 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
   const [state, setState] = useState<PreferencesState>(() => loadInitialState());
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    const root = document.documentElement;
-
-    if (state.theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    root.style.colorScheme = state.theme;
+    applyThemeToDocument(state.theme);
   }, [state.theme]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { usePreferences } from "@/features/preferences/contexts";
+import { usePreferences } from "@/features/preferences";
 import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
 import { useDexCsvData } from "@/hooks/useDexCsvData";

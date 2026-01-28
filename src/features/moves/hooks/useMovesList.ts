@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
-import { usePreferences } from "@/features/preferences/contexts";
+import { usePreferences } from "@/features/preferences";
 import { transformMovesForDex } from "@/utils/dataTransforms";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";

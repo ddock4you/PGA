@@ -5,7 +5,7 @@ import {
   GENERATION_VERSION_GROUP_MAP,
   getVersionGroupByGameId,
 } from "@/features/generation/constants/generationData";
-import { usePreferences } from "@/features/preferences/contexts";
+import { usePreferences } from "@/features/preferences";
 import type { ParsedSearchQueryParams } from "@/lib/utils";
 
 export function useSyncSearchPreferences(parsed: ParsedSearchQueryParams) {

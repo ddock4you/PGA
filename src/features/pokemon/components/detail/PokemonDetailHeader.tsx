@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { usePreferences } from "@/features/preferences/contexts";
+import { usePreferences } from "@/features/preferences";
 import { GameGenerationSelector } from "@/features/generation/components/GameGenerationSelector";
 import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../api/pokemonApi";

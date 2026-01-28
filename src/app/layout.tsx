@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ClientLayout } from "@/components/ClientLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { PreferencesProvider } from "@/features/preferences/contexts";
+import { PREFERENCES_STORAGE_KEY, PreferencesProvider } from "@/features/preferences";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className={inter.className}>
+        <Script
+          id="pga-theme-init"
+          strategy="beforeInteractive"
+        >{`(function(){try{var raw=localStorage.getItem(${JSON.stringify(PREFERENCES_STORAGE_KEY)});if(!raw)return;var parsed=JSON.parse(raw);var theme=parsed&&parsed.theme;if(theme!=='dark')return;var root=document.documentElement;root.classList.add('dark');root.style.colorScheme='dark';}catch(e){}})();`}</Script>
         <PreferencesProvider>
           <ErrorBoundary>
             <div className="min-h-screen bg-background text-foreground">

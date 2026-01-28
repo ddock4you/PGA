@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { usePreferences } from "@/features/preferences/contexts";
+import { usePreferences } from "@/features/preferences";
 import { GameGenerationModal } from "./GameGenerationModal";
 import { GENERATION_GAME_MAPPING } from "../constants/generationData";
 import type { GameVersion } from "../types/generationTypes";
