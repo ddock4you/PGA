@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
+import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import {
   buildTypeMap,
   computeAttackMultiplier,
@@ -21,7 +21,7 @@ function toChoiceFromMultiplier(multiplier: number): MultiplierChoice {
 
 export function useTypeQuiz(options?: UseTypeQuizOptions): UseTypeQuizResult {
   const totalQuestions = options?.totalQuestions ?? 10;
-  const { data: types, isLoading, isError } = useAllTypesQuery();
+  const { data: types, isLoading, isError } = useAllTypes();
 
   const [questionIndex, setQuestionIndex] = useState(1);
   const [question, setQuestion] = useState<TypeQuizQuestion | null>(null);

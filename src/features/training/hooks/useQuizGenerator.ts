@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
+import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import { buildTypeMap, type TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 import { useQuizContext } from "../contexts";
 import { loadQuizData, type QuizMove, type QuizPokemon } from "../api/quizData";
@@ -11,7 +11,7 @@ import { generateTypeQuiz } from "../utils/generators/generateTypeQuiz";
 
 export function useQuizGenerator() {
   const { state, actions } = useQuizContext();
-  const { data: allTypes } = useAllTypesQuery();
+  const { data: allTypes } = useAllTypes();
   const [quizData, setQuizData] = useState<{ pokemons: QuizPokemon[]; moves: QuizMove[] } | null>(
     null
   );

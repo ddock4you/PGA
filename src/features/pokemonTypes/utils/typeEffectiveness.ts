@@ -1,4 +1,4 @@
-import type { PokeApiType } from "@/features/pokemonTypes/api/typeApi";
+import type { PokeApiType } from "@/features/pokemonTypes/model/typeData";
 
 export type TypeName = string;
 
@@ -80,7 +80,7 @@ export function computeDefenseEffectivenessDetail(
     immune: [],
   };
 
-  const allTypeNames = Object.keys(typeMap).filter((t) => t !== "stellar" && t !== "unknown");
+  const allTypeNames = Object.keys(typeMap);
 
   for (const attackType of allTypeNames) {
     const multiplier = computeAttackMultiplier(attackType, defenders, typeMap);

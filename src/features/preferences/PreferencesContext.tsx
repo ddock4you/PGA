@@ -4,13 +4,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import { PREFERENCES_STORAGE_KEY } from "./constants";
 import { applyThemeToDocument } from "./theme";
-import type { PreferencesContextValue, PreferencesState, Theme } from "./types";
+import type { PreferencesContextValue, PreferencesState, Theme, TypeChartId } from "./types";
 
 const defaultState: PreferencesState = {
   theme: "light",
   selectedGameId: null,
   selectedGenerationId: null,
   selectedVersionGroup: null,
+  typeChartId: "gen6plus",
 };
 
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
@@ -96,6 +97,13 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     }));
   }, []);
 
+  const setTypeChartId = useCallback((chartId: TypeChartId) => {
+    setState((prev) => ({
+      ...prev,
+      typeChartId: chartId,
+    }));
+  }, []);
+
   const value = useMemo<PreferencesContextValue>(
     () => ({
       state,
@@ -104,6 +112,7 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
       setSelectedGameId,
       setSelectedGenerationId,
       setSelectedVersionGroup,
+      setTypeChartId,
     }),
     [
       state,
@@ -112,6 +121,7 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
       setSelectedGameId,
       setSelectedGenerationId,
       setSelectedVersionGroup,
+      setTypeChartId,
     ]
   );
 

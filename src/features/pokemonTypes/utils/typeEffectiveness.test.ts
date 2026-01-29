@@ -5,7 +5,7 @@ import {
   computeDefenseEffectiveness,
   type TypeMap,
 } from "./typeEffectiveness";
-import type { PokeApiType } from "@/features/pokemonTypes/api/typeApi";
+import { getAllTypesStatic, type PokeApiType } from "../model/typeData";
 
 function createType(
   name: string,
@@ -82,3 +82,30 @@ describe("computeDefenseEffectiveness", () => {
   });
 });
 
+describe("type charts (static)", () => {
+  it("Gen 1: ghost -> psychic is 0x (psychic immune to ghost)", () => {
+    const types = getAllTypesStatic("gen1");
+    const typeMap = buildTypeMap(types);
+    expect(computeAttackMultiplier("ghost", ["psychic"], typeMap)).toBe(0);
+  });
+
+  it("Gen 1: ice -> fire is 1x (ice neutral to fire)", () => {
+    const types = getAllTypesStatic("gen1");
+    const typeMap = buildTypeMap(types);
+    expect(computeAttackMultiplier("ice", ["fire"], typeMap)).toBe(1);
+  });
+
+  it("Gen 1: bug <-> poison are both 2x", () => {
+    const types = getAllTypesStatic("gen1");
+    const typeMap = buildTypeMap(types);
+    expect(computeAttackMultiplier("bug", ["poison"], typeMap)).toBe(2);
+    expect(computeAttackMultiplier("poison", ["bug"], typeMap)).toBe(2);
+  });
+
+  it("Gen 2~5: ghost/dark -> steel are 0.5x", () => {
+    const types = getAllTypesStatic("gen2to5");
+    const typeMap = buildTypeMap(types);
+    expect(computeAttackMultiplier("ghost", ["steel"], typeMap)).toBe(0.5);
+    expect(computeAttackMultiplier("dark", ["steel"], typeMap)).toBe(0.5);
+  });
+});

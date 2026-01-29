@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
+import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import {
   buildTypeMap,
   computeOffenseEffectiveness,
@@ -37,7 +37,7 @@ interface PokemonAttackEffectivenessSectionProps {
 export function PokemonAttackEffectivenessSection({
   types,
 }: PokemonAttackEffectivenessSectionProps) {
-  const { data: allTypes, isLoading } = useAllTypesQuery();
+  const { data: allTypes, isLoading } = useAllTypes();
 
   const typeMap = useMemo(() => {
     if (!allTypes) return {};

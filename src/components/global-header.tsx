@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/moves", label: "기술" },
   { href: "/abilities", label: "특성" },
   { href: "/items", label: "도구" },
+  { href: "/type-chart", label: "상성표" },
   { href: "/training", label: "배틀 트레이닝" },
 ];
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchPokemon, type PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
 import { usePokemonSpeciesByGeneration } from "@/features/pokemon/hooks/usePokemonQueries";
-import { useAllTypesQuery } from "@/features/pokemonTypes/hooks/useAllTypesQuery";
+import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import {
   buildTypeMap,
   computeAttackMultiplier,
@@ -32,7 +32,7 @@ export function usePokemonQuiz(options: UsePokemonQuizOptions): UsePokemonQuizRe
     isError: speciesError,
   } = usePokemonSpeciesByGeneration(generationId);
 
-  const { data: types, isLoading: typesLoading, isError: typesError } = useAllTypesQuery();
+  const { data: types, isLoading: typesLoading, isError: typesError } = useAllTypes();
 
   const typeMap: TypeMap | null = useMemo(() => {
     if (!types) return null;
