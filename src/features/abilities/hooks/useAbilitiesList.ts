@@ -7,9 +7,8 @@ import { transformAbilitiesForDex } from "@/utils/dataTransforms";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
+import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
 import type { DexAbilitySummary } from "@/utils/dataTransforms";
-
-const ITEMS_PER_PAGE = 30;
 
 export function useAbilitiesList() {
   const router = useRouter();
@@ -56,7 +55,7 @@ export function useAbilitiesList() {
     queryKey: chunkQueryKey,
     enabled: !isCsvLoading && !isCsvError,
     fetchPage: async (pageParam = 1) => {
-      const pageSize = ITEMS_PER_PAGE;
+      const pageSize = DEFAULT_LIST_PAGE_SIZE;
       const count = filteredAbilities.length;
       const totalPagesOfResults = Math.max(1, Math.ceil(count / pageSize));
       const start = (pageParam - 1) * pageSize;

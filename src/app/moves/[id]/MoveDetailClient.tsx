@@ -11,7 +11,7 @@ import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 import type { PokeApiMove } from "@/features/moves/api/movesApi";
-import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
+import type { PokeApiNamedResource } from "@/types/pokeapi";
 
 type LearnedPokemonEntry = PokeApiNamedResource;
 

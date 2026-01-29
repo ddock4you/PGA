@@ -3,6 +3,9 @@ export interface NamedAPIResource {
   url: string;
 }
 
+// Common alias used across features.
+export type PokeApiNamedResource = NamedAPIResource;
+
 export interface PokemonTypeSlot {
   slot: number;
   type: NamedAPIResource;

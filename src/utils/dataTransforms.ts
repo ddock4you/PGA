@@ -1,7 +1,5 @@
 import type {
   CsvPokemon,
-  CsvMove,
-  CsvMachine,
   CsvNature,
   CsvItem,
   CsvAbility,
@@ -308,41 +306,6 @@ export function transformPokemonForDex(
         types: pokemonTypes,
       };
     });
-}
-
-// 기술 데이터 변환
-export interface DexMoveSummary {
-  id: number;
-  name: string;
-  type: string;
-  damageClass: string;
-  power: number | null;
-  accuracy: number | null;
-  pp: number;
-  machines: CsvMachine[];
-  displayName?: string;
-}
-
-export function transformMovesForDex(
-  csvMoves: CsvMove[],
-  csvMachines: CsvMachine[],
-  generationId: string
-): DexMoveSummary[] {
-  const genId = parseInt(generationId, 10);
-
-  return csvMoves
-    .filter((m) => m.generation_id <= genId)
-    .map((move) => ({
-      id: move.id,
-      name: move.identifier,
-      type: getTypeName(move.type_id),
-      damageClass: getDamageClassName(move.damage_class_id),
-      power: move.power,
-      accuracy: move.accuracy,
-      pp: move.pp,
-      machines: csvMachines.filter((m) => m.move_id === move.id),
-    }))
-    .sort((a, b) => a.id - b.id);
 }
 
 // 특성 데이터 변환

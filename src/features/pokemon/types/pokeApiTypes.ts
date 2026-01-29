@@ -1,4 +1,4 @@
-import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
+import type { PokeApiNamedResource } from "@/types/pokeapi";
 
 export interface PokeApiPokemonSpecies {
   id: number;

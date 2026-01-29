@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
-import type { DexMoveSummary } from "@/utils/dataTransforms";
+import type { DexMoveSummary } from "@/features/moves/types";
 import { useMovesList } from "@/features/moves/hooks/useMovesList";
 
 export function MovesList() {

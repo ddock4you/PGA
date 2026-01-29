@@ -5,13 +5,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import { usePreferences } from "@/features/preferences";
-import { transformMovesForDex } from "@/utils/dataTransforms";
+import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
-import type { DexMoveSummary } from "@/utils/dataTransforms";
-
-const ITEMS_PER_PAGE = 30;
+import type { DexMoveSummary } from "@/features/moves/types";
+import { transformMovesForDex } from "@/features/moves/utils/transformMovesForDex";
 
 export function useMovesList() {
   const router = useRouter();
@@ -73,7 +72,7 @@ export function useMovesList() {
     queryKey: chunkQueryKey,
     enabled: !isCsvLoading && !isCsvError,
     fetchPage: async (pageParam = 1) => {
-      const pageSize = ITEMS_PER_PAGE;
+      const pageSize = DEFAULT_LIST_PAGE_SIZE;
       const count = filteredMoves.length;
       const calculatedTotalPages = Math.max(1, Math.ceil(count / pageSize));
       const start = (pageParam - 1) * pageSize;

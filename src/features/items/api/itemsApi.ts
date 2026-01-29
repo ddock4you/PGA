@@ -1,5 +1,5 @@
 import { fetchFromPokeApi } from "@/lib/pokeapi";
-import type { PokeApiNamedResource } from "@/features/generation/api/generationApi";
+import type { PokeApiNamedResource } from "@/types/pokeapi";
 
 export interface PokeApiItem {
   id: number;
