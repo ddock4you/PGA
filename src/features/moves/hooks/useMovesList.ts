@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
@@ -9,31 +9,32 @@ import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
-import type { DexMoveSummary } from "@/features/moves/types";
-import { transformMovesForDex } from "@/features/moves/utils/transformMovesForDex";
+import { useNavigationType } from "@/hooks/useNavigationType";
+import type { DexMoveListItem } from "@/features/moves/types";
+import { transformMovesForList } from "@/features/moves/utils/transformMovesForList";
+import { matchesAnySearchText, normalizeSearchQuery } from "@/utils/searchText";
 
 export function useMovesList() {
   const router = useRouter();
   const pathname = usePathname();
   const { state } = usePreferences();
   const [searchQuery, setSearchQuery] = useState("");
-  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
+  const { navigationType, markPush } = useNavigationType();
 
   const effectiveGenerationId = state.selectedGenerationId ?? "1";
 
   const {
     movesData,
     moveNamesData,
-    machinesData,
     isLoading: isCsvLoading,
     isError: isCsvError,
   } = useDexCsvData();
   const { getLocalizedMoveName } = useLocalizedMoveName({ movesData, moveNamesData });
 
   const allMoves = useMemo(() => {
-    if (!movesData || !machinesData) return [];
-    return transformMovesForDex(movesData, machinesData, effectiveGenerationId);
-  }, [movesData, machinesData, effectiveGenerationId]);
+    if (!movesData) return [];
+    return transformMovesForList(movesData, effectiveGenerationId);
+  }, [movesData, effectiveGenerationId]);
 
   const localizedMoves = useMemo(() => {
     if (!allMoves.length) return [];
@@ -45,13 +46,11 @@ export function useMovesList() {
 
   const filteredMoves = useMemo(() => {
     if (!localizedMoves.length) return [];
-    if (!searchQuery.trim()) return localizedMoves;
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    return localizedMoves.filter((move) => {
-      const englishMatch = move.name.toLowerCase().includes(normalizedQuery);
-      const koreanMatch = move.displayName?.toLowerCase().includes(normalizedQuery);
-      return englishMatch || koreanMatch;
-    });
+    const normalizedQuery = normalizeSearchQuery(searchQuery);
+    if (!normalizedQuery) return localizedMoves;
+    return localizedMoves.filter((move) =>
+      matchesAnySearchText([move.name, move.displayName], normalizedQuery)
+    );
   }, [localizedMoves, searchQuery]);
 
   const chunkQueryKey = useMemo(
@@ -68,7 +67,7 @@ export function useMovesList() {
     fetchNextPage,
     isFetchingNextPage,
     isError: loadMoreError,
-  } = useLoadMore<DexMoveSummary>({
+  } = useLoadMore<DexMoveListItem>({
     queryKey: chunkQueryKey,
     enabled: !isCsvLoading && !isCsvError,
     fetchPage: async (pageParam = 1) => {
@@ -85,21 +84,6 @@ export function useMovesList() {
     },
   });
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handlePop = () => setNavigationType("pop");
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
-
-  useEffect(() => {
-    if (navigationType === "pop") {
-      const id = window.setTimeout(() => setNavigationType("push"), 0);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [navigationType]);
-
   useListRestoration({
     pathname,
     currentPage,
@@ -114,10 +98,10 @@ export function useMovesList() {
       if (typeof window !== "undefined") {
         saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
       }
-      setNavigationType("push");
+      markPush();
       router.push(`/moves/${id}`);
     },
-    [currentPage, pathname, router]
+    [currentPage, markPush, pathname, router]
   );
 
   const handleSearchChange = useCallback((query: string) => {

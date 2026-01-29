@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchMove } from "@/features/moves/api/movesApi";
-import { MoveDetailClient } from "./MoveDetailClient";
+import { MoveDetailClient } from "@/features/moves/components/MoveDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
 import { loadDexCsvData } from "@/lib/dexCsvData";
 import type { PokeApiMove } from "@/features/moves/api/movesApi";

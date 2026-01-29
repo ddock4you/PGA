@@ -1,6 +1,4 @@
-import type { CsvMachine } from "@/types/csvTypes";
-
-export interface DexMoveSummary {
+export interface DexMoveListItem {
   id: number;
   name: string;
   type: string;
@@ -8,6 +6,10 @@ export interface DexMoveSummary {
   power: number | null;
   accuracy: number | null;
   pp: number;
-  machines: CsvMachine[];
   displayName?: string;
+}
+
+// Use when move-to-machine mapping is required.
+export interface DexMoveWithMachines extends DexMoveListItem {
+  machines: import("@/types/csvTypes").CsvMachine[];
 }

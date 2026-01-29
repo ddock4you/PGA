@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { transformItemsForDex } from "@/utils/dataTransforms";
@@ -9,12 +9,14 @@ import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
 import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
 import type { DexItemSummary } from "@/utils/dataTransforms";
+import { useNavigationType } from "@/hooks/useNavigationType";
+import { includesSearchText, normalizeSearchQuery } from "@/utils/searchText";
 
 export function useItemsList() {
   const router = useRouter();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
-  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
+  const { navigationType, markPush } = useNavigationType();
 
   const { itemsData, isLoading: isCsvLoading, isError: isCsvError } = useDexCsvData();
 
@@ -25,9 +27,9 @@ export function useItemsList() {
 
   const filteredItems = useMemo(() => {
     if (!allItems.length) return [];
-    if (!searchQuery.trim()) return allItems;
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    return allItems.filter((item) => item.name.toLowerCase().includes(normalizedQuery));
+    const normalizedQuery = normalizeSearchQuery(searchQuery);
+    if (!normalizedQuery) return allItems;
+    return allItems.filter((item) => includesSearchText(item.name, normalizedQuery));
   }, [allItems, searchQuery]);
 
   const chunkQueryKey = useMemo(() => ["items", searchQuery.trim()], [searchQuery]);
@@ -58,21 +60,6 @@ export function useItemsList() {
     },
   });
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handlePop = () => setNavigationType("pop");
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
-
-  useEffect(() => {
-    if (navigationType === "pop") {
-      const id = window.setTimeout(() => setNavigationType("push"), 0);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [navigationType]);
-
   useListRestoration({
     pathname,
     currentPage,
@@ -87,10 +74,10 @@ export function useItemsList() {
       if (typeof window !== "undefined") {
         saveListState(pathname, { pageCount: Math.max(1, currentPage), scrollY: window.scrollY });
       }
-      setNavigationType("push");
+      markPush();
       router.push(`/items/${id}`);
     },
-    [currentPage, pathname, router]
+    [currentPage, markPush, pathname, router]
   );
 
   const handleSearchChange = useCallback((query: string) => {

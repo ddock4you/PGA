@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
@@ -16,6 +16,8 @@ import { useListRestoration } from "@/hooks/useListRestoration";
 import type { DexFilters } from "../types/filterTypes";
 import { saveListState } from "@/lib/listState";
 import type { CsvPokemonSpeciesName, CsvPokemonType } from "@/types/csvTypes";
+import { useNavigationType } from "@/hooks/useNavigationType";
+import { matchesAnySearchText, normalizeSearchQuery } from "@/utils/searchText";
 
 type CsvPokemonRow = Parameters<typeof transformPokemonForDex>[0][number];
 
@@ -23,7 +25,7 @@ export function DexPokemonTab() {
   const router = useRouter();
   const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
   const pathname = usePathname();
-  const [navigationType, setNavigationType] = useState<"push" | "pop">("push");
+  const { navigationType, markPush } = useNavigationType();
 
   const {
     pokemonData,
@@ -131,21 +133,6 @@ export function DexPokemonTab() {
     ]
   );
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handlePop = () => setNavigationType("pop");
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
-
-  useEffect(() => {
-    if (navigationType === "pop") {
-      const id = window.setTimeout(() => setNavigationType("push"), 0);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [navigationType]);
-
   const hasBaseData =
     Boolean(pokemonData) &&
     Boolean(pokemonTypesData) &&
@@ -195,7 +182,7 @@ export function DexPokemonTab() {
         scrollY: window.scrollY,
       });
     }
-    setNavigationType("push");
+    markPush();
     router.push(`/dex/${pokemon.id}`);
   };
 
@@ -324,13 +311,11 @@ function getFilteredPokemonSummaries({
     pokemonSpeciesNamesData
   );
 
-  if (searchQuery.trim()) {
-    const query = searchQuery.trim().toLowerCase();
+  const normalizedQuery = normalizeSearchQuery(searchQuery);
+  if (normalizedQuery) {
     summaries = summaries.filter((p) => {
-      const koreanMatch = p.name.toLowerCase().includes(query);
       const pokemon = pokemonById.get(p.id);
-      const englishMatch = pokemon ? pokemon.identifier.toLowerCase().includes(query) : false;
-      return koreanMatch || englishMatch;
+      return matchesAnySearchText([p.name, pokemon?.identifier], normalizedQuery);
     });
   }
 

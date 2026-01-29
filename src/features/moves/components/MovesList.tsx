@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
-import type { DexMoveSummary } from "@/features/moves/types";
 import { useMovesList } from "@/features/moves/hooks/useMovesList";
 
 export function MovesList() {
@@ -75,7 +74,7 @@ export function MovesList() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  items.map((move: DexMoveSummary) => {
+                  items.map((move) => {
                     const displayName = move.displayName ?? move.name;
 
                     return (

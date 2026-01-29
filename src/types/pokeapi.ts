@@ -153,6 +153,27 @@ export interface MoveEffectEntry {
   language: NamedAPIResource;
 }
 
+export interface MoveFlavorTextEntry {
+  flavor_text: string;
+  language: NamedAPIResource;
+  version_group: NamedAPIResource;
+}
+
+export interface MoveMeta {
+  ailment: NamedAPIResource;
+  category: NamedAPIResource;
+  min_hits: number | null;
+  max_hits: number | null;
+  min_turns: number | null;
+  max_turns: number | null;
+  drain: number;
+  healing: number;
+  crit_rate: number;
+  ailment_chance: number;
+  flinch_chance: number;
+  stat_chance: number;
+}
+
 export interface Move {
   id: number;
   name: string;
@@ -163,4 +184,11 @@ export interface Move {
   priority: number;
   damage_class: NamedAPIResource;
   effect_entries: MoveEffectEntry[];
+}
+
+export interface MoveDetail extends Move {
+  effect_chance: number | null;
+  flavor_text_entries: MoveFlavorTextEntry[];
+  meta: MoveMeta | null;
+  learned_by_pokemon: NamedAPIResource[];
 }
