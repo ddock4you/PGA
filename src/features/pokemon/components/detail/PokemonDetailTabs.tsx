@@ -4,7 +4,7 @@ import type {
   PokeApiPokemonSpecies,
   PokeApiEvolutionChain,
   PokeApiEncounter,
-} from "../../api/pokemonApi";
+} from "../../types/pokeApiTypes";
 import { PokemonStatsChart } from "./PokemonStatsChart";
 import { PokemonTypeEffectiveness } from "./PokemonTypeEffectiveness";
 import { PokemonAttackEffectivenessSection } from "./PokemonAttackEffectivenessSection";

@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   fetchPokemonSpeciesListByGeneration,
-  type PokeApiPokemonSpecies,
-} from "@/features/pokemon/api/pokemonApi";
+} from "@/features/pokemon/api/pokemonApi.client";
+import type { PokeApiPokemonSpecies } from "@/features/pokemon/types/pokeApiTypes";
 
 const pokemonSpeciesCache = new Map<string, PokeApiPokemonSpecies[]>();
 const pokemonSpeciesPromise = new Map<string, Promise<PokeApiPokemonSpecies[]>>();

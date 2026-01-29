@@ -5,7 +5,7 @@ import {
   fetchPokemonSpecies,
   fetchEvolutionChain,
   fetchPokemonEncounters,
-} from "@/features/pokemon/api/pokemonApi";
+} from "@/features/pokemon/api/pokemonApi.server";
 import { PokemonDetailClient } from "./PokemonDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
 import { loadDexCsvData } from "@/lib/dexCsvData";
@@ -14,7 +14,7 @@ import type {
   PokeApiEvolutionChain,
   PokeApiPokemon,
   PokeApiPokemonSpecies,
-} from "@/features/pokemon/api/pokemonApi";
+} from "@/features/pokemon/types/pokeApiTypes";
 import { cache } from "react";
 
 interface PageProps {

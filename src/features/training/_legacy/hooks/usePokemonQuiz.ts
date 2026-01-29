@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchPokemon, type PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
+import { fetchPokemon } from "@/features/pokemon/api/pokemonApi.client";
+import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 import { usePokemonSpeciesByGeneration } from "@/features/pokemon/hooks/usePokemonQueries";
 import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import {

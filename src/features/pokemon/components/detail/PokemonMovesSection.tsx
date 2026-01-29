@@ -1,12 +1,12 @@
-import type { PokemonMovesSectionProps } from "./moves/types/moveTypes";
-import { usePokemonMovesData } from "@/features/pokemon/hooks/usePokemonMovesData";
-import { LevelUpMovesTable } from "./moves/components/LevelUpMovesTable";
-import { TmHmMovesTable } from "./moves/components/TmHmMovesTable";
-import { TutorMovesTable } from "./moves/components/TutorMovesTable";
-import { OtherMethodMovesTable } from "./moves/components/OtherMethodMovesTable";
-import { SpecialMethodMovesTable } from "./moves/components/SpecialMethodMovesTable";
-import { PreviousStageMovesTable } from "./moves/components/PreviousStageMovesTable";
-import { LegacyMovesTable } from "./moves/components/LegacyMovesTable";
+import type { PokemonMovesSectionProps } from "@/features/pokemon/moves/types/moveTypes";
+import { usePokemonMovesData } from "@/features/pokemon/hooks/moves/usePokemonMovesData";
+import { LevelUpMovesTable } from "@/features/pokemon/moves/components/LevelUpMovesTable";
+import { TmHmMovesTable } from "@/features/pokemon/moves/components/TmHmMovesTable";
+import { TutorMovesTable } from "@/features/pokemon/moves/components/TutorMovesTable";
+import { OtherMethodMovesTable } from "@/features/pokemon/moves/components/OtherMethodMovesTable";
+import { SpecialMethodMovesTable } from "@/features/pokemon/moves/components/SpecialMethodMovesTable";
+import { PreviousStageMovesTable } from "@/features/pokemon/moves/components/PreviousStageMovesTable";
+import { LegacyMovesTable } from "@/features/pokemon/moves/components/LegacyMovesTable";
 
 export function PokemonMovesSection(props: PokemonMovesSectionProps) {
   const {

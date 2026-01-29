@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
-import type { MoveRow } from "@/features/pokemon/components/detail/moves/types/moveTypes";
+import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
+import type { MoveRow } from "@/features/pokemon/moves/types/moveTypes";
 
 export function useTutorMoves({
   moves,
@@ -21,7 +21,7 @@ export function useTutorMoves({
   return useMemo(() => {
     if (selectedGenerationNumber < 3) return [];
 
-    const rows = moves
+    return moves
       .flatMap((move) =>
         move.version_group_details
           .filter(
@@ -32,7 +32,5 @@ export function useTutorMoves({
           .map((detail) => buildRowFromDetail(move, detail))
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-
-    return rows;
   }, [moves, buildRowFromDetail, targetVersionGroup, selectedGenerationNumber]);
 }

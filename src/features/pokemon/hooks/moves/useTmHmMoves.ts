@@ -2,9 +2,9 @@
 
 import { useMemo } from "react";
 import type { CsvMachine, CsvVersionGroup } from "@/types/csvTypes";
-import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
-import type { MoveMeta } from "@/features/pokemon/components/detail/moves/types/moveTypes";
-import { parseIdFromUrl } from "@/features/pokemon/components/detail/moves/utils/moveUtils";
+import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
+import type { MoveMeta } from "@/features/pokemon/moves/types/moveTypes";
+import { parseIdFromUrl } from "@/features/pokemon/moves/utils/moveUtils";
 
 export function useTmHmMoves({
   moves,

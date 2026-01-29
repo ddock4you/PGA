@@ -2,7 +2,7 @@ import type {
   PokeApiPokemon,
   PokeApiPokemonSpecies,
   PokeApiEvolutionChain,
-} from "@/features/pokemon/api/pokemonApi";
+} from "@/features/pokemon/types/pokeApiTypes";
 
 export interface PokemonMovesSectionProps {
   moves: PokeApiPokemon["moves"];

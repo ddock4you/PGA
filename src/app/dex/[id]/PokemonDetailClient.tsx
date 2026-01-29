@@ -13,7 +13,7 @@ import type {
   PokeApiEvolutionChain,
   PokeApiPokemon,
   PokeApiPokemonSpecies,
-} from "@/features/pokemon/api/pokemonApi";
+} from "@/features/pokemon/types/pokeApiTypes";
 
 // 스크롤 관련 설정 (공통 hook에서 가져옴)
 // 필요시 SCROLL_CONSTANTS를 직접 수정하거나 다른 값 사용 가능

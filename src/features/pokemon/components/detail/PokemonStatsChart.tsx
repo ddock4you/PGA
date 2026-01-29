@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { PokeApiPokemon } from "../../api/pokemonApi";
+import type { PokeApiPokemon } from "../../types/pokeApiTypes";
 
 interface PokemonStatsChartProps {
   stats: PokeApiPokemon["stats"];

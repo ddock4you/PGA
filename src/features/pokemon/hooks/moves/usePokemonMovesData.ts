@@ -3,16 +3,20 @@
 import { useCallback, useMemo } from "react";
 import { usePreferences } from "@/features/preferences";
 import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
-import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
+import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { getDamageClassName, getTypeName } from "@/utils/dataTransforms";
 import { usePreviousStagePokemons } from "@/features/pokemon/hooks/usePreviousStagePokemons";
-import { SPECIAL_METHODS } from "@/features/pokemon/components/detail/moveConstants";
-import type { MoveRow, MoveMeta, PokemonMovesSectionProps } from "@/features/pokemon/components/detail/moves/types/moveTypes";
-import { parseIdFromUrl } from "@/features/pokemon/components/detail/moves/utils/moveUtils";
-import { useLevelUpMoves } from "@/features/pokemon/hooks/useLevelUpMoves";
-import { useTmHmMoves } from "@/features/pokemon/hooks/useTmHmMoves";
-import { useTutorMoves } from "@/features/pokemon/hooks/useTutorMoves";
+import { SPECIAL_METHODS } from "@/features/pokemon/moveConstants";
+import type {
+  MoveMeta,
+  MoveRow,
+  PokemonMovesSectionProps,
+} from "@/features/pokemon/moves/types/moveTypes";
+import { parseIdFromUrl } from "@/features/pokemon/moves/utils/moveUtils";
+import { useLevelUpMoves } from "@/features/pokemon/hooks/moves/useLevelUpMoves";
+import { useTmHmMoves } from "@/features/pokemon/hooks/moves/useTmHmMoves";
+import { useTutorMoves } from "@/features/pokemon/hooks/moves/useTutorMoves";
 
 export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   const { moves, species, evolutionChain } = props;
@@ -180,7 +184,7 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
             const row = { ...buildRowFromDetail(move, firstPreviousDetail) };
             row.versionGroups = uniqueGroups.join(", ");
             row.method = firstPreviousDetail.move_learn_method.name;
-            row.generationLabel = `≤ ${maxGeneration}세대`;
+            row.generationLabel = `<= ${maxGeneration}세대`;
             rows.push(row);
           }
         }

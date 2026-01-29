@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { PokeApiPokemon } from "@/features/pokemon/api/pokemonApi";
-import type { MoveRow } from "@/features/pokemon/components/detail/moves/types/moveTypes";
+import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
+import type { MoveRow } from "@/features/pokemon/moves/types/moveTypes";
 
 export function useLevelUpMoves(
   moves: PokeApiPokemon["moves"],

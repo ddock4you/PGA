@@ -1,6 +1,8 @@
+"use client";
+
 import { useMemo, useState, useEffect } from "react";
-import type { PokeApiEvolutionChain, PokeApiPokemon } from "../api/pokemonApi";
-import { fetchPokemon } from "../api/pokemonApi";
+import type { PokeApiEvolutionChain, PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
+import { fetchPokemon } from "@/features/pokemon/api/pokemonApi.client";
 
 function walkEvolutionPath(
   node: PokeApiEvolutionChain["chain"],

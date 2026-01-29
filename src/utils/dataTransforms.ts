@@ -126,21 +126,6 @@ export function getKoreanTypeName(englishTypeName: string): string {
   return englishToKorean[englishTypeName] || englishTypeName;
 }
 
-// 포켓몬 이름을 한국어로 변환하는 함수
-export function getKoreanPokemonName(
-  englishName: string,
-  speciesNamesData?: Array<{ pokemon_species_id: number; local_language_id: number; name: string }>
-): string {
-  if (!speciesNamesData) return englishName;
-
-  // 먼저 포켓몬 ID를 찾아야 하는데, 영어 이름으로 species ID를 찾는 것은 복잡하다.
-  // 간단하게 영어 이름을 직접 매핑하는 방식을 사용하거나,
-  // API에서 가져온 데이터에 이미 한국어 이름이 포함되어 있는지 확인해야 한다.
-
-  // 우선은 영어 이름을 반환하되, 향후 개선 가능
-  return englishName;
-}
-
 // 데미지 클래스 ID와 이름 매핑
 const DAMAGE_CLASS_ID_TO_NAME: Record<number, string> = {
   2: "physical",

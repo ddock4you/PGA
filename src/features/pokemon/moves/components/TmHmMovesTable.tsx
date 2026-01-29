@@ -9,31 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getDamageClassKorean } from "@/utils/dataTransforms";
+import { getDamageClassKorean, getKoreanTypeName } from "@/utils/dataTransforms";
 import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
 import type { MoveRow } from "../types/moveTypes";
-
-// 타입 이름(영문)으로부터 한글 이름을 찾는 매핑
-const TYPE_NAME_TO_KOREAN_LOCAL: Record<string, string> = {
-  normal: "노말",
-  fighting: "격투",
-  flying: "비행",
-  poison: "독",
-  ground: "땅",
-  rock: "바위",
-  bug: "벌레",
-  ghost: "고스트",
-  steel: "강철",
-  fire: "불꽃",
-  water: "물",
-  grass: "풀",
-  electric: "전기",
-  psychic: "에스퍼",
-  ice: "얼음",
-  dragon: "드래곤",
-  dark: "악",
-  fairy: "페어리",
-};
+import { formatStat } from "../utils/moveUtils";
 
 interface TmHmMovesTableProps {
   rows: MoveRow[];
@@ -41,17 +20,11 @@ interface TmHmMovesTableProps {
   showCsvFallback: boolean;
 }
 
-const formatStat = (value?: number | null) => (value === null || value === undefined ? "-" : value);
-
-export const TmHmMovesTable = ({
-  rows,
-  selectedGenerationId,
-  showCsvFallback,
-}: TmHmMovesTableProps) => {
+export const TmHmMovesTable = ({ rows, selectedGenerationId, showCsvFallback }: TmHmMovesTableProps) => {
   const { getLocalizedMoveName } = useLocalizedMoveName();
 
   const renderCommonCells = (move: MoveRow) => {
-    const koreanType = TYPE_NAME_TO_KOREAN_LOCAL[move.type] || move.type;
+    const koreanType = getKoreanTypeName(move.type);
     const koreanCategory = getDamageClassKorean(move.category) || move.category;
 
     return (
@@ -61,9 +34,7 @@ export const TmHmMovesTable = ({
         </TableCell>
         <TableCell className="capitalize">{koreanCategory}</TableCell>
         <TableCell className="text-right">{formatStat(move.power)}</TableCell>
-        <TableCell className="text-right">
-          {move.accuracy !== null ? `${move.accuracy}%` : "-"}
-        </TableCell>
+        <TableCell className="text-right">{move.accuracy !== null ? `${move.accuracy}%` : "-"}</TableCell>
         <TableCell className="text-right">{formatStat(move.pp)}</TableCell>
       </>
     );
@@ -72,9 +43,7 @@ export const TmHmMovesTable = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">
-          기술 머신(TMs/HMs) - {selectedGenerationId}세대
-        </CardTitle>
+        <CardTitle className="text-sm font-medium">기술 머신(TMs/HMs) - {selectedGenerationId}세대</CardTitle>
       </CardHeader>
       <CardContent>
         {showCsvFallback ? (
@@ -106,10 +75,7 @@ export const TmHmMovesTable = ({
                         : "-"}
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/moves/${move.name}`}
-                        className="capitalize text-primary hover:underline"
-                      >
+                      <Link href={`/moves/${move.name}`} className="capitalize text-primary hover:underline">
                         {getLocalizedMoveName(move.name)}
                       </Link>
                     </TableCell>
