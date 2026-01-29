@@ -14,9 +14,9 @@ import type {
   PokemonMovesSectionProps,
 } from "@/features/pokemon/moves/types/moveTypes";
 import { parseIdFromUrl } from "@/features/pokemon/moves/utils/moveUtils";
-import { useLevelUpMoves } from "@/features/pokemon/hooks/moves/useLevelUpMoves";
-import { useTmHmMoves } from "@/features/pokemon/hooks/moves/useTmHmMoves";
-import { useTutorMoves } from "@/features/pokemon/hooks/moves/useTutorMoves";
+import { useLevelUpMoves } from "@/features/pokemon/moves/hooks/useLevelUpMoves";
+import { useTmHmMoves } from "@/features/pokemon/moves/hooks/useTmHmMoves";
+import { useTutorMoves } from "@/features/pokemon/moves/hooks/useTutorMoves";
 
 export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   const { moves, species, evolutionChain } = props;
@@ -31,7 +31,9 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
   const selectedGenerationId = state.selectedGenerationId || "1";
   const selectedGenerationNumber = Number(selectedGenerationId);
   const targetVersionGroup =
-    state.selectedVersionGroup ?? GENERATION_VERSION_GROUP_MAP[selectedGenerationId] ?? "red-blue";
+    state.selectedVersionGroup ??
+    GENERATION_VERSION_GROUP_MAP[selectedGenerationId] ??
+    "red-blue";
 
   const moveMetadata = useMemo(() => {
     const byName: Record<string, MoveMeta> = {};

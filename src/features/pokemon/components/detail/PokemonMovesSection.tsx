@@ -1,5 +1,5 @@
 import type { PokemonMovesSectionProps } from "@/features/pokemon/moves/types/moveTypes";
-import { usePokemonMovesData } from "@/features/pokemon/hooks/moves/usePokemonMovesData";
+import { usePokemonMovesData } from "@/features/pokemon/moves/hooks/usePokemonMovesData";
 import { LevelUpMovesTable } from "@/features/pokemon/moves/components/LevelUpMovesTable";
 import { TmHmMovesTable } from "@/features/pokemon/moves/components/TmHmMovesTable";
 import { TutorMovesTable } from "@/features/pokemon/moves/components/TutorMovesTable";
