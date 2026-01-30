@@ -1,18 +1,13 @@
-import {
-  loadAbilitiesCsv,
-  loadAbilityNamesCsv,
-  loadItemsCsv,
-  loadItemNamesCsv,
-  loadMachinesCsv,
-  loadMoveNamesCsv,
-  loadMovesCsv,
-  loadNaturesCsv,
-  loadPokemonAbilitiesCsv,
-  loadPokemonCsv,
-  loadPokemonSpeciesNamesCsv,
-  loadPokemonTypesCsv,
-  loadVersionGroupsCsv,
-} from "@/data/csvLoader";
+import { loadAbilitiesCsv, loadAbilityNamesCsv } from "@/lib/csv/abilities";
+import { loadItemsCsv, loadItemNamesCsv } from "@/lib/csv/items";
+import { loadMachinesCsv } from "@/lib/csv/machines";
+import { loadMoveNamesCsv, loadMovesCsv } from "@/lib/csv/movesCore";
+import { loadNaturesCsv } from "@/lib/csv/natures";
+import { loadPokemonAbilitiesCsv } from "@/lib/csv/pokemonAbilities";
+import { loadPokemonCsv, loadPokemonSpeciesNamesCsv } from "@/lib/csv/pokemonCore";
+import { loadPokemonTypesCsv } from "@/lib/csv/pokemonTypes";
+import { loadVersionGroupsCsv } from "@/lib/csv/versionGroups";
+
 import type {
   CsvAbility,
   CsvAbilityName,

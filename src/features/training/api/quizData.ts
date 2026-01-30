@@ -1,10 +1,6 @@
-import {
-  loadPokemonCsv,
-  loadPokemonTypesCsv,
-  loadPokemonSpeciesNamesCsv,
-  loadMovesCsv,
-  loadMoveNamesCsv,
-} from "@/data/csvLoader";
+import { loadMoveNamesCsv, loadMovesCsv } from "@/lib/csv/movesCore";
+import { loadPokemonCsv, loadPokemonSpeciesNamesCsv } from "@/lib/csv/pokemonCore";
+import { loadPokemonTypesCsv } from "@/lib/csv/pokemonTypes";
 import {
   transformPokemonForDex,
   GENERATION_POKEMON_RANGES,
