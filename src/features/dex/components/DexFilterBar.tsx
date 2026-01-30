@@ -7,7 +7,7 @@ import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
 import { DexGenerationSelector } from "./DexGenerationSelector";
 import { DexTypeFilter } from "./DexTypeFilter";
 import { DexSortOptions } from "./DexSortOptions";
-import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
+import type { DexFilters } from "../types/filterTypes";
 import type { DexFilterBarProps } from "../types/ui";
 
 export function DexFilterBar({
@@ -15,14 +15,35 @@ export function DexFilterBar({
   searchQuery,
   onFiltersChange,
   onSearchQueryChange,
+  onReset,
   description = "세대/게임과 다양한 조건으로 포켓몬을 탐색할 수 있습니다.",
 }: DexFilterBarProps) {
   const updateFilter = <K extends keyof DexFilters>(key: K, value: DexFilters[K]) => {
-    onFiltersChange({ ...filters, [key]: value });
+    onFiltersChange({ [key]: value } as Partial<DexFilters>);
   };
 
   const handleResetFilters = () => {
-    onFiltersChange(DEFAULT_DEX_FILTERS);
+    if (onReset) {
+      onReset();
+      return;
+    }
+
+    onFiltersChange({
+      dexGenerationId: "9",
+      selectedGameVersion: undefined,
+      includeSubGenerations: true,
+      onlyDefaultForms: false,
+      selectedTypes: [],
+      selectedAbilityId: undefined,
+      sortByWeight: false,
+      weightOrder: "desc",
+      sortByHeight: false,
+      heightOrder: "desc",
+      sortByDexNumber: false,
+      dexNumberOrder: "asc",
+      currentPage: 1,
+      itemsPerPage: 30,
+    } satisfies DexFilters);
     onSearchQueryChange("");
   };
   return (

@@ -3,27 +3,21 @@ import { useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
-import {
-  transformPokemonForDex,
-  GENERATION_POKEMON_RANGES,
-  shouldShowVariantPokemon,
-} from "@/utils/dataTransforms";
+import type { DexPokemonSummary } from "@/utils/dataTransforms";
 import { DexFilterBar } from "./DexFilterBar";
-import { DexPokemonCard, type DexPokemonSummary } from "./DexPokemonCard";
+import { DexPokemonCard } from "./DexPokemonCard";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
-import type { DexFilters } from "../types/filterTypes";
 import { saveListState } from "@/lib/listState";
-import type { CsvPokemonSpeciesName, CsvPokemonType } from "@/types/csvTypes";
 import { useNavigationType } from "@/hooks/useNavigationType";
-import { matchesAnySearchText, normalizeSearchQuery } from "@/utils/searchText";
-
-type CsvPokemonRow = Parameters<typeof transformPokemonForDex>[0][number];
+import { useDexPokemonIndexes } from "../hooks/useDexPokemonIndexes";
+import { getFilteredPokemonSummaries } from "../utils/getFilteredPokemonSummaries";
+import { buildDexPokemonQueryKey } from "../utils/buildDexPokemonQueryKey";
 
 export function DexPokemonTab() {
   const router = useRouter();
-  const { filters, searchQuery, updateFilters, updateSearchQuery } = useDexFilters();
+  const { filters, searchQuery, updateFilters, updateSearchQuery, resetFilters } = useDexFilters();
   const pathname = usePathname();
   const { navigationType, markPush } = useNavigationType();
 
@@ -36,39 +30,11 @@ export function DexPokemonTab() {
     isError,
   } = useDexCsvData();
 
-  const pokemonTypesById = useMemo(() => {
-    const map = new Map<number, number[]>();
-    pokemonTypesData?.forEach((type) => {
-      const existing = map.get(type.pokemon_id);
-      if (existing) {
-        existing.push(type.type_id);
-      } else {
-        map.set(type.pokemon_id, [type.type_id]);
-      }
-    });
-    return map;
-  }, [pokemonTypesData]);
-
-  const pokemonAbilitiesById = useMemo(() => {
-    const map = new Map<number, number[]>();
-    pokemonAbilitiesData?.forEach((ability) => {
-      const existing = map.get(ability.pokemon_id);
-      if (existing) {
-        existing.push(ability.ability_id);
-      } else {
-        map.set(ability.pokemon_id, [ability.ability_id]);
-      }
-    });
-    return map;
-  }, [pokemonAbilitiesData]);
-
-  const pokemonById = useMemo(() => {
-    const map = new Map<number, CsvPokemonRow>();
-    pokemonData?.forEach((pokemon) => {
-      map.set(pokemon.id, pokemon);
-    });
-    return map;
-  }, [pokemonData]);
+  const { pokemonTypesById, pokemonAbilitiesById, pokemonById } = useDexPokemonIndexes({
+    pokemonData,
+    pokemonTypesData,
+    pokemonAbilitiesData,
+  });
 
   const filteredPokemonSummaries = useMemo(
     () =>
@@ -95,42 +61,8 @@ export function DexPokemonTab() {
   );
 
   const chunkQueryKey = useMemo(
-    () => [
-      "dex-pokemon",
-      filters.dexGenerationId,
-      filters.includeSubGenerations,
-      filters.onlyDefaultForms,
-      filters.selectedGameVersion?.id ?? "default",
-      filters.selectedTypes
-        .slice()
-        .sort((a, b) => a - b)
-        .join(","),
-      filters.selectedAbilityId ?? "none",
-      filters.sortByWeight,
-      filters.weightOrder,
-      filters.sortByHeight,
-      filters.heightOrder,
-      filters.sortByDexNumber,
-      filters.dexNumberOrder,
-      filters.itemsPerPage,
-      searchQuery.trim(),
-    ],
-    [
-      filters.dexGenerationId,
-      filters.includeSubGenerations,
-      filters.onlyDefaultForms,
-      filters.selectedGameVersion,
-      filters.selectedTypes,
-      filters.selectedAbilityId,
-      filters.sortByWeight,
-      filters.weightOrder,
-      filters.sortByHeight,
-      filters.heightOrder,
-      filters.sortByDexNumber,
-      filters.dexNumberOrder,
-      filters.itemsPerPage,
-      searchQuery,
-    ]
+    () => buildDexPokemonQueryKey(filters, searchQuery),
+    [filters, searchQuery]
   );
 
   const hasBaseData =
@@ -193,6 +125,7 @@ export function DexPokemonTab() {
         searchQuery={searchQuery}
         onFiltersChange={updateFilters}
         onSearchQueryChange={updateSearchQuery}
+        onReset={resetFilters}
         description="세대/게임과 다양한 조건으로 포켓몬을 탐색할 수 있습니다."
       />
 
@@ -237,129 +170,4 @@ export function DexPokemonTab() {
       )}
     </div>
   );
-}
-
-function getFilteredPokemonSummaries({
-  pokemonData,
-  pokemonTypesData,
-  pokemonSpeciesNamesData,
-  pokemonTypesById,
-  pokemonAbilitiesById,
-  pokemonById,
-  filters,
-  searchQuery,
-}: {
-  pokemonData?: CsvPokemonRow[];
-  pokemonTypesData?: CsvPokemonType[];
-  pokemonSpeciesNamesData?: CsvPokemonSpeciesName[];
-  pokemonTypesById: Map<number, number[]>;
-  pokemonAbilitiesById: Map<number, number[]>;
-  pokemonById: Map<number, CsvPokemonRow>;
-  filters: DexFilters;
-  searchQuery: string;
-}) {
-  if (!pokemonData || !pokemonTypesData || !pokemonSpeciesNamesData) return [];
-
-  let filteredPokemon = pokemonData;
-  let minId = 1;
-  let maxId = 1010;
-
-  if (!filters.includeSubGenerations) {
-    const range = GENERATION_POKEMON_RANGES[filters.dexGenerationId];
-    if (range) {
-      [minId, maxId] = range;
-    }
-  } else {
-    const range = GENERATION_POKEMON_RANGES[filters.dexGenerationId];
-    if (range) {
-      minId = 1;
-      maxId = range[1];
-    }
-  }
-
-  filteredPokemon = filteredPokemon.filter((p) => p.id >= minId && p.id <= maxId);
-
-  if (filters.selectedGameVersion) {
-    const selectedGameVersionId = filters.selectedGameVersion.id;
-    filteredPokemon = filteredPokemon.filter((p) =>
-      shouldShowVariantPokemon(p.identifier, selectedGameVersionId)
-    );
-  }
-
-  if (filters.onlyDefaultForms) {
-    filteredPokemon = filteredPokemon.filter((p) => p.is_default === 1);
-  }
-
-  if (filters.selectedTypes.length > 0) {
-    filteredPokemon = filteredPokemon.filter((p) => {
-      const pokemonTypeIds = pokemonTypesById.get(p.id) ?? [];
-      return filters.selectedTypes.some((typeId) => pokemonTypeIds.includes(typeId));
-    });
-  }
-
-  if (filters.selectedAbilityId) {
-    const selectedAbilityId = filters.selectedAbilityId;
-    filteredPokemon = filteredPokemon.filter((p) => {
-      const pokemonAbilityIds = pokemonAbilitiesById.get(p.id) ?? [];
-      return pokemonAbilityIds.includes(selectedAbilityId);
-    });
-  }
-
-  let summaries = transformPokemonForDex(
-    filteredPokemon,
-    pokemonTypesData,
-    pokemonSpeciesNamesData
-  );
-
-  const normalizedQuery = normalizeSearchQuery(searchQuery);
-  if (normalizedQuery) {
-    summaries = summaries.filter((p) => {
-      const pokemon = pokemonById.get(p.id);
-      return matchesAnySearchText([p.name, pokemon?.identifier], normalizedQuery);
-    });
-  }
-
-  if (!filters.sortByWeight && !filters.sortByHeight && !filters.sortByDexNumber) {
-    summaries.sort((a, b) => {
-      const aPokemon = pokemonById.get(a.id);
-      const bPokemon = pokemonById.get(b.id);
-
-      if (!aPokemon || !bPokemon) return 0;
-
-      const speciesComparison = aPokemon.species_id - bPokemon.species_id;
-      if (speciesComparison !== 0) return speciesComparison;
-
-      const defaultComparison = bPokemon.is_default - aPokemon.is_default;
-      if (defaultComparison !== 0) return defaultComparison;
-
-      return aPokemon.id - bPokemon.id;
-    });
-  }
-
-  if (filters.sortByWeight) {
-    summaries.sort((a, b) => {
-      const aPokemon = pokemonById.get(a.id);
-      const bPokemon = pokemonById.get(b.id);
-      if (!aPokemon || !bPokemon) return 0;
-
-      const comparison = aPokemon.weight - bPokemon.weight;
-      return filters.weightOrder === "asc" ? comparison : -comparison;
-    });
-  } else if (filters.sortByHeight) {
-    summaries.sort((a, b) => {
-      const aPokemon = pokemonById.get(a.id);
-      const bPokemon = pokemonById.get(b.id);
-      if (!aPokemon || !bPokemon) return 0;
-
-      const comparison = aPokemon.height - bPokemon.height;
-      return filters.heightOrder === "asc" ? comparison : -comparison;
-    });
-  } else if (filters.sortByDexNumber) {
-    summaries.sort((a, b) => {
-      const comparison = a.id - b.id;
-      return filters.dexNumberOrder === "asc" ? comparison : -comparison;
-    });
-  }
-
-  return summaries;
 }

@@ -11,13 +11,6 @@ export interface DexFilterContextType {
   resetFilters: () => void;
 }
 
-export type DexFilterAction =
-  | { type: "UPDATE_FILTERS"; payload: Partial<DexFilters> }
-  | { type: "UPDATE_SEARCH"; payload: string }
-  | { type: "UPDATE_PAGINATION"; payload: number }
-  | { type: "RESET_FILTERS" }
-  | { type: "LOAD_FROM_STORAGE"; payload: { filters: DexFilters; searchQuery: string } };
-
 export interface DexFilterProviderProps {
   children: ReactNode;
 }
@@ -25,8 +18,9 @@ export interface DexFilterProviderProps {
 export interface DexFilterBarProps {
   filters: DexFilters;
   searchQuery: string;
-  onFiltersChange: (filters: DexFilters) => void;
+  onFiltersChange: (filters: DexFilters | Partial<DexFilters>) => void;
   onSearchQueryChange: (value: string) => void;
+  onReset?: () => void;
   description?: string;
 }
 

@@ -274,8 +274,25 @@ export function transformPokemonForDex(
   pokemonTypesData: CsvPokemonType[],
   pokemonSpeciesNamesData: CsvPokemonSpeciesName[]
 ): DexPokemonSummary[] {
-  return csvData
-    .sort((a, b) => {
+  const koreanNameBySpeciesId = new Map<number, string>();
+  for (const row of pokemonSpeciesNamesData) {
+    if (row.local_language_id !== 3) continue;
+    if (!koreanNameBySpeciesId.has(row.pokemon_species_id)) {
+      koreanNameBySpeciesId.set(row.pokemon_species_id, row.name);
+    }
+  }
+
+  const typeEntriesByPokemonId = new Map<number, { slot: number; type_id: number }[]>();
+  for (const row of pokemonTypesData) {
+    const existing = typeEntriesByPokemonId.get(row.pokemon_id);
+    if (existing) {
+      existing.push({ slot: row.slot, type_id: row.type_id });
+    } else {
+      typeEntriesByPokemonId.set(row.pokemon_id, [{ slot: row.slot, type_id: row.type_id }]);
+    }
+  }
+
+  const sortedPokemon = [...csvData].sort((a, b) => {
       // species_id로 우선 정렬 (같은 종족 그룹화)
       const speciesComparison = a.species_id - b.species_id;
       if (speciesComparison !== 0) return speciesComparison;
@@ -285,27 +302,26 @@ export function transformPokemonForDex(
       if (defaultComparison !== 0) return defaultComparison;
 
       return a.id - b.id; // 최종적으로 id 순 정렬
-    })
-    .map((p) => {
-      // 한글 이름 찾기 (없으면 영문 사용)
-      const koreanName =
-        pokemonSpeciesNamesData.find(
-          (name) => name.pokemon_species_id === p.species_id && name.local_language_id === 3 // 한국어
-        )?.name || p.identifier;
-
-      // 타입 정보 찾기
-      const pokemonTypes = pokemonTypesData
-        .filter((pt) => pt.pokemon_id === p.id)
-        .sort((a, b) => a.slot - b.slot) // slot 순으로 정렬
-        .map((pt) => TYPE_ID_TO_KOREAN_NAME[pt.type_id] || getTypeName(pt.type_id));
-
-      return {
-        id: p.id,
-        name: koreanName,
-        number: `No.${p.id.toString().padStart(4, "0")}`,
-        types: pokemonTypes,
-      };
     });
+
+  return sortedPokemon.map((p) => {
+    const koreanName = koreanNameBySpeciesId.get(p.species_id) ?? p.identifier;
+
+    const typeEntries = typeEntriesByPokemonId.get(p.id);
+    const pokemonTypes = typeEntries
+      ? typeEntries
+          .slice()
+          .sort((a, b) => a.slot - b.slot)
+          .map((pt) => TYPE_ID_TO_KOREAN_NAME[pt.type_id] || getTypeName(pt.type_id))
+      : [];
+
+    return {
+      id: p.id,
+      name: koreanName,
+      number: `No.${p.id.toString().padStart(4, "0")}`,
+      types: pokemonTypes,
+    };
+  });
 }
 
 // 특성 데이터 변환

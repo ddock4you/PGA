@@ -28,5 +28,5 @@ dist-ssr
 .agents
 .opencode
 .cursor
-/docs
+docs
 opencode.json

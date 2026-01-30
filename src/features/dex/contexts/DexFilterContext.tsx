@@ -2,7 +2,6 @@
 import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
 import { DEFAULT_DEX_FILTERS, type DexFilters } from "../types/filterTypes";
 import type {
-  DexFilterAction,
   DexFilterContextType,
   DexFilterProviderProps,
 } from "../types/ui";
@@ -10,14 +9,22 @@ import type {
 // Context 생성
 const DexFilterContext = createContext<DexFilterContextType | undefined>(undefined);
 
-// localStorage 키
-const DEX_FILTERS_STORAGE_KEY = "dex-filters";
-const DEX_SEARCH_STORAGE_KEY = "dex-search-query";
+// localStorage 키 (versioned)
+const DEX_FILTERS_STORAGE_KEY = "pga.dex.filters.v1";
+const DEX_SEARCH_STORAGE_KEY = "pga.dex.search.v1";
+
+// legacy keys (migration)
+const LEGACY_DEX_FILTERS_STORAGE_KEY = "dex-filters";
+const LEGACY_DEX_SEARCH_STORAGE_KEY = "dex-search-query";
 
 // Reducer 함수
 function dexFilterReducer(
   state: { filters: DexFilters; searchQuery: string },
-  action: DexFilterAction
+  action:
+    | { type: "UPDATE_FILTERS"; payload: Partial<DexFilters> }
+    | { type: "UPDATE_SEARCH"; payload: string }
+    | { type: "UPDATE_PAGINATION"; payload: number }
+    | { type: "RESET_FILTERS" }
 ) {
   switch (action.type) {
     case "UPDATE_FILTERS": {
@@ -32,10 +39,7 @@ function dexFilterReducer(
       return { ...state, filters: { ...state.filters, currentPage: action.payload } };
 
     case "RESET_FILTERS":
-      return { filters: { ...DEFAULT_DEX_FILTERS, dexGenerationId: "9" }, searchQuery: "" };
-
-    case "LOAD_FROM_STORAGE":
-      return action.payload;
+      return DEFAULT_STATE;
 
     default:
       return state;
@@ -53,8 +57,12 @@ function loadFromStorage(): { filters: DexFilters; searchQuery: string } {
   }
 
   try {
-    const filtersData = localStorage.getItem(DEX_FILTERS_STORAGE_KEY);
-    const searchData = localStorage.getItem(DEX_SEARCH_STORAGE_KEY);
+    const filtersData =
+      localStorage.getItem(DEX_FILTERS_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_DEX_FILTERS_STORAGE_KEY);
+    const searchData =
+      localStorage.getItem(DEX_SEARCH_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_DEX_SEARCH_STORAGE_KEY);
 
     const savedFilters = filtersData ? JSON.parse(filtersData) : null;
     const savedSearch = searchData || "";
@@ -88,16 +96,7 @@ function saveToStorage(filters: DexFilters, searchQuery: string) {
 
 // Provider 컴포넌트
 export function DexFilterProvider({ children }: DexFilterProviderProps) {
-  const [state, dispatch] = useReducer(dexFilterReducer, DEFAULT_STATE);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof localStorage === "undefined") {
-      return;
-    }
-
-    const storedData = loadFromStorage();
-    dispatch({ type: "LOAD_FROM_STORAGE", payload: storedData });
-  }, []);
+  const [state, dispatch] = useReducer(dexFilterReducer, undefined, loadFromStorage);
 
   // 상태 변경 시 localStorage에 저장
   useEffect(() => {
