@@ -1,4 +1,3 @@
-import { fetchFromPokeApi } from "@/lib/pokeapi";
 import type { Ability, NamedAPIResource } from "@/types/pokeapi";
 
 export interface PokeApiAbility extends Ability {
@@ -25,8 +24,4 @@ export interface PokeApiAbility extends Ability {
     slot: number;
     pokemon: NamedAPIResource;
   }[];
-}
-
-export async function fetchAbility(idOrName: number | string): Promise<PokeApiAbility> {
-  return fetchFromPokeApi<PokeApiAbility>(`/ability/${idOrName}`);
 }

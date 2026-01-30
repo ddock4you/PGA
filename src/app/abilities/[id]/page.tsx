@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchAbility } from "@/features/abilities/api/abilitiesApi";
-import type { PokeApiAbility } from "@/features/abilities/api/abilitiesApi";
+import { fetchAbility } from "@/features/abilities/api/abilitiesApi.server";
+import type { PokeApiAbility } from "@/features/abilities/types/pokeApiAbility";
 import { getLocalizedAbilityName } from "@/features/abilities/utils/localization";
 import { AbilityDetailClient } from "./AbilityDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";

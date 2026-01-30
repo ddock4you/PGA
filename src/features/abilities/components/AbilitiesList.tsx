@@ -30,8 +30,6 @@ export function AbilitiesList() {
     handleRowClick,
   } = useAbilitiesList();
 
-  const getAbilityDescription = (ability: DexAbilitySummary) => ability.description;
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
@@ -83,7 +81,7 @@ export function AbilitiesList() {
                       <TableCell className="text-xs text-muted-foreground">
                         {ability.generation}세대
                       </TableCell>
-                      <TableCell className="text-xs">{getAbilityDescription(ability)}</TableCell>
+                      <TableCell className="text-xs">{ability.description}</TableCell>
                     </TableRow>
                   ))
                 )}
