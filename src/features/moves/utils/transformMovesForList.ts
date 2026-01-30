@@ -1,5 +1,6 @@
 import type { CsvMove } from "@/types/csvTypes";
-import { getDamageClassName, getTypeName } from "@/utils/dataTransforms";
+import { getDamageClassName } from "@/utils/pokemonDataIds";
+import { getKoreanTypeNameFromId } from "@/utils/pokemonTypes";
 
 import type { DexMoveListItem } from "../types";
 
@@ -16,7 +17,7 @@ export function transformMovesForList(
     moves.push({
       id: move.id,
       name: move.identifier,
-      type: getTypeName(move.type_id),
+      type: getKoreanTypeNameFromId(move.type_id),
       damageClass: getDamageClassName(move.damage_class_id),
       power: move.power,
       accuracy: move.accuracy,

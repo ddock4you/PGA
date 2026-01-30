@@ -1,8 +1,7 @@
-import { TYPE_ID_TO_KOREAN_NAME, getEnglishTypeName } from "@/utils/dataTransforms";
+export { ALL_KOREAN_TYPE_NAMES } from "@/utils/pokemonTypes";
+import { getEnglishTypeName } from "@/utils/pokemonTypes";
 import type { QuizOptions } from "../../contexts/types";
 import type { QuizPokemon } from "../../api/quizData";
-
-export const ALL_KOREAN_TYPE_NAMES = Object.values(TYPE_ID_TO_KOREAN_NAME);
 
 export function toEnglishTypes(koreanTypes: string[]): string[] {
   return koreanTypes.map(getEnglishTypeName);

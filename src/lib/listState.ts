@@ -6,7 +6,7 @@ export interface ListPageState {
   timestamp?: number;
 }
 
-const getStorageKey = (path: string) => `pga.list-state:${path}`;
+const getStorageKey = (path: string) => `pga.listState.v1:${path}`;
 
 export function saveListState(path: string, state: ListPageState) {
   if (typeof window === "undefined") return;

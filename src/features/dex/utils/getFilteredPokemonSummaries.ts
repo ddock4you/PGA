@@ -1,9 +1,7 @@
-import {
-  transformPokemonForDex,
-  GENERATION_POKEMON_RANGES,
-  shouldShowVariantPokemon,
-} from "@/utils/dataTransforms";
-import type { DexPokemonSummary } from "@/utils/dataTransforms";
+import { transformPokemonForDex } from "@/lib/csvTransforms/pokemonSummary";
+import type { DexPokemonSummary } from "@/lib/csvTransforms/pokemonSummary";
+import { GENERATION_POKEMON_RANGES } from "@/lib/generationRanges";
+import { shouldShowVariantPokemon } from "@/features/dex/utils/variantPokemon";
 import type {
   CsvPokemon,
   CsvPokemonSpeciesName,

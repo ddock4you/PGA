@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchFromPokeApi } from "@/lib/pokeapi";
+import { fetchFromPokeApi } from "@/lib/pokeapi.server";
 import type { NamedAPIResource } from "@/types/pokeapi";
 
 export type PokeApiNamedResource = NamedAPIResource;

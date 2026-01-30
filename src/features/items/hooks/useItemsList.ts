@@ -3,12 +3,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { transformItemsForDex } from "@/utils/dataTransforms";
+import { transformItemsForList } from "@/features/items/utils/transformItemsForList";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
 import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
-import type { DexItemSummary } from "@/utils/dataTransforms";
+import type { DexItemSummary } from "@/features/items/types/itemList";
 import { useNavigationType } from "@/hooks/useNavigationType";
 import { includesSearchText, normalizeSearchQuery } from "@/utils/searchText";
 
@@ -22,7 +22,7 @@ export function useItemsList() {
 
   const allItems = useMemo(() => {
     if (!itemsData) return [];
-    return transformItemsForDex(itemsData);
+    return transformItemsForList(itemsData);
   }, [itemsData]);
 
   const filteredItems = useMemo(() => {

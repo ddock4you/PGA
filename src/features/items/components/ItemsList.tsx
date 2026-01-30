@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
-import type { DexItemSummary } from "@/utils/dataTransforms";
+import type { DexItemSummary } from "@/features/items/types/itemList";
 import { useItemsList } from "@/features/items/hooks/useItemsList";
 import { getItemCategoryDescription, getItemSpriteUrl } from "@/features/items/utils/itemDisplay";
 

@@ -8,22 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
+import { useMoveNameResolver } from "@/features/moves/hooks/useMoveNameResolver";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
-import type { PokeApiMove } from "@/features/moves/api/movesApi";
+import type { MoveDetail } from "@/types/pokeapi";
 import type { PokeApiNamedResource } from "@/types/pokeapi";
 
 type LearnedPokemonEntry = PokeApiNamedResource;
 
 interface MoveDetailClientProps {
-  move: PokeApiMove;
+  move: MoveDetail;
 }
 
 export function MoveDetailClient({ move }: MoveDetailClientProps) {
   const router = useRouter();
 
   const { pokemonSpeciesNamesData, versionGroupsData } = useDexCsvData();
-  const { getLocalizedMoveName } = useLocalizedMoveName();
+  const { getMoveName } = useMoveNameResolver();
   const { getArtworkUrl } = usePokemonArtwork();
 
   const versionGroupRankMap = useMemo(() => {
@@ -56,7 +56,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
     return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
   };
 
-  const getEffectText = (entries: PokeApiMove["effect_entries"]) => {
+  const getEffectText = (entries: MoveDetail["effect_entries"]) => {
     const ko = entries.find((e) => e.language.name === "ko");
     const en = entries.find((e) => e.language.name === "en");
     return {
@@ -83,7 +83,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
     sortedFlavorTextEntries[0];
   const flavorText = flavorTextEntry?.flavor_text;
 
-  const localizedMoveName = getLocalizedMoveName(move.name);
+  const localizedMoveName = getMoveName(move.name);
 
   return (
     <div className="space-y-4">

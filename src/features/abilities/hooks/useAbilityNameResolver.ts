@@ -1,4 +1,4 @@
-// useLocalizedAbilityName: ability CSV + CSV 이름 테이블을 이용해 ID/identifier/API 응답을 한국어로 변환하는 공통 함수입니다.
+// useAbilityNameResolver: ability CSV + CSV 이름 테이블을 이용해 ID/identifier/API 응답을 한국어로 변환하는 훅입니다.
 "use client";
 
 import { useCallback, useMemo } from "react";
@@ -29,7 +29,7 @@ interface UseLocalizedAbilityNameOptions {
 
 const KOREAN_LANGUAGE_NAME = "ko";
 
-export function useLocalizedAbilityName(options: UseLocalizedAbilityNameOptions = {}) {
+export function useAbilityNameResolver(options: UseLocalizedAbilityNameOptions = {}) {
   const { abilitiesData: defaultAbilitiesData, abilityNamesData: defaultAbilityNamesData } =
     useDexCsvData();
 
@@ -100,7 +100,7 @@ export function useLocalizedAbilityName(options: UseLocalizedAbilityNameOptions 
   }, []);
 
   // 입력값으로부터 영어/한국어 번역 또는 identifier를 선별해 최종 표시명을 반환합니다.
-  const getLocalizedAbilityName = useCallback(
+  const getAbilityName = useCallback(
     (input?: AbilityInput) => {
       if (!input) return "";
 
@@ -143,5 +143,5 @@ export function useLocalizedAbilityName(options: UseLocalizedAbilityNameOptions 
     ]
   );
 
-  return { getLocalizedAbilityName };
+  return { getAbilityName };
 }

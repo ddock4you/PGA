@@ -1,4 +1,4 @@
-import { fetchFromPokeApi } from "@/lib/pokeapi";
+import { fetchFromPokeApi } from "@/lib/pokeapi.server";
 import type { MoveDetail } from "@/types/pokeapi";
 
 export type PokeApiMove = MoveDetail;

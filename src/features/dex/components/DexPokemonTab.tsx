@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { useDexFilters } from "../contexts/DexFilterContext";
-import type { DexPokemonSummary } from "@/utils/dataTransforms";
+import type { DexPokemonSummary } from "@/lib/csvTransforms/pokemonSummary";
 import { DexFilterBar } from "./DexFilterBar";
 import { DexPokemonCard } from "./DexPokemonCard";
 import { LoadMoreButton } from "@/components/ui/load-more-button";

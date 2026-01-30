@@ -10,8 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
-import { getDamageClassKorean, getKoreanTypeName } from "@/utils/dataTransforms";
+import { useMoveNameResolver } from "@/features/moves/hooks/useMoveNameResolver";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
+import { getDamageClassKorean } from "@/features/pokemon/utils/localization";
 import { getKoreanPokemonNameFromCsv } from "@/features/pokemon/utils/pokemonName";
 import type { MoveRow } from "../types/moveTypes";
 import { formatStat } from "../utils/moveUtils";
@@ -23,7 +24,7 @@ interface PreviousStageMovesTableProps {
 
 export const PreviousStageMovesTable = ({ rows, isLoading }: PreviousStageMovesTableProps) => {
   const { pokemonSpeciesNamesData, pokemonData } = useDexCsvData();
-  const { getLocalizedMoveName } = useLocalizedMoveName();
+  const { getMoveName } = useMoveNameResolver();
 
   const renderCommonCells = (move: MoveRow) => {
     const koreanType = getKoreanTypeName(move.type);
@@ -82,7 +83,7 @@ export const PreviousStageMovesTable = ({ rows, isLoading }: PreviousStageMovesT
                     <TableCell className="font-medium">{move.level ?? "-"}</TableCell>
                     <TableCell>
                       <Link href={`/moves/${move.name}`} className="capitalize text-primary hover:underline">
-                        {getLocalizedMoveName(move.name)}
+                        {getMoveName(move.name)}
                       </Link>
                     </TableCell>
                     {renderCommonCells(move)}

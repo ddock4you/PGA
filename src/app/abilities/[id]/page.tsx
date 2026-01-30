@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchAbility } from "@/features/abilities/api/abilitiesApi.server";
 import type { PokeApiAbility } from "@/features/abilities/types/pokeApiAbility";
-import { getLocalizedAbilityName } from "@/features/abilities/utils/localization";
+import { getAbilityDisplayName } from "@/features/abilities/utils/getAbilityDisplayName";
 import { AbilityDetailClient } from "./AbilityDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
 import { loadDexCsvData } from "@/lib/dexCsvData";
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const ability = await fetchAbility(id);
 
-    const koreanName = getLocalizedAbilityName(ability);
+    const koreanName = getAbilityDisplayName(ability);
     const description =
       ability.effect_entries?.find((entry) => entry.language.name === "ko")?.short_effect ||
       ability.effect_entries?.find((entry) => entry.language.name === "en")?.short_effect ||

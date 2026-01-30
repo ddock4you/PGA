@@ -1,4 +1,4 @@
-import { getEnglishTypeName, getKoreanTypeName } from "@/utils/dataTransforms";
+import { getEnglishTypeName, getKoreanTypeName } from "@/utils/pokemonTypes";
 import { computeAttackMultiplier, type TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
 import type { QuizChoiceData, QuizOptions, QuizQuestion } from "../../contexts/types";
 import { ALL_KOREAN_TYPE_NAMES, pickRandom, shuffleInPlace } from "./_shared";

@@ -3,12 +3,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { transformAbilitiesForDex } from "@/utils/dataTransforms";
+import { transformAbilitiesForList } from "@/features/abilities/utils/transformAbilitiesForList";
 import { useLoadMore } from "@/hooks/useLoadMore";
 import { useListRestoration } from "@/hooks/useListRestoration";
 import { saveListState } from "@/lib/listState";
 import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
-import type { DexAbilitySummary } from "@/utils/dataTransforms";
+import type { DexAbilitySummary } from "@/features/abilities/types/abilityList";
 import { useNavigationType } from "@/hooks/useNavigationType";
 import { matchesAnySearchText, normalizeSearchQuery } from "@/utils/searchText";
 
@@ -27,7 +27,7 @@ export function useAbilitiesList() {
 
   const allAbilities = useMemo(() => {
     if (!abilitiesData || !abilityNamesData) return [];
-    return transformAbilitiesForDex(abilitiesData, abilityNamesData, 3, 9);
+    return transformAbilitiesForList(abilitiesData, abilityNamesData, 3, 9);
   }, [abilitiesData, abilityNamesData]);
 
   const filteredAbilities = useMemo(() => {

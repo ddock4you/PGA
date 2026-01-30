@@ -1,11 +1,9 @@
 import { loadMoveNamesCsv, loadMovesCsv } from "@/lib/csv/movesCore";
 import { loadPokemonCsv, loadPokemonSpeciesNamesCsv } from "@/lib/csv/pokemonCore";
 import { loadPokemonTypesCsv } from "@/lib/csv/pokemonTypes";
-import {
-  transformPokemonForDex,
-  GENERATION_POKEMON_RANGES,
-  TYPE_ID_TO_KOREAN_NAME,
-} from "@/utils/dataTransforms";
+import { transformPokemonForDex } from "@/lib/csvTransforms/pokemonSummary";
+import { GENERATION_POKEMON_RANGES } from "@/lib/generationRanges";
+import { getKoreanTypeNameFromId } from "@/utils/pokemonTypes";
 
 export interface QuizPokemon {
   id: number;
@@ -100,12 +98,12 @@ export async function loadQuizData() {
       return {
         id: m.id,
         name: koreanName || englishName!,
-        type: TYPE_ID_TO_KOREAN_NAME[m.type_id] || "알수없음",
+        type: getKoreanTypeNameFromId(m.type_id),
         power: m.power,
         damageClassId: m.damage_class_id,
       };
     })
-    .filter((m): m is QuizMove => m !== null && m.type !== "알수없음"); // 유효한 기술만
+    .filter((m): m is QuizMove => m !== null && m.type !== "unknown");
 
   return { pokemons: cachedQuizPokemons, moves: cachedQuizMoves };
 }

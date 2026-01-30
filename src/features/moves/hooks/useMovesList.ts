@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
+import { useMoveNameResolver } from "@/features/moves/hooks/useMoveNameResolver";
 import { usePreferences } from "@/features/preferences";
 import { DEFAULT_LIST_PAGE_SIZE } from "@/lib/pagination";
 import { useLoadMore } from "@/hooks/useLoadMore";
@@ -29,7 +29,7 @@ export function useMovesList() {
     isLoading: isCsvLoading,
     isError: isCsvError,
   } = useDexCsvData();
-  const { getLocalizedMoveName } = useLocalizedMoveName({ movesData, moveNamesData });
+  const { getMoveName } = useMoveNameResolver({ movesData, moveNamesData });
 
   const allMoves = useMemo(() => {
     if (!movesData) return [];
@@ -40,9 +40,9 @@ export function useMovesList() {
     if (!allMoves.length) return [];
     return allMoves.map((move) => ({
       ...move,
-      displayName: getLocalizedMoveName(move.id),
+      displayName: getMoveName(move.id),
     }));
-  }, [allMoves, getLocalizedMoveName]);
+  }, [allMoves, getMoveName]);
 
   const filteredMoves = useMemo(() => {
     if (!localizedMoves.length) return [];

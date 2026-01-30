@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchMove } from "@/features/moves/api/movesApi";
+import { fetchMove } from "@/features/moves/api/movesApi.server";
 import { MoveDetailClient } from "@/features/moves/components/MoveDetailClient";
 import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
 import { loadDexCsvData } from "@/lib/dexCsvData";
-import type { PokeApiMove } from "@/features/moves/api/movesApi";
+import type { MoveDetail } from "@/types/pokeapi";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function MoveDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  let move: PokeApiMove;
+  let move: MoveDetail;
   try {
     move = await fetchMove(id);
   } catch {

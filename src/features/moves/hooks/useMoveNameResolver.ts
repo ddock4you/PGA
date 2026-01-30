@@ -1,4 +1,4 @@
-// useLocalizedMoveName: CSV 데이터를 기반으로 기술 ID/identifier를 한국어명으로 해결하고 공통으로 노출하는 훅입니다.
+// useMoveNameResolver: CSV 데이터를 기반으로 기술 ID/identifier를 한국어명으로 해결하는 훅입니다.
 "use client";
 
 import { useCallback, useMemo } from "react";
@@ -10,7 +10,7 @@ interface UseLocalizedMoveNameOptions {
   moveNamesData?: CsvMoveName[];
 }
 
-export function useLocalizedMoveName(options: UseLocalizedMoveNameOptions = {}) {
+export function useMoveNameResolver(options: UseLocalizedMoveNameOptions = {}) {
   const { movesData: defaultMovesData, moveNamesData: defaultMoveNamesData } = useDexCsvData();
 
   const movesData = options.movesData ?? defaultMovesData;
@@ -42,7 +42,7 @@ export function useLocalizedMoveName(options: UseLocalizedMoveNameOptions = {}) 
   }, [movesData]);
 
   // 입력값이 ID, identifier, 혹은 move 객체인 경우에도 일관된 한국어/공백 처리된 이름을 반환합니다.
-  const getLocalizedMoveName = useCallback(
+  const getMoveName = useCallback(
     (input?: number | string) => {
       if (input === undefined || input === null) return "";
 
@@ -73,5 +73,5 @@ export function useLocalizedMoveName(options: UseLocalizedMoveNameOptions = {}) 
     [identifierToMoveId, moveIdToIdentifier, moveIdToKoreanName]
   );
 
-  return { getLocalizedMoveName };
+  return { getMoveName };
 }

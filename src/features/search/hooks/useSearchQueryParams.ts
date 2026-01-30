@@ -6,7 +6,7 @@ import {
   buildSearchQueryString,
   parseSearchQueryString,
   type SearchQueryParamsInput,
-} from "@/lib/utils";
+} from "@/features/search/utils/queryString";
 
 export function useSearchQueryParams() {
   const searchParams = useSearchParams();

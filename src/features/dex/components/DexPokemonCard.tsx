@@ -1,14 +1,9 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, getEnglishTypeName } from "@/utils/dataTransforms";
-
-export interface DexPokemonSummary {
-  id: number;
-  name: string;
-  number: string;
-  types: string[];
-}
+import { getEnglishTypeName } from "@/utils/pokemonTypes";
+import { getTypeBadgeClass } from "@/utils/typeBadge";
+import type { DexPokemonSummary } from "@/lib/csvTransforms/pokemonSummary";
 
 interface DexPokemonCardProps extends DexPokemonSummary {
   onClick: () => void;
@@ -44,9 +39,7 @@ export function DexPokemonCard(props: DexPokemonCardProps) {
               <Badge
                 key={type}
                 variant="secondary"
-                className={`text-xs px-2 py-0.5 ${
-                  TYPE_COLORS[getEnglishTypeName(type)] || "bg-gray-400 text-white"
-                }`}
+                className={`text-xs px-2 py-0.5 ${getTypeBadgeClass(getEnglishTypeName(type))}`}
               >
                 {type}
               </Badge>

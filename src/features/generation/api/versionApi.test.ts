@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildGameGenerationMap } from "./versionApi.server";
 
-vi.mock("@/lib/pokeapi", () => {
+vi.mock("@/lib/pokeapi.server", () => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchFromPokeApi: vi.fn(async (path: string): Promise<any> => {

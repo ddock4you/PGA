@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, getKoreanTypeName } from "@/utils/dataTransforms";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
+import { getTypeBadgeClass } from "@/utils/typeBadge";
 import type { QuizQuestion } from "../contexts/types";
 
 interface QuizQuestionCardProps {
@@ -57,9 +58,7 @@ export function QuizQuestionCard({
                       return (
                         <Badge
                           key={type}
-                          className={`capitalize text-xs text-white ${
-                            TYPE_COLORS[koreanType as keyof typeof TYPE_COLORS] || "bg-gray-500"
-                          }`}
+                          className={`capitalize text-xs ${getTypeBadgeClass(type)}`}
                         >
                           {koreanType}
                         </Badge>

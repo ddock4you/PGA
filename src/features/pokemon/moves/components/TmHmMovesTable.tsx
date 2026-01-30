@@ -9,8 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getDamageClassKorean, getKoreanTypeName } from "@/utils/dataTransforms";
-import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
+import { getDamageClassKorean } from "@/features/pokemon/utils/localization";
+import { useMoveNameResolver } from "@/features/moves/hooks/useMoveNameResolver";
 import type { MoveRow } from "../types/moveTypes";
 import { formatStat } from "../utils/moveUtils";
 
@@ -21,7 +22,7 @@ interface TmHmMovesTableProps {
 }
 
 export const TmHmMovesTable = ({ rows, selectedGenerationId, showCsvFallback }: TmHmMovesTableProps) => {
-  const { getLocalizedMoveName } = useLocalizedMoveName();
+  const { getMoveName } = useMoveNameResolver();
 
   const renderCommonCells = (move: MoveRow) => {
     const koreanType = getKoreanTypeName(move.type);
@@ -76,7 +77,7 @@ export const TmHmMovesTable = ({ rows, selectedGenerationId, showCsvFallback }: 
                     </TableCell>
                     <TableCell>
                       <Link href={`/moves/${move.name}`} className="capitalize text-primary hover:underline">
-                        {getLocalizedMoveName(move.name)}
+                        {getMoveName(move.name)}
                       </Link>
                     </TableCell>
                     {renderCommonCells(move)}

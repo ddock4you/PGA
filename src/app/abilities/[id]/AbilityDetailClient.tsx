@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { useLocalizedAbilityName } from "@/hooks/useLocalizedAbilityName";
+import { useAbilityNameResolver } from "@/features/abilities/hooks/useAbilityNameResolver";
 import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,9 +64,9 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
     };
   };
 
-  const { getLocalizedAbilityName } = useLocalizedAbilityName();
+  const { getAbilityName } = useAbilityNameResolver();
   const { effect } = getEffectText(ability.effect_entries);
-  const abilityDisplayName = getLocalizedAbilityName(ability);
+  const abilityDisplayName = getAbilityName(ability);
   // 한국어 flavor_text_entries 중 가장 최신 버전그룹 선택
   const flavorTextEntries = ability.flavor_text_entries;
 

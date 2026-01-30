@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { getKoreanTypeName } from "@/utils/dataTransforms";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
 import { TypeBadge } from "./TypeBadge";
 
 interface TypeChartTableProps {

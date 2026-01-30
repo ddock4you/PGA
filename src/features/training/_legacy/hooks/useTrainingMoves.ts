@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { TYPE_ID_TO_KOREAN_NAME } from "@/utils/dataTransforms";
+import { getEnglishTypeNameFromId, getKoreanTypeNameFromId } from "@/utils/pokemonTypes";
 import type { LegacyMoveChoice } from "../types/moveChoice";
 import type { CsvMove } from "@/types/csvTypes";
 import type { TypeMap } from "@/features/pokemonTypes/utils/typeEffectiveness";
@@ -59,14 +59,8 @@ export function createMoveChoicesForType(
 
   return typeMoves
     .map((move) => {
-      const englishTypeName = Object.keys(TYPE_ID_TO_KOREAN_NAME).find(
-        (key) => Number(key) === move.type_id
-      );
-
-      if (!englishTypeName) {
-        console.warn(`Unknown type ID: ${move.type_id}`);
-        return null;
-      }
+      const englishTypeName = getEnglishTypeNameFromId(move.type_id);
+      if (englishTypeName === "unknown") return null;
 
       const multiplier = computeAttackMultiplier(englishTypeName, defenderTypes, typeMap);
 
@@ -74,7 +68,7 @@ export function createMoveChoicesForType(
         id: move.id.toString(),
         name: move.koreanName,
         typeId: move.type_id,
-        typeName: TYPE_ID_TO_KOREAN_NAME[move.type_id] || "unknown",
+        typeName: getKoreanTypeNameFromId(move.type_id),
         multiplier,
         power: move.power || 0,
       };

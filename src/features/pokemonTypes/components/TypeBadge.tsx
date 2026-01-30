@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { TYPE_COLORS, getKoreanTypeName } from "@/utils/dataTransforms";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
+import { getTypeBadgeClass } from "@/utils/typeBadge";
 
 interface TypeBadgeProps {
   typeNameEn: string;
@@ -8,7 +9,7 @@ interface TypeBadgeProps {
 
 export function TypeBadge({ typeNameEn, className }: TypeBadgeProps) {
   const korean = getKoreanTypeName(typeNameEn);
-  const colorClass = TYPE_COLORS[typeNameEn] ?? "bg-gray-400 text-white";
+  const colorClass = getTypeBadgeClass(typeNameEn);
 
   return (
     <Badge className={`${colorClass} ${className ?? ""}`.trim()}>

@@ -9,8 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useLocalizedMoveName } from "@/hooks/useLocalizedMoveName";
-import { getDamageClassKorean, getKoreanTypeName } from "@/utils/dataTransforms";
+import { useMoveNameResolver } from "@/features/moves/hooks/useMoveNameResolver";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
+import { getDamageClassKorean } from "@/features/pokemon/utils/localization";
 import type { MoveRow } from "../types/moveTypes";
 import { formatStat } from "../utils/moveUtils";
 
@@ -50,7 +51,7 @@ export const MovesTable = ({
   extraHeaders = [],
   footer,
 }: MovesTableProps) => {
-  const { getLocalizedMoveName } = useLocalizedMoveName();
+  const { getMoveName } = useMoveNameResolver();
 
   return (
     <Card>
@@ -85,7 +86,7 @@ export const MovesTable = ({
                     {leadingCell ? <TableCell>{leadingCell(move)}</TableCell> : null}
                     <TableCell>
                       <Link href={`/moves/${move.name}`} className="capitalize text-primary hover:underline">
-                        {getLocalizedMoveName(move.name)}
+                        {getMoveName(move.name)}
                       </Link>
                     </TableCell>
                     {renderCommonCells(move)}

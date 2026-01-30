@@ -2,13 +2,13 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { useLocalizedAbilityName } from "@/hooks/useLocalizedAbilityName";
+import { useAbilityNameResolver } from "@/features/abilities/hooks/useAbilityNameResolver";
 import { parseAbilityIdFromUrl } from "@/features/pokemon/utils/abilityId";
 import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 
 export function AbilitiesCard({ pokemon }: { pokemon: PokeApiPokemon }) {
   const { abilitiesData, abilityNamesData } = useDexCsvData();
-  const { getLocalizedAbilityName } = useLocalizedAbilityName({
+  const { getAbilityName } = useAbilityNameResolver({
     abilitiesData,
     abilityNamesData,
   });
@@ -21,7 +21,7 @@ export function AbilitiesCard({ pokemon }: { pokemon: PokeApiPokemon }) {
       <CardContent className="space-y-2 text-sm">
         {pokemon.abilities.map((a) => {
           const abilityId = parseAbilityIdFromUrl(a.ability.url);
-          const koreanAbilityName = getLocalizedAbilityName({
+          const koreanAbilityName = getAbilityName({
             id: abilityId,
             identifier: a.ability.name,
           });

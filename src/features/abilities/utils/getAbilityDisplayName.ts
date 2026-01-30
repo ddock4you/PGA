@@ -10,7 +10,7 @@ export interface AbilityWithNames {
   names?: LocalizedNameEntry[];
 }
 
-export function getLocalizedAbilityName(
+export function getAbilityDisplayName(
   ability: AbilityWithNames,
   preferredLanguage = "ko"
 ): string {

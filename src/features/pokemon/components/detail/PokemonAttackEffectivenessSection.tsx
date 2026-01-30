@@ -7,7 +7,7 @@ import {
   computeOffenseEffectiveness,
 } from "@/features/pokemonTypes/utils/typeEffectiveness";
 import type { PokeApiNamedResource } from "@/types/pokeapi";
-import { getKoreanTypeName } from "@/utils/dataTransforms";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
 
 interface PokemonAttackEffectivenessSectionProps {
   types: { type: PokeApiNamedResource }[];

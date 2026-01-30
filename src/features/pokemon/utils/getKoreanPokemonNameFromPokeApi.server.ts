@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchFromPokeApi } from "@/lib/pokeapi";
+import { fetchFromPokeApi } from "@/lib/pokeapi.server";
 import { fetchPokemon } from "@/features/pokemon/api/pokemonApi.server";
 import type { PokeApiPokemonSpecies } from "@/features/pokemon/types/pokeApiTypes";
 

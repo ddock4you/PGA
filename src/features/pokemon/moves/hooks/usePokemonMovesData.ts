@@ -5,7 +5,8 @@ import { usePreferences } from "@/features/preferences";
 import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation";
 import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { getDamageClassName, getTypeName } from "@/utils/dataTransforms";
+import { getDamageClassName } from "@/utils/pokemonDataIds";
+import { getKoreanTypeNameFromId } from "@/utils/pokemonTypes";
 import { usePreviousStagePokemons } from "@/features/pokemon/hooks/usePreviousStagePokemons";
 import { SPECIAL_METHODS } from "@/features/pokemon/moveConstants";
 import type {
@@ -39,13 +40,13 @@ export const usePokemonMovesData = (props: PokemonMovesSectionProps) => {
     const byName: Record<string, MoveMeta> = {};
     const byId: Record<number, MoveMeta> = {};
 
-    movesData?.forEach((move) => {
-      const meta: MoveMeta = {
-        name: move.identifier,
-        type: getTypeName(move.type_id),
-        category: getDamageClassName(move.damage_class_id),
-        power: move.power,
-        accuracy: move.accuracy,
+      movesData?.forEach((move) => {
+        const meta: MoveMeta = {
+          name: move.identifier,
+          type: getKoreanTypeNameFromId(move.type_id),
+          category: getDamageClassName(move.damage_class_id),
+          power: move.power,
+          accuracy: move.accuracy,
         pp: move.pp,
       };
       byName[move.identifier] = meta;

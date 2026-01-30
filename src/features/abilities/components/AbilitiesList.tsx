@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
-import type { DexAbilitySummary } from "@/utils/dataTransforms";
+import type { DexAbilitySummary } from "@/features/abilities/types/abilityList";
 import { useAbilitiesList } from "@/features/abilities/hooks/useAbilitiesList";
 
 export function AbilitiesList() {

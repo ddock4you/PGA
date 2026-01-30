@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PokemonDetailHeader } from "@/features/pokemon/components/detail/PokemonDetailHeader";
 import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
 import { PokemonDetailTabs } from "@/features/pokemon/components/detail/PokemonDetailTabs";
-import { smoothScrollToElement, SCROLL_CONSTANTS } from "@/hooks/useSmoothScroll";
+import { smoothScrollToElement, SCROLL_CONSTANTS } from "@/utils/scroll";
 import type {
   PokeApiEncounter,
   PokeApiEvolutionChain,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
-import { getEvolutionTriggerKorean, getTimeOfDayKorean } from "@/utils/dataTransforms";
+import { getEvolutionTriggerKorean, getTimeOfDayKorean } from "@/features/pokemon/utils/localization";
 import type { PokeApiEvolutionChain, PokeApiEvolutionChainLink } from "../../types/pokeApiTypes";
 import type { CsvPokemonSpeciesName, CsvItem } from "@/types/csvTypes";
 

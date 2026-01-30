@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Search from "lucide-react/dist/esm/icons/search";
-import { buildSearchQueryString } from "@/lib/utils";
+import { buildSearchQueryString } from "@/features/search/utils/queryString";
 
 /**
  * 검색 랜딩 페이지 중앙의 통합 검색 UI 컴포넌트.

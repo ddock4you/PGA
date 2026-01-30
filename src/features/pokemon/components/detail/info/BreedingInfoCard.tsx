@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getEggGroupKorean, getGrowthRateKorean, getStatNameKorean } from "@/utils/dataTransforms";
+import { getEggGroupKorean, getGrowthRateKorean, getStatNameKorean } from "@/features/pokemon/utils/localization";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "@/features/pokemon/types/pokeApiTypes";
 
 export function BreedingInfoCard({

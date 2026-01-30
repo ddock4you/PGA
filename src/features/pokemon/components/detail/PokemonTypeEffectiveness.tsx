@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAllTypes } from "@/features/pokemonTypes/hooks/useAllTypes";
 import { buildTypeMap, computeAttackMultiplier } from "@/features/pokemonTypes/utils/typeEffectiveness";
 import type { PokeApiPokemon } from "../../types/pokeApiTypes";
-import { getKoreanTypeName } from "@/utils/dataTransforms";
+import { getKoreanTypeName } from "@/utils/pokemonTypes";
 
 interface PokemonTypeEffectivenessProps {
   types: PokeApiPokemon["types"];
