@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
@@ -10,11 +10,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import type { Ability, AbilityEffectEntry, AbilityFlavorTextEntry } from "@/types/pokeapi";
+import type { Ability, AbilityEffectEntry } from "@/types/pokeapi";
 
 interface AbilityDetailClientProps {
   ability: Ability;
 }
+
+const getPokemonDisplayName = (
+  koreanSpeciesNameMap: Map<number, string>
+) => (pokemon: { name: string; url: string }) => {
+  const match = pokemon.url.match(/\/pokemon\/(\d+)\//);
+  if (!match) {
+    return pokemon.name;
+  }
+  const speciesId = Number(match[1]);
+  if (Number.isNaN(speciesId)) {
+    return pokemon.name;
+  }
+  return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
+};
+
+const getEffectText = (entries: AbilityEffectEntry[]) => {
+  const ko = entries.find((e) => e.language.name === "ko");
+  const en = entries.find((e) => e.language.name === "en");
+  return {
+    effect: ko?.effect || en?.effect || "-",
+    short_effect: ko?.short_effect || en?.short_effect || "-",
+  };
+};
 
 export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
   const router = useRouter();
@@ -32,58 +55,40 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
   }, [pokemonSpeciesNamesData]);
 
   const versionGroupRankMap = useMemo(() => {
-    const map: Record<string, number> = {};
+    const map = new Map<string, number>();
     versionGroupsData.forEach((group) => {
-      map[group.identifier] = group.id;
+      map.set(group.identifier, group.id);
     });
     return map;
   }, [versionGroupsData]);
 
-  // 포켓몬 URL에서 종족 ID 추출 → 한국어 이름 매핑
-  const getPokemonDisplayName = (pokemon: { name: string; url: string }) => {
-    const match = pokemon.url.match(/\/pokemon\/(\d+)\//);
-    if (!match) {
-      return pokemon.name;
-    }
-    const speciesId = Number(match[1]);
-    if (Number.isNaN(speciesId)) {
-      return pokemon.name;
-    }
-    return koreanSpeciesNameMap.get(speciesId) ?? pokemon.name;
-  };
-
   const { getArtworkUrl } = usePokemonArtwork();
-
-  // Effect entries 중 한국어/영어를 우선으로 하는 설명 텍스트 추출
-  const getEffectText = (entries: AbilityEffectEntry[]) => {
-    const ko = entries.find((e) => e.language.name === "ko");
-    const en = entries.find((e) => e.language.name === "en");
-    return {
-      effect: ko?.effect || en?.effect || "-",
-      short_effect: ko?.short_effect || en?.short_effect || "-",
-    };
-  };
-
   const { getAbilityName } = useAbilityNameResolver();
   const { effect } = getEffectText(ability.effect_entries);
   const abilityDisplayName = getAbilityName(ability);
-  // 한국어 flavor_text_entries 중 가장 최신 버전그룹 선택
-  const flavorTextEntries = ability.flavor_text_entries;
 
-  const flavorTextEntry =
-    flavorTextEntries
-      .filter((entry: AbilityFlavorTextEntry) => entry.language.name === "ko")
-      .reduce<AbilityFlavorTextEntry | undefined>((chosen, entry) => {
-        const currentRank = versionGroupRankMap[entry.version_group.name] ?? -1;
-        const chosenRank = chosen ? versionGroupRankMap[chosen.version_group.name] ?? -1 : -1;
-        if (!chosen || currentRank >= chosenRank) {
-          return entry;
-        }
-        return chosen;
-      }, undefined) ?? undefined;
-  const flavorText = flavorTextEntry?.flavor_text;
+  const getLatestFlavorText = useCallback(() => {
+    const koEntries = ability.flavor_text_entries.filter(
+      (entry) => entry.language.name === "ko"
+    );
 
-  // 메인 렌더링: 헤더, 상세 카드, 포켓몬 목록 순서
+    if (koEntries.length === 0) return null;
+
+    return koEntries.reduce((latest, entry) => {
+      const latestRank = latest ? versionGroupRankMap.get(latest.version_group.name) ?? -1 : -1;
+      const currentRank = versionGroupRankMap.get(entry.version_group.name) ?? -1;
+      return currentRank > latestRank ? entry : latest;
+    });
+  }, [ability.flavor_text_entries, versionGroupRankMap]);
+
+  const flavorText = getLatestFlavorText()?.flavor_text;
+
+  const handlePokemonClick = useCallback((targetId: string | null) => {
+    if (targetId) {
+      router.push(`/dex/${targetId}`);
+    }
+  }, [router]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -101,7 +106,6 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
           </Badge>
           <Badge variant="outline">{ability.generation.name}</Badge>
         </div>
-        {/* <p className="text-muted-foreground text-sm mt-1">{short_effect}</p> */}
       </header>
 
       <div className="grid grid-cols-1 gap-4">
@@ -121,7 +125,7 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {ability.pokemon.map((p) => {
-                const displayName = getPokemonDisplayName(p.pokemon);
+                const displayName = getPokemonDisplayName(koreanSpeciesNameMap)(p.pokemon);
                 const portrait = getArtworkUrl(p.pokemon);
                 const match = p.pokemon.url.match(/\/pokemon\/(\d+)\//);
                 const targetId = match ? match[1] : null;
@@ -130,11 +134,7 @@ export function AbilityDetailClient({ ability }: AbilityDetailClientProps) {
                     key={p.pokemon.name}
                     variant="secondary"
                     className="cursor-pointer"
-                    onClick={() => {
-                      if (targetId) {
-                        router.push(`/dex/${targetId}`);
-                      }
-                    }}
+                    onClick={() => handlePokemonClick(targetId)}
                   >
                     <div className="flex items-center gap-2">
                       {portrait && (

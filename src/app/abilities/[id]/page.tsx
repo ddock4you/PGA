@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { fetchAbility } from "@/features/abilities/api/abilitiesApi.server";
 import type { PokeApiAbility } from "@/features/abilities/types/pokeApiAbility";
 import { getAbilityDisplayName } from "@/features/abilities/utils/getAbilityDisplayName";
@@ -11,19 +12,22 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// SEO 메타데이터 생성 (서버 사이드)
+const fetchAbilityCached = cache(async (id: string) => {
+  return fetchAbility(id);
+});
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-
+  
   try {
-    const ability = await fetchAbility(id);
-
+    const ability = await fetchAbilityCached(id);
+    
     const koreanName = getAbilityDisplayName(ability);
     const description =
       ability.effect_entries?.find((entry) => entry.language.name === "ko")?.short_effect ||
       ability.effect_entries?.find((entry) => entry.language.name === "en")?.short_effect ||
       `${koreanName} 특성의 상세 정보`;
-
+    
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -49,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         },
       },
     };
-
+    
     return {
       title: `${koreanName} - 특성 정보`,
       description: description,
@@ -71,19 +75,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// 서버 사이드 데이터 prefetch
 export default async function AbilityDetailPage({ params }: PageProps) {
   const { id } = await params;
-
+  
   let ability: PokeApiAbility;
   try {
-    ability = await fetchAbility(id);
+    ability = await fetchAbilityCached(id);
   } catch {
     notFound();
   }
-
+  
   const csvData = await loadDexCsvData();
-
+  
   return (
     <DexCsvDataProvider data={csvData}>
       <AbilityDetailClient ability={ability} />
