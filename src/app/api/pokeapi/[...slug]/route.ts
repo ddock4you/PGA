@@ -19,9 +19,16 @@ export async function GET(
 
   try {
     const data = await fetchFromPokeApi(targetPath);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
+      }
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "PokéAPI 요청을 처리하지 못했습니다.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (error instanceof Error) {
+      const status = error.message.includes('404') ? 404 : 500;
+      return NextResponse.json({ error: error.message }, { status });
+    }
+    return NextResponse.json({ error: "알 수 없는 에러가 발생했습니다." }, { status: 500 });
   }
 }
