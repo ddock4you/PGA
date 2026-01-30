@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildGameGenerationMap } from "./versionApi";
+import { buildGameGenerationMap } from "./versionApi.server";
 
 vi.mock("@/lib/pokeapi", () => {
   return {

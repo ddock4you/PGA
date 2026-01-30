@@ -1,5 +1,5 @@
 // 도감 필터 관련 타입 정의
-import type { GameVersion } from "@/features/generation/types/generationTypes";
+import type { GameVersion } from "@/features/generation";
 
 export interface DexFilters {
   // 1행 - 게임/세대 선택

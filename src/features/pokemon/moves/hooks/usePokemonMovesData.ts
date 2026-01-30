@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { usePreferences } from "@/features/preferences";
-import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation/constants/generationData";
+import { GENERATION_VERSION_GROUP_MAP } from "@/features/generation";
 import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 import { useDexCsvData } from "@/hooks/useDexCsvData";
 import { getDamageClassName, getTypeName } from "@/utils/dataTransforms";

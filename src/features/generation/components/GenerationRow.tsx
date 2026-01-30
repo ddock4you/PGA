@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import type { GameVersion, GenerationInfo } from "../types/generationTypes";
 
@@ -19,7 +21,7 @@ export function GenerationRow({ generation, onGameSelect }: GenerationRowProps) 
             key={version.id}
             variant="secondary"
             size="sm"
-            className={`${version.color} text-white hover:opacity-80 transition-opacity`}
+            className={`${version.color} ${version.textClass ?? "text-white"} hover:opacity-80 transition-opacity`}
             onClick={() => onGameSelect(version)}
           >
             {version.name}

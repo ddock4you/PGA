@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GameGenerationModal } from "@/features/generation/components/GameGenerationModal";
-import type { GameVersion } from "@/features/generation/types/generationTypes";
+import { GameGenerationModal, getGenerationLabel } from "@/features/generation";
+import type { GameVersion } from "@/features/generation";
 import type { DexGenerationSelectorProps } from "../types/ui";
 
 export function DexGenerationSelector({
@@ -17,27 +17,12 @@ export function DexGenerationSelector({
     setIsModalOpen(false);
   };
 
-  const getGenerationDisplayName = (genId: string) => {
-    const genNames: Record<string, string> = {
-      "1": "1세대",
-      "2": "2세대",
-      "3": "3세대",
-      "4": "4세대",
-      "5": "5세대",
-      "6": "6세대",
-      "7": "7세대",
-      "8": "8세대",
-      "9": "9세대",
-    };
-    return genNames[genId] || genId;
-  };
-
   const getDisplayText = () => {
     if (selectedGameVersion) {
-      const generationName = getGenerationDisplayName(generationId);
+      const generationName = getGenerationLabel(generationId);
       return `${selectedGameVersion.name} (${generationName})`;
     }
-    return getGenerationDisplayName(generationId);
+    return getGenerationLabel(generationId);
   };
 
   return (

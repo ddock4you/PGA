@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  GENERATION_VERSION_GROUP_MAP,
-  getVersionGroupByGameId,
-} from "@/features/generation/constants/generationData";
+import { GENERATION_VERSION_GROUP_MAP, getVersionGroupByGameId } from "@/features/generation";
 import { usePreferences } from "@/features/preferences";
 import type { ParsedSearchQueryParams } from "@/lib/utils";
 

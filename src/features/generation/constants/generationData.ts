@@ -23,6 +23,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "blue",
         name: "파랑",
         color: "bg-blue-500",
+        textClass: "text-white",
         generationId: "1",
         versionGroup: "red-blue",
       },
@@ -30,6 +31,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "yellow",
         name: "노랑",
         color: "bg-yellow-500",
+        textClass: "text-gray-900",
         generationId: "1",
         versionGroup: "yellow",
       },
@@ -43,6 +45,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "gold",
         name: "금",
         color: "bg-yellow-600",
+        textClass: "text-gray-900",
         generationId: "2",
         versionGroup: "gold-silver",
       },
@@ -50,6 +53,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "silver",
         name: "은",
         color: "bg-gray-400",
+        textClass: "text-gray-900",
         generationId: "2",
         versionGroup: "gold-silver",
       },
@@ -57,6 +61,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "crystal",
         name: "크리스탈",
         color: "bg-purple-400",
+        textClass: "text-white",
         generationId: "2",
         versionGroup: "crystal",
       },
@@ -132,6 +137,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "heartgold",
         name: "하트골드",
         color: "bg-yellow-500",
+        textClass: "text-gray-900",
         generationId: "4",
         versionGroup: "heartgold-soulsilver",
       },
@@ -139,6 +145,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "soulsilver",
         name: "소울실버",
         color: "bg-gray-300",
+        textClass: "text-gray-900",
         generationId: "4",
         versionGroup: "heartgold-soulsilver",
       },
@@ -159,6 +166,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "white",
         name: "화이트",
         color: "bg-gray-100",
+        textClass: "text-gray-900",
         generationId: "5",
         versionGroup: "black-white",
       },
@@ -173,6 +181,7 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
         id: "white-2",
         name: "화이트2",
         color: "bg-gray-200",
+        textClass: "text-gray-900",
         generationId: "5",
         versionGroup: "black-2-white-2",
       },
@@ -296,14 +305,3 @@ export const GENERATION_GAME_MAPPING: GenerationInfo[] = [
     ],
   },
 ];
-
-export function getVersionGroupByGameId(gameId: string): string | undefined {
-  for (const generation of GENERATION_GAME_MAPPING) {
-    const version = generation.versions.find((v) => v.id === gameId);
-    if (version) {
-      return version.versionGroup;
-    }
-  }
-
-  return undefined;
-}

@@ -1,7 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["raw.githubusercontent.com", "assets.pokemon.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/PokeAPI/sprites/**",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.pokemon.com",
+        pathname: "/assets/**",
+      },
+    ],
   },
   async rewrites() {
     return [

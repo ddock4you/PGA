@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/features/preferences";
 import { GameGenerationModal } from "./GameGenerationModal";
-import { GENERATION_GAME_MAPPING } from "../constants/generationData";
+import { getGameVersionById, getGenerationInfoByGameId, getGenerationLabel } from "../utils/gameGeneration";
 import type { GameVersion } from "../types/generationTypes";
 
 interface GameGenerationSelectorProps {
@@ -33,16 +35,13 @@ export function GameGenerationSelector({
     }
 
     if (showGenerationOnly) {
-      return state.selectedGenerationId ? `${state.selectedGenerationId}세대` : "세대 선택";
+      return state.selectedGenerationId ? getGenerationLabel(state.selectedGenerationId) : "세대 선택";
     }
 
     if (state.selectedGameId) {
-      for (const generation of GENERATION_GAME_MAPPING) {
-        const game = generation.versions.find((v) => v.id === state.selectedGameId);
-        if (game) {
-          return `${game.name} (${generation.name})`;
-        }
-      }
+      const game = getGameVersionById(state.selectedGameId);
+      const generation = getGenerationInfoByGameId(state.selectedGameId);
+      if (game && generation) return `${game.name} (${generation.name})`;
     }
 
     return "게임/세대 선택";

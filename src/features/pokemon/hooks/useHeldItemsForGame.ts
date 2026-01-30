@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
+import { getGenerationInfoByGameId } from "@/features/generation";
 import type { CsvItem } from "@/types/csvTypes";
 import type { PokeApiPokemon } from "@/features/pokemon/types/pokeApiTypes";
 
@@ -34,9 +34,7 @@ export function useHeldItemsForGame({
         }
 
         if (!versionDetail && selectedGameId) {
-          const selectedGeneration = GENERATION_GAME_MAPPING.find((gen) =>
-            gen.versions.some((v) => v.id === selectedGameId)
-          );
+          const selectedGeneration = getGenerationInfoByGameId(selectedGameId);
           if (selectedGeneration) {
             const generationVersionNames = selectedGeneration.versions.map((v) => v.id);
             versionDetail =

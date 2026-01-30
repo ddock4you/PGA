@@ -1,5 +1,7 @@
+import "server-only";
+
 import { fetchFromPokeApi } from "@/lib/pokeapi";
-import type { PokeApiNamedResource } from "./generationApi";
+import type { PokeApiNamedResource } from "./generationApi.server";
 
 export interface PokeApiVersion {
   id: number;

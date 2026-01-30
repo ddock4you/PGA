@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { usePreferences } from "@/features/preferences";
-import { GENERATION_GAME_MAPPING } from "@/features/generation/constants/generationData";
+import { getGenerationInfoByGameId, getGameVersionById } from "@/features/generation";
 import type { PokeApiPokemon, PokeApiPokemonSpecies } from "../../types/pokeApiTypes";
 import { getPokemonDisplayName } from "@/features/pokemon/utils/pokemonDisplayName";
 
@@ -55,13 +55,7 @@ function FlavorText({ species, language }: { species: PokeApiPokemonSpecies; lan
   // 선택된 게임 버전에 맞는 버전 이름 찾기
   let targetVersionName = "";
   if (selectedGameId) {
-    for (const generation of GENERATION_GAME_MAPPING) {
-      const game = generation.versions.find((v) => v.id === selectedGameId);
-      if (game) {
-        targetVersionName = game.id; // API에서는 ID가 버전 이름으로 사용됨
-        break;
-      }
-    }
+    targetVersionName = getGameVersionById(selectedGameId)?.id ?? ""; // API에서는 ID가 버전 이름으로 사용됨
   }
 
   // 1. 선택된 언어 + 선택된 버전
@@ -71,9 +65,7 @@ function FlavorText({ species, language }: { species: PokeApiPokemonSpecies; lan
 
   // 2. 선택된 언어 + 해당 세대의 다른 버전
   if (targetEntries.length === 0 && targetVersionName) {
-    const selectedGeneration = GENERATION_GAME_MAPPING.find((gen) =>
-      gen.versions.some((v) => v.id === selectedGameId)
-    );
+    const selectedGeneration = selectedGameId ? getGenerationInfoByGameId(selectedGameId) : undefined;
     if (selectedGeneration) {
       const generationVersionNames = selectedGeneration.versions.map((v) => v.id);
       targetEntries = species.flavor_text_entries.filter(

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { GameVersion } from "@/features/generation/types/generationTypes";
+import type { GameVersion } from "@/features/generation";
 import type { DexFilters } from "./filterTypes";
 
 export interface DexFilterContextType {
