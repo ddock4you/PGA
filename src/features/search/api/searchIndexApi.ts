@@ -2,7 +2,7 @@ import "server-only";
 
 import { fetchPokemonSpeciesListByGeneration } from "@/features/pokemon/api/pokemonApi.server";
 import { fetchGeneration } from "@/features/generation/api/generationApi";
-import { fetchItemList } from "@/features/items/api/itemsApi";
+import { fetchItemList } from "@/features/items/api/itemsApi.server";
 
 export interface SearchEntry {
   id: number;

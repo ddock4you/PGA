@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchItem } from "@/features/items/api/itemsApi";
+import { fetchItem } from "@/features/items/api/itemsApi.server";
 import { ItemDetailClient } from "./ItemDetailClient";
 import type { Item } from "@/types/pokeapi";
 

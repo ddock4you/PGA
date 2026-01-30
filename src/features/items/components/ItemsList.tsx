@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import type { DexItemSummary } from "@/utils/dataTransforms";
 import { useItemsList } from "@/features/items/hooks/useItemsList";
+import { getItemCategoryDescription, getItemSpriteUrl } from "@/features/items/utils/itemDisplay";
 
 export function ItemsList() {
   const {
@@ -30,22 +31,6 @@ export function ItemsList() {
     loadMoreError,
     handleRowClick,
   } = useItemsList();
-
-  const getItemEffectText = (item: DexItemSummary) => {
-    const descriptions: Record<string, string> = {
-      "standard-balls": "포켓몬을 잡는 데 사용",
-      healing: "HP 회복",
-      "pp-recovery": "기술 PP 회복",
-      "status-cures": "상태 이상 치료",
-      vitamins: "능력치 상승",
-      evolution: "진화 관련",
-      "held-items": "지니게 하는 도구",
-    };
-    return descriptions[item.category] || `${item.category} 카테고리의 도구`;
-  };
-
-  const getItemSpriteUrl = (itemName: string) =>
-    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
 
   return (
     <div className="space-y-4">
@@ -113,7 +98,7 @@ export function ItemsList() {
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell className="capitalize">{item.category}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {getItemEffectText(item)}
+                        {getItemCategoryDescription(item.category)}
                       </TableCell>
                     </TableRow>
                   ))
