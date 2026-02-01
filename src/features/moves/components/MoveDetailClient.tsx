@@ -13,6 +13,8 @@ import { usePokemonArtwork } from "@/hooks/usePokemonArtwork";
 import type { MoveDetail } from "@/types/pokeapi";
 import type { PokeApiNamedResource } from "@/types/pokeapi";
 
+const backArrow = <ArrowLeft className="h-5 w-5" />;
+
 type LearnedPokemonEntry = PokeApiNamedResource;
 
 interface MoveDetailClientProps {
@@ -89,7 +91,7 @@ export function MoveDetailClient({ move }: MoveDetailClientProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="-ml-2">
-          <ArrowLeft className="h-5 w-5" />
+          {backArrow}
         </Button>
         <span className="text-sm font-medium text-muted-foreground">기술 상세</span>
       </div>

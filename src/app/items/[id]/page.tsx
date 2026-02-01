@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchItem } from "@/features/items/api/itemsApi.server";
-import { ItemDetailClient } from "./ItemDetailClient";
+import { ItemDetailClient } from "@/features/items/components/ItemDetailClient";
+import { DexCsvDataProvider } from "@/lib/dexCsvProvider";
+import { loadDexCsvData } from "@/lib/dexCsvData";
 import type { Item } from "@/types/pokeapi";
 
 interface PageProps {
@@ -81,5 +83,11 @@ export default async function ItemDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <ItemDetailClient item={item} />;
+  const csvData = await loadDexCsvData();
+
+  return (
+    <DexCsvDataProvider data={csvData}>
+      <ItemDetailClient item={item} />
+    </DexCsvDataProvider>
+  );
 }

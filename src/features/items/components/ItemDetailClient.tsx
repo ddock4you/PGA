@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import type { Item, ItemEffectEntry } from "@/types/pokeapi";
 
+const backArrow = <ArrowLeft className="h-5 w-5" />;
+
 interface ItemDetailClientProps {
   item: Item;
 }
@@ -30,7 +32,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="-ml-2">
-          <ArrowLeft className="h-5 w-5" />
+          {backArrow}
         </Button>
         <span className="text-sm font-medium text-muted-foreground">도구 상세</span>
       </div>
