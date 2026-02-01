@@ -1,30 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { Button } from "@/components/ui/button";
 import { PokemonDetailHeader } from "@/features/pokemon/components/detail/PokemonDetailHeader";
 import { PokemonDetailOverview } from "@/features/pokemon/components/detail/PokemonDetailOverview";
 import { PokemonDetailTabs } from "@/features/pokemon/components/detail/PokemonDetailTabs";
-import { smoothScrollToElement, SCROLL_CONSTANTS } from "@/utils/scroll";
 import type {
   PokeApiEncounter,
   PokeApiEvolutionChain,
   PokeApiPokemon,
   PokeApiPokemonSpecies,
 } from "@/features/pokemon/types/pokeApiTypes";
-
-// 스크롤 관련 설정 (공통 hook에서 가져옴)
-// 필요시 SCROLL_CONSTANTS를 직접 수정하거나 다른 값 사용 가능
-const SCROLL_DURATION = SCROLL_CONSTANTS.DEFAULT_DURATION;
-const SCROLL_DELAY = SCROLL_CONSTANTS.TAB_SWITCH_DELAY;
+import { useDetailScroll } from "./_hooks/useDetailScroll";
 
 interface PokemonDetailClientProps {
   pokemon: PokeApiPokemon;
   species: PokeApiPokemonSpecies;
   evolutionChain?: PokeApiEvolutionChain;
   encounters?: PokeApiEncounter[];
+  language?: string;
 }
 
 export function PokemonDetailClient({
@@ -32,38 +28,31 @@ export function PokemonDetailClient({
   species,
   evolutionChain,
   encounters,
+  language = "ko",
 }: PokemonDetailClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialTab = searchParams.get("scrollTo") === "obtaining-methods" ? "info" : "overview";
+
+  const getInitialTab = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("scrollTo") === "obtaining-methods" ? "info" : "overview";
+  };
+
+  const initialTab = getInitialTab();
   const [activeTab, setActiveTab] = useState(initialTab);
-  const language = "ko";
-  // URL 쿼리 파라미터에서 스크롤 타겟 확인 및 처리
-  useEffect(() => {
-    const scrollTo = searchParams.get("scrollTo");
 
-    if (scrollTo === "obtaining-methods") {
-      const timer = setTimeout(() => {
-        smoothScrollToElement("obtaining-methods", SCROLL_DURATION);
-      }, SCROLL_DELAY);
+  const BACK_BUTTON_ICON = useMemo(
+    () => <ArrowLeft className="h-5 w-5" />,
+    []
+  );
 
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (activeTab === "evolution") {
-      setTimeout(() => {
-        smoothScrollToElement("evolution-chain", SCROLL_DURATION);
-      }, SCROLL_DELAY);
-    }
-  }, [activeTab]);
+  useDetailScroll("obtaining-methods", window.location.search.includes("scrollTo=obtaining-methods"));
+  useDetailScroll("evolution-chain", activeTab === "evolution");
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500" style={{ paddingTop: "1rem" }}>
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="-ml-2">
-          <ArrowLeft className="h-5 w-5" />
+          {BACK_BUTTON_ICON}
         </Button>
         <span className="text-sm font-medium text-muted-foreground">도감 상세</span>
       </div>
