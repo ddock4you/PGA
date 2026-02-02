@@ -1,0 +1,162 @@
+---
+alwaysApply: true
+---
+
+### 2. 데이터 상태 (현재 기준)
+
+**저장 위치:** 서버 Fetch(Next `fetch` + `next.revalidate`) + 클라이언트 CSV 로드/파싱(모듈 캐시) + (선택) `DexCsvDataProvider` Context
+**역할:**
+- PokéAPI 데이터는 서버에서 로드(상세 페이지 prefetch 등)하고, 클라이언트에는 주로 props로 전달한다.
+- CSV 기반 데이터는 번들에 포함된 CSV(`?raw` static import)를 브라우저에서 파싱해 사용한다.
+- `DexCsvDataProvider`는 “전역 싱글톤”이 아니라, 필요한 라우트/페이지에서만 CSV 데이터를 내려주는 보조 수단이다.
+
+- **2.1 공통 데이터(서버 로드)**
+
+  - 타입 목록 및 상성: 18개 타입의 `damage_relations`
+  - 세대/게임 정보: 세대 리스트, 버전 그룹, 버전-세대 매핑
+
+- **2.2 포켓몬 도감 데이터(서버 조합)**
+
+  - 세대별 species 리스트, 개별 상세는 서버에서 로드 후 필요한 형태로 조합해 클라이언트에 전달한다.
+  - 클라이언트는 가능한 한 “표현/상호작용”에 집중하고, 데이터 로딩은 서버에 둔다.
+
+- **2.3 CSV 데이터(클라이언트 로드/공유)**
+  - CSV는 `src/data/*.csv`를 `src/lib/csv/*` 모듈에서 static import 후, 브라우저에서 PapaParse로 파싱한다.
+  - `src/lib/dexCsvData.ts`의 `loadDexCsvData()`는 프로미스 + 메모리 캐시로 중복 파싱을 방지한다.
+  - `src/hooks/useDexCsvData.ts`는 다음 우선순위로 데이터를 제공한다.
+    - `DexCsvDataProvider` 컨텍스트가 있으면 해당 값을 사용
+    - 없으면 클라이언트에서 `loadDexCsvData()`를 호출해 로드
+
+- **2.4 통합 검색 인덱스(클라이언트 생성/캐시)**
+  - 통합 검색 인덱스는 `src/features/search/api/unifiedSearchIndexApi.ts`에서 CSV를 읽어 생성한다.
+  - `src/features/search/hooks/useUnifiedSearchIndex.ts`에서 모듈 캐시(프로미스/결과)로 재사용한다.
+  - 통합 검색은 CSV 기반으로 동작하며, 검색 경로에서 PokéAPI 호출은 기본적으로 지양한다.
+
+---
+
+### 3. 페이지/기능별 상태
+
+각 페이지는 위 전역 상태/쿼리를 바탕으로, 자체적인 UI 상태를 로컬 상태(컴포넌트/훅)로 관리한다.
+
+- **3.1 검색 랜딩 (`/`)**
+
+  - 로컬 상태:
+    - `query`: 현재 입력된 검색어
+    - (현재) 검색 기록 저장/자동완성은 사용하지 않는다.
+  - 전역/공유 데이터 활용:
+    - 검색 실행 시 `/search`로 네비게이션
+    - 인덱스 로딩/필터링은 결과 페이지(`/search`)에서 수행한다.
+
+- **3.2 검색 결과 (`/search`)**
+
+  - `useUnifiedSearchIndex()`가 클라이언트에서 CSV 기반 인덱스를 로드/캐시하고, 화면은 그 결과를 렌더링한다.
+
+  - 로컬 상태:
+    - `activeTab`: `'all' | 'pokemon' | 'moves' | 'abilities' | 'items'` (탭 포커스)
+  - 전역/공유 데이터 활용:
+    - URL 파라미터에서 `q` (쿼리) 읽기
+    - `unifiedSearchIndex` 데이터로 실시간 필터링
+    - 검색 결과가 없는 탭은 자동으로 비활성화
+
+  - 주의:
+    - 통합 검색은 “세대 제한 없음”이 기본값이므로 URL의 `gen`은 생략한다.
+    - 레거시/외부 링크로 `gen=unified`가 들어오더라도 Preferences(`selectedGenerationId`)에 동기화하지 않는다.
+
+- **3.3 포켓몬 도감 (`/dex`)**
+
+  - 로컬 상태:
+    - `DexFilterContext`가 필터/검색어/페이지를 관리하고 `localStorage`에 저장한다.
+    - CSV 데이터는 `useDexCsvData()`로 로드한다.
+    - 저장 키는 버전 접미사를 포함해 스키마 변경에 대비한다. (예: `pga.dex.filters.v1`, `pga.dex.search.v1`)
+  - 전역/공유 데이터 활용:
+    - (현재) Preferences의 `selectedGameId/selectedGenerationId`는 도감 필터의 단일 소스가 아니다.
+  - **더보기 상태**: `useLoadMore` 훅으로 관리 (현재 페이지 수, 총 페이지 수, 로딩 상태)
+
+- **3.4 기술 리스트 (`/moves`)**
+
+- 로컬 상태:
+- `searchQuery`: 기술명 검색어
+- 전역/공유 데이터 활용:
+- `selectedGeneration`: 세대 필터링용
+- `movesData`, `moveNamesData`: 기술 정보
+- (공통) 리스트 상태 복원: `useListRestoration` + `saveListState`
+- (공통) 브라우저 뒤로가기 감지: `useNavigationType`
+- **더보기 상태**: `useLoadMore` 훅으로 관리 (현재 페이지 수, 총 페이지 수, 로딩 상태)
+
+- **3.5 특성 리스트 (`/abilities`)**
+
+- 로컬 상태:
+- `searchQuery`: 특성명 검색어
+- 전역/공유 데이터 활용:
+- `abilitiesData`, `abilityNamesData`: 특성 정보
+- **더보기 상태**: `useLoadMore` 훅으로 관리 (현재 페이지 수, 총 페이지 수, 로딩 상태)
+
+- **3.6 도구 리스트 (`/items`)**
+
+- 로컬 상태:
+- `searchQuery`: 도구명 검색어
+- 전역/공유 데이터 활용:
+- `itemsData`, `itemNamesData`: 도구 정보
+- **더보기 상태**: `useLoadMore` 훅으로 관리 (현재 페이지 수, 총 페이지 수, 로딩 상태)
+
+- **3.8 특성 상세 (`/abilities/[id]`)**
+- 로컬 상태:
+- 없음 (주로 서버에서 prefetch한 데이터 표시)
+- 전역/공유 데이터 활용:
+  - `ability` 데이터: PokéAPI 특성 데이터 (이름, 효과, 보유 포켓몬 등)
+  - `pokemon-species-names` 데이터: 포켓몬 이름 한글화 (CSV)
+  - `version-groups` 데이터: 버전 그룹 순서 (flavor_text 최신 버전 선택용)
+
+- **3.7 배틀 트레이닝 (`/training`)**
+  - **Context API 기반 중앙 집중 관리**
+  - 상태 구조:
+    - UI 상태: `mode` ('attack' | 'type'), `level` (1 | 2 | 3 | null), `screen` ('start' | 'playing' | 'finished')
+    - 옵션 상태: 문제 수, 듀얼 타입 허용, 세대 선택 등
+    - 퀴즈 상태: 현재 문제, 점수, 선택한 답 등
+  - **성능 최적화**: `actions` 객체를 `useMemo`로 메모이제이션하여 컨텍스트 소비 컴포넌트 불필요한 리렌더링 방지
+  - **문제 생성 분리**: 순수 생성 로직은 `src/features/training/utils/generators/*`, 훅(`useQuizGenerator`)은 로딩/트리거만 담당
+  - **플레이 UI 공통화**: 문제 카드/선택지/결과 푸터를 공통 컴포넌트(예: QuizPlayScaffold, QuizChoiceGrid, QuizResultFooter)로 조합하고, 모드/레벨별 파일은 설정값과 예외 슬롯만 담당
+  - **선택 로직 분리(타입 퀴즈)**: 듀얼 타입 선택/자동 제출 같은 로직은 `useTypeAnswerSelection` 훅으로 분리
+  - **레거시 격리**: 이전 구현은 `src/features/training/_legacy/*`에 보관하고, 현재 플로우에서는 import하지 않는다
+  - 전역/공유 데이터 활용:
+    - 타입 상성 데이터 (공격 상성 계산, 0.25배/4배 포함 고도화)
+    - 퀴즈 데이터 (CSV 기반 로컬 데이터: QuizPokemon, QuizMove 인터페이스)
+    - 포켓몬 데이터 (모든 모드에서 포켓몬 기반 문제 생성)
+    - 기술 데이터 (공격 모드에서 기술 선택 문제 생성, 한글화 지원)
+    - 세대별 포켓몬 리스트 (세대 필터링, 로컬 데이터 기반)
+
+---
+
+추가 원칙:
+
+- 페이지/도메인별로 공통적으로 사용하는 로컬 상태/데이터 래퍼는
+  - `src/features/<feature>/hooks`, `src/features/<feature>/api`, `src/features/<feature>/types`
+  - (필요 시) `src/app/<segment>/_hooks`, `src/app/<segment>/_components`
+    와 같이 **기능/라우트 근처의 하위 폴더**에 배치하여, 관련 로직을 함께 관리한다.
+
+### 4. 에러/로딩/알림 상태
+
+- **에러 상태**
+
+  - 라우트 단위 에러 UI를 우선 사용: `src/app/**/error.tsx`
+  - 전역적인 장애(예: 네트워크 다운)는 상단 토스트/배너로 보조 표시할 수 있다.
+
+- **로딩 상태**
+
+  - 라우트 단위 로딩 UI를 우선 사용: `src/app/**/loading.tsx`
+  - 클라이언트 상호작용에 따른 로딩은 해당 컴포넌트에서 스켈레톤/버튼 로딩으로 표시한다.
+
+- **알림/토스트**
+  - 현재 코드베이스에는 Toast 시스템이 도입되어 있지 않다.
+  - 사용자 피드백은 페이지/카드 내 텍스트, Alert, 라우트 단위 로딩/에러 UI로 처리한다.
+
+---
+
+### 5. 버전 관리/마이그레이션 고려
+
+- `localStorage` 키에 버전 접미사 사용 (예: `pga.preferences.v1`)
+- Preferences는 `pga.preferences.v1`(단일 JSON)에 저장하며, 테마는 기본값을 `light`로 둔다.
+- FOUC 방지: 저장된 테마가 `dark`인 경우 hydration 이전(`src/app/layout.tsx`의 `beforeInteractive` 스크립트)에서 `html.dark`를 선적용한다.
+- 나중에 구조가 바뀔 경우:
+  - 새로운 버전의 키를 읽고, 없으면 기본값으로 초기화
+  - 이전 버전 키는 점진적으로 무시하거나 필요 시 마이그레이션 로직 추가

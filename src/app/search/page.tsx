@@ -4,7 +4,7 @@ import { SearchPageClient } from "@/features/search/components/SearchPageClient"
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{ q?: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const qRaw = resolvedSearchParams.q;

@@ -1,0 +1,178 @@
+---
+alwaysApply: false
+---
+
+### 2. 포켓몬 관련
+
+#### 2.1 `pokemon`
+
+- **주요 사용 필드(예시)**
+  - `id`: 숫자 ID
+  - `name`: 기본 영문 이름
+  - `types`: 타입 배열
+    - `type.name`: `fire`, `water` 등 타입 이름
+  - `stats`: 능력치 배열
+    - `stat.name`: `hp`, `attack`, `defense`, `special-attack`, `special-defense`, `speed`
+    - `base_stat`: 종족값
+    - `effort`: EV 제공량
+  - `abilities`: 특성 목록
+    - `ability.name`
+    - `is_hidden`: 숨겨진 특성 여부
+  - `held_items`: 야생일 때 지닌 도구
+    - `item.name`
+    - `version_details[].rarity`
+  - `moves`: 배울 수 있는 기술들
+    - `move.name`
+    - `version_group_details[]`
+      - `move_learn_method.name`: `level-up` / `machine` / `egg` / `tutor`
+      - `level_learned_at`
+      - `version_group.name`
+
+#### 2.2 `pokemon-species`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `generation`: 처음 등장 세대
+  - `gender_rate`: 성비 정보
+  - `egg_groups[]`
+  - `hatch_counter`: 부화 카운터
+  - `base_happiness`: 초기 친밀도
+  - `growth_rate`: 경험치 곡선 정보
+  - `capture_rate`: 포획도
+  - `flavor_text_entries[]`: 도감 설명 텍스트
+  - `evolution_chain.url`: 진화 체인 리소스 URL
+  - `habitat`: 서식지 (있을 경우)
+
+#### 2.3 `evolution-chain`
+
+- **주요 사용 필드**
+  - `id`
+  - `chain`: 루트 노드
+    - `species`: 포켓몬 species 정보
+    - `evolves_to[]`: 다음 단계들
+      - `evolution_details[]`: 레벨, 아이템, 친밀도, 시간대 등 조건
+
+---
+
+### 3. 타입/상성
+
+#### 3.1 `type`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `damage_relations`:
+    - `double_damage_to[]`, `half_damage_to[]`, `no_damage_to[]`
+    - `double_damage_from[]`, `half_damage_from[]`, `no_damage_from[]`
+  - 복합타입 상성 계산은 두 타입의 `damage_relations`를 조합하는 유틸 함수에서 처리
+
+---
+
+### 4. 기술/아이템/머신
+
+#### 4.1 `move`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `type.name`
+  - `power`, `accuracy`, `pp`, `priority`
+  - `damage_class.name`: `physical` / `special` / `status`
+  - `effect_entries[]`: 효과 텍스트
+  - `meta`: 부가 메타 정보(급소율, 드랍 스탯 등, 사용 여부는 선택)
+  - `machines[]`: 이 기술을 가르치는 머신 정보
+    - `machine.url`
+
+#### 4.2 `item`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `category.name`
+  - `cost`
+  - `effect_entries[]`: 효과 텍스트
+  - `flavor_text_entries[]`: 설명 텍스트
+
+#### 4.3 `machine`
+
+- 기술머신/비전머신(TMs/HMs)에 대한 정보
+- **주요 사용 필드**
+  - `id`
+  - `item`: TM/HM 아이템
+  - `move`: 연결된 기술
+  - `version_group`: 적용되는 버전 그룹
+
+---
+
+### 5. 성격/특성/개체값 힌트
+
+#### 5.1 `ability`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `effect_entries[]`: 영어 기준 상세 효과 텍스트
+  - `flavor_text_entries[]`: 게임별 짧은 설명 텍스트
+  - `pokemon[]`: 해당 특성을 가지는 포켓몬 목록
+
+#### 5.2 `nature`
+
+- **주요 사용 필드**
+  - `id`, `name`
+  - `increased_stat`, `decreased_stat`: 어떤 능력치를 올리고/내리는지
+  - `likes_flavor`, `hates_flavor`: 맛 선호 (선택 사용)
+
+#### 5.3 `characteristic`
+
+- **주요 사용 필드**
+  - `id`
+  - `descriptions[]`: “약간 성급한 성격” 같은 텍스트
+  - `highest_stat`: 최고 개체값이 어느 스탯인지 정보
+
+---
+
+### 6. 지역/출현/기타
+
+#### 6.1 출현 정보: `/pokemon/{id or name}/encounters`
+
+- **주요 사용 필드**
+  - 각 location-area 별 등장 정보(레벨 범위, 등장 확률, 조건 등)
+  - 1차 버전에서는 간단히 “어느 지역/버전에서 등장하는지” 정도의 요약에 활용 가능
+
+#### 6.2 `generation`, `version`, `version-group`
+
+- **generation**
+  - `id`, `name`
+  - 포함되는 `pokemon_species`, `types`, `moves`, `abilities` 등 목록
+- **version-group**
+  - `id`, `name`
+  - 연결된 `generation`
+  - 포함되는 `versions` 목록
+- **version**
+  - 개별 게임(예: `sword`, `shield`, `scarlet`, `violet` 등)
+
+이 정보들을 조합해:
+
+- “사용자가 선택한 게임 → 해당 세대/버전 그룹”을 계산하고,
+- 검색/도감/퀴즈의 데이터 범위를 결정한다.
+
+### 7. 최근 데이터 로딩 전략
+
+- PokéAPI 요청은 기본적으로 서버에서 수행한다.
+  - 공통 fetch 래퍼: `src/lib/pokeapi.ts` (`next.revalidate` 기본 1일)
+  - 상세 페이지는 서버에서 prefetch 후 Client Component에 props로 전달한다.
+  - 필요 시 `React.cache`로 동일 요청 내 중복 fetch를 줄인다. (예: `src/app/dex/[id]/page.tsx`의 `loadPokemonDetail`)
+
+  - CSV 데이터는 브라우저에서 로드/파싱한다.
+  - `src/lib/csv/*` 모듈이 CSV를 static import 후 PapaParse로 파싱
+  - `src/lib/dexCsvData.ts`의 `loadDexCsvData()`가 메모리 캐시로 재사용
+  - 페이지에 따라 `DexCsvDataProvider`로 내려주거나(`src/app/dex/[id]/page.tsx` 등), 컨텍스트가 없으면 `src/hooks/useDexCsvData.ts`가 클라이언트에서 로드한다.
+
+- 클라이언트에서 PokéAPI 응답을 직접 확인해야 할 경우 `src/app/api/pokeapi/[...slug]/route.ts` 프록시를 사용할 수 있다.
+
+### 8. 프로젝트 타입(Props) ↔ PokéAPI 필드 매핑 원칙
+
+- 현재 구현은 상세 화면에서 PokéAPI 원본 타입을 그대로 props로 전달/소비하는 방식을 허용한다.
+  - 예: `src/app/dex/[id]/page.tsx`, `src/app/moves/[id]/page.tsx`, `src/app/abilities/[id]/page.tsx`
+
+- “표시용 값(한글 이름/라벨)”은 유틸/훅으로 일관되게 변환한다.
+  - 예: `src/features/abilities/utils/localization.ts`, `src/hooks/useLocalizedMoveName.ts`
+
+- 별도의 프로젝트 전용 DTO(`PokemonDetail` 등)는 반드시 필요할 때만 도입한다.
+  - 기준: 여러 화면에서 동일 변환/정규화 로직이 반복되거나, 원본 응답을 그대로 노출하기 어려운 경우

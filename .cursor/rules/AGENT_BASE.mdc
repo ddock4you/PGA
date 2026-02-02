@@ -1,0 +1,37 @@
+---
+alwaysApply: true
+---
+
+## Agent Base Rules (Next.js App Router)
+
+### Single Source of Truth
+
+- Code wins over docs.
+- If docs conflict, follow this priority:
+  - `AGENT_BASE.mdc`
+  - `COMPONENT_ARCHITECTURE.mdc`
+  - `STATE_MANAGEMENT.mdc`
+  - `DESIGN_SYSTEM.mdc`
+  - `UI_PATTERNS.mdc`
+  - `API_TYPES.mdc`
+  - `DEVELOPMENT_PLAN.mdc` / `CONCEPT.mdc` (planning/historical)
+
+### Routing / File Structure
+
+- Routes live in `src/app/**`.
+  - Route entry: `src/app/<segment>/page.tsx`
+  - Route states: `src/app/<segment>/loading.tsx`, `src/app/<segment>/error.tsx`, `src/app/<segment>/not-found.tsx`
+- Default to Server Components for route entries.
+- Use Client Components only when needed (event handlers, browser-only APIs).
+  - Mark with `use client`.
+
+### Data & State
+
+- Prefer server-side data loading (Server Components + shared server utilities).
+- Client Components should primarily render using `props` and/or feature-level context.
+
+### Safety
+
+- Do not run destructive git commands.
+- Do not commit/push unless explicitly requested.
+- Do not add secrets to the repo (e.g., `.env`, credentials).

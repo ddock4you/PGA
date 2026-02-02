@@ -25,7 +25,7 @@ export function GlobalHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <header className="top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <Link href="/" className="text-base font-semibold">
             포켓몬 게임 어시스턴트
