@@ -247,29 +247,6 @@ alwaysApply: true
     - `src/features/<feature>/types`
       에 배치한다.
 
-### 6.3 Feature 서브도메인 폴더 규칙 (권장)
-
-- **목표**: 한 feature 안에서 특정 서브도메인(예: `pokemon/moves`)이 커질 때, UI/타입/유틸/훅을 한 덩어리로 유지하면서도 레이어 경계를 지킨다.
-
-- **규칙**
-  - `components/` 트리는 “UI leaf”로 취급한다.
-    - `hooks/`, `api/`, `utils/`, `types/`에서 `components/**` 아래의 `types/utils/constants`를 import 하지 않는다.
-    - 여러 레이어에서 재사용되는 타입/유틸/상수는 `src/features/<feature>/<subdomain>/{types,utils,constants}`처럼 feature 루트 쪽으로 올린다.
-  - 서브도메인 단위로 묶을 때는 feature 내부에 한 단계 폴더를 두는 것을 우선한다.
-    - 예: `src/features/pokemon/moves/components/*`
-    - 예: `src/features/pokemon/moves/types/*`
-    - 예: `src/features/pokemon/moves/utils/*`
-    - 예: `src/features/pokemon/moves/hooks/*` (서브도메인 전용 훅은 가능하면 서브도메인 아래에 둔다)
-
-- **라우트 단위(`src/app`)**
-  - 라우트 전용 상태/훅/컴포넌트가 필요한 경우(최소화 권장):
-    - `src/app/<segment>/_hooks`, `src/app/<segment>/_components`
-  - 전역/도메인에 가까운 것은 `features` 레이어로 끌어올린다.
-
-상태의 성격(전역 vs 페이지 로컬)과 데이터 출처(서버 vs 클라이언트)에 관한 보다 자세한 원칙은 `STATE_MANAGEMENT.mdc`를 따른다.
-
----
-
 ### 6.1 Provider 스코프(적용 범위) 원칙
 
 - **원칙**
@@ -290,6 +267,29 @@ alwaysApply: true
     - `src/app/error.tsx`, `src/app/not-found.tsx`, `src/app/loading.tsx`
     - 필요 시 `src/app/<segment>/error.tsx`, `src/app/<segment>/loading.tsx`로 세분화
   - “어느 화면에서 실패했는지”를 라우트 단위로 드러내고, 로딩/에러 UI는 페이지 조합 레이어(`src/app`)에서 제공한다.
+
+---
+
+### 6.3 Feature 서브도메인 폴더 규칙 (권장)
+
+- **목표**: 한 feature 안에서 특정 서브도메인(예: `pokemon/moves`)이 커질 때, UI/타입/유틸/훅을 한 덩어리로 유지하면서도 레이어 경계를 지킨다.
+
+- **규칙**
+  - `components/` 트리는 “UI leaf”로 취급한다.
+    - `hooks/`, `api/`, `utils/`, `types/`에서 `components/**` 아래의 `types/utils/constants`를 import 하지 않는다.
+    - 여러 레이어에서 재사용되는 타입/유틸/상수는 `src/features/<feature>/<subdomain>/{types,utils,constants}`처럼 feature 루트 쪽으로 올린다.
+  - 서브도메인 단위로 묶을 때는 feature 내부에 한 단계 폴더를 두는 것을 우선한다.
+    - 예: `src/features/pokemon/moves/components/*`
+    - 예: `src/features/pokemon/moves/types/*`
+    - 예: `src/features/pokemon/moves/utils/*`
+    - 예: `src/features/pokemon/moves/hooks/*` (서브도메인 전용 훅은 가능하면 서브도메인 아래에 둔다)
+
+- **라우트 단위(`src/app`)**
+  - 라우트 전용 상태/훅/컴포넌트가 필요한 경우(최소화 권장):
+    - `src/app/<segment>/_hooks`, `src/app/<segment>/_components`
+  - 전역/도메인에 가까운 것은 `features` 레이어로 끌어올린다.
+
+상태의 성격(전역 vs 페이지 로컬)과 데이터 출처(서버 vs 클라이언트)에 관한 보다 자세한 원칙은 `STATE_MANAGEMENT.mdc`를 따른다.
 
 ---
 

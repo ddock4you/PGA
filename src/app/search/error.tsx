@@ -1,5 +1,5 @@
 'use client';
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Link } from "lucide-react";
 
 export default function SearchError({
   error,
@@ -32,12 +32,12 @@ export default function SearchError({
         >
           다시 시도
         </button>
-        <a
+        <Link   
           href="/"
           className="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
         >
           홈으로 이동
-        </a>
+        </Link>
       </div>
     </div>
   );

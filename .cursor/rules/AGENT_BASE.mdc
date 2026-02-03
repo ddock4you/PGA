@@ -2,36 +2,36 @@
 alwaysApply: true
 ---
 
-## Agent Base Rules (Next.js App Router)
+# 에이전트 기본 규칙 (Next.js App Router)
 
-### Single Source of Truth
+## 단일 기준(Single Source of Truth)
 
-- Code wins over docs.
-- If docs conflict, follow this priority:
+- 코드는 문서보다 우선한다.
+- 문서끼리 충돌하는 경우, 아래 우선순위를 따른다:
   - `AGENT_BASE.mdc`
   - `COMPONENT_ARCHITECTURE.mdc`
   - `STATE_MANAGEMENT.mdc`
   - `DESIGN_SYSTEM.mdc`
   - `UI_PATTERNS.mdc`
   - `API_TYPES.mdc`
-  - `DEVELOPMENT_PLAN.mdc` / `CONCEPT.mdc` (planning/historical)
+  - `DEVELOPMENT_PLAN.mdc` / `CONCEPT.mdc` (기획/히스토리)
 
-### Routing / File Structure
+## 라우팅 / 파일 구조
 
-- Routes live in `src/app/**`.
-  - Route entry: `src/app/<segment>/page.tsx`
-  - Route states: `src/app/<segment>/loading.tsx`, `src/app/<segment>/error.tsx`, `src/app/<segment>/not-found.tsx`
-- Default to Server Components for route entries.
-- Use Client Components only when needed (event handlers, browser-only APIs).
-  - Mark with `use client`.
+- 라우트는 `src/app/**`에 둔다.
+  - 라우트 엔트리: `src/app/<segment>/page.tsx`
+  - 라우트 상태 파일: `src/app/<segment>/loading.tsx`, `src/app/<segment>/error.tsx`, `src/app/<segment>/not-found.tsx`
+- 라우트 엔트리는 기본적으로 서버 컴포넌트(Server Components)를 사용한다.
+- 필요한 경우에만 클라이언트 컴포넌트(Client Components)를 사용한다(이벤트 핸들러, 브라우저 전용 API 등).
+  - 파일 상단에 `use client`를 표시한다.
 
-### Data & State
+## 데이터 & 상태
 
-- Prefer server-side data loading (Server Components + shared server utilities).
-- Client Components should primarily render using `props` and/or feature-level context.
+- 서버 사이드 데이터 로딩을 우선한다(서버 컴포넌트 + 공용 서버 유틸리티).
+- 클라이언트 컴포넌트는 주로 `props` 및/또는 feature 레벨 컨텍스트를 사용해 렌더링해야 한다.
 
-### Safety
+## 안전
 
-- Do not run destructive git commands.
-- Do not commit/push unless explicitly requested.
-- Do not add secrets to the repo (e.g., `.env`, credentials).
+- 파괴적(되돌리기 어려운) git 명령은 실행하지 않는다.
+- 사용자가 명시적으로 요청하지 않는 한 commit/push 하지 않는다.
+- 저장소에 비밀정보(예: `.env`, credentials)를 추가하지 않는다.

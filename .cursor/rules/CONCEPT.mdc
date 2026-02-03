@@ -2,7 +2,7 @@
 alwaysApply: false
 ---
 
-## 안내
+# 안내
 
 - 이 문서는 프로젝트 초기 컨셉/기획 초안이다.
 - 현재 구현과 충돌하면, 코드와 `AGENT_BASE.mdc`, `COMPONENT_ARCHITECTURE.mdc`, `STATE_MANAGEMENT.mdc`를 우선한다.
