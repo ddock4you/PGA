@@ -84,5 +84,6 @@ pnpm test             # vitest
 ## 이후 작업
 
 - 전반적인 UI 개편 (현재는 주요 기능들을 확인하기 위해 만든 알파 테스트용)
+  - 개편 UI 컨셉 [링크](https://excalidraw.com/#json=ZNw4qltsVdpQZzVTNBZMT,nzgt65OCg4X2iNujIT7jUQ) (작성중) 
 - PokéAPI 데이터가 노후화되어 이 앱을 위한 전용 포켓몬 데이터셋 구축 필요
 - 신규 콘텐츠 추가
